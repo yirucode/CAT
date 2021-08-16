@@ -3,16 +3,13 @@
 CC = gfortran
 CXXFLAGS =-c -g -Og -Wall
 
-# file place
-OBJ = obj
-
 # linking
-a.out: helloVSCode.f90 getName.o
-	$(CC) helloVSCode.f90 getName.o
+a.out: MST.f90 
+	$(CC) MST.f90
 
 # compiling
-getName.o: getName.f90
-	$(CC) $(CXXFLAGS) getName.f90
+# getName.o: getName.f90
+# 	$(CC) $(CXXFLAGS) getName.f90
 
 # cleanup
 clean:

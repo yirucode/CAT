@@ -2,6 +2,7 @@
 ####################### Makefile Template ##############################
 ########################################################################
 
+# 2021/8/16 練習 無法運作 待修正
 # Compiler settings - Can be customized.
 CC = gfortran
 CPP = gfortran -cpp
