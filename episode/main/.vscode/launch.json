@@ -1,0 +1,55 @@
+// {
+//     "version": "0.2.0",
+//     "configurations": [
+
+//         {
+//             "name": "(Windows) Launch",
+//             "type": "cppvsdbg",
+//             "request": "launch",
+//             "program": "${workspaceFolder}/a.exe",
+//             "args": [],
+//             "stopAtEntry": false,
+//             "cwd": "${fileDirname}",
+//             "environment": [],
+//             "console": "externalTerminal",
+//             "preLaunchTask": "make"
+//         },
+//         {
+//             "name": "Run GDB",
+//             "type": "cppdbg",
+//             "request": "launch",
+//             "program": "${workspaceRoot}/a.exe",
+//             "args": [],
+//             "stopAtEntry": false,
+//             "cwd": "${workspaceRoot}",
+//             "externalConsole": false,
+//             "MIMode": "gdb",
+//             "preLaunchTask": "make",
+//         }
+//     ]
+// }
+
+{
+    "version": "0.0.1",
+    "configurations": [
+        {
+            "name": "Fortran Launch (GDB)",
+            "type": "cppdbg",
+            "request": "launch",
+            "targetArchitecture": "x86",
+            "program": "${workspaceRoot}\\${fileBasenameNoExtension}.exe",
+            "miDebuggerPath": "gdb.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "externalConsole": true,
+            "preLaunchTask": "gfortran"
+        },
+        {
+            "name": "Intel Debug Attach",
+            "type": "cppvsdbg",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
+}

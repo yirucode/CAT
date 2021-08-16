@@ -5,8 +5,9 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
+ 
 
-# Make data base, printed on Tue Aug 17 01:22:49 2021
+# Make data base, printed on Tue Aug 17 01:32:09 2021
 
 # Variables
 
@@ -43,8 +44,7 @@ VSCODE_NLS_CONFIG = {"locale":"zh-tw","availableLanguages":{"*":"zh-tw"},"_langu
 # environment
 INTEL_LICENSE_FILE = C:\Program Files (x86)\Common Files\Intel\Licenses
 # environment
-ONEDRIVE = D:\Users\OneDrive 
- - ��ߤ����j��
+ONEDRIVE = D:\Users\OneDrive - ��ߤ����j��
 # environment
 PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY;.PYW
 # makefile (from 'Makefile', line 1)
@@ -62,7 +62,7 @@ PROGRAMW6432 = C:\Program Files
 # environment
 PROGRAMDATA = C:\ProgramData
 # environment
-VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-d6c013f3-987c-45bb-a67f-25c68d139f1a-sock
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-d47d2bab-2376-4e86-b92d-195eb7274e1d-sock
 # environment
 VSCODE_CWD = D:\CAT_inGit\CAT
 # environment
@@ -90,7 +90,7 @@ ELECTRON_RUN_AS_NODE = 1
 # environment
 VS2017INSTALLDIR = C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_2776_PMWUOKORRJPOBBOW
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_1196_ZEOWQHGALEFUEENS
 # environment
 VSCODE_PIPE_LOGGING = true
 # environment
@@ -142,7 +142,8 @@ MAKE_VERSION := 3.82.90
 # environment
 PROGRAMFILES(X86) = C:\Program Files (x86)
 # automatic
-%D = $(patsubst %/,%,$(patsubst %\,%,$(dir $%)))
+%D = $(pats 
+ubst %/,%,$(patsubst %\,%,$(dir $%)))
 # environment
 LOCALAPPDATA = C:\Users\Atwood\AppData\Local
 # environment
@@ -214,7 +215,7 @@ PROCESSOR_LEVEL = 6
 # environment
 FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
 # environment
-VSCODE_PID = 2776
+VSCODE_PID = 1196
 # environment
 USERDOMAIN_ROAMINGPROFILE = DESKTOP-73328GL
 # variable set hash-table stats:
@@ -228,7 +229,7 @@ USERDOMAIN_ROAMINGPROFILE = DESKTOP-73328GL
 
 # C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64_win\compiler (key C:/Program Files (x86)/Common Files/Intel/Shared Libraries/redist/intel64_win/compiler, mtime 1587961503): 24 files, no impossibilities.
 # C:\WINDOWS\System32\WindowsPowerShell\v1.0\ (key C:/WINDOWS/System32/WindowsPowerShell/v1.0/, mtime 1613723042): 32 files, no impossibilities.
-# . (key d:/CAT_inGit/CAT/CAT MST, mtime 1629134422): 10 files, no impossibilities.
+# . (key d:/CAT_inGit/CAT/CAT MST, mtime 1629135085): 11 files, no impossibilities.
 # C:\Program Files\Git\cmd (key C:/Program Files/Git/cmd, mtime 1628464926): 8 files, no impossibilities.
 # C:\WINDOWS\System32\OpenSSH\: could not be stat'd.
 # C:\MinGW\bin (key C:/MinGW/bin, mtime 1628498939): 129 files, no impossibilities.
@@ -248,7 +249,7 @@ USERDOMAIN_ROAMINGPROFILE = DESKTOP-73328GL
 # C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32_win\compiler (key C:/Program Files (x86)/Common Files/Intel/Shared Libraries/redist/ia32_win/compiler, mtime 1587961500): 24 files, no impossibilities.
 # C:\Program Files\IBM\SPSS\Statistics\25\JRE\bin (key C:/Program Files/IBM/SPSS/Statistics/25/JRE/bin, mtime 1588075173): 124 files, no impossibilities.
 
-# 3754 files, no impossibilities in 21 directories.
+# 3755 files, no impossibilities in 21 directories.
 
 # Implicit Rules
 
@@ -318,17 +319,16 @@ main.f90:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 7 (6) / strings = 3631 / storage = 54805 B / avg = 15 B
+# strcache buffers: 7 (6) / strings = 3632 / storage = 54814 B / avg = 15 B
 # current buf: size = 8174 B / used = 5815 B / count = 387 / avg = 15 B
-# other used: total = 46631 B / count = 3244 / avg = 14 B
-# other free: total = 54 B / max = 14 B / min = 5 B / avg = 9 B
+# other used: total = 46640 B / count = 3245 / avg = 14 B
+# other free: total = 45 B / max = 14 B / min = 1 B / avg = 7 B
 
-# strcache performance: lookups = 3788 / hit r 
-make.exe: *** No rule to make target 'all'.  Stop.
- 
-ate = 4%
+# strcache performance: lookups = 3789 / hit rate = 4%
 # hash-table stats:
-# Load=3631/8192=44%, Rehash=0, Collisions=1335/3788=35%
-# Finished Make data base on Tue Aug 17 01:22:49 2021
+# Load=3632/8192=44%, Rehash=0, Collisions=1336/3789=35%
+# Finished Make data base on Tue Aug 17 01:32:09 2021
 
+ 
+make.exe: *** No rule to make target 'all'.  Stop.
  
