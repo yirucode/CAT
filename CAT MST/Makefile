@@ -4,12 +4,12 @@ CC = gfortran
 CXXFLAGS =-c -g -Og -Wall
 
 # linking
-a.out: main.f90 
-	$(CC) main.f90
+a.out: main.o 
+	$(CC) main.o
 
 # compiling
-# getName.o: getName.f90
-# 	$(CC) $(CXXFLAGS) getName.f90
+main.o: main.f90
+	$(CC) $(CXXFLAGS) main.f90
 
 # cleanup
 clean:

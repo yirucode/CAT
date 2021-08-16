@@ -1,3 +1,42 @@
+{
+    "version": "0.0.3",
+    "configurations": [
+
+        {
+            "name": "Launch(gdb)",
+            "type": "by-gdb",
+            "request": "launch",
+            "program": "${workspaceRoot}\\a.exe", //對此檔案進行偵錯
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "make" //先執行tasks.json 中的 make
+        },
+    ]
+}
+
+// {
+//     "version": "0.0.3",
+//     "configurations": [
+
+//         {
+//             "name": "Launch(gdb)",
+//             "type": "by-gdb",
+//             "request": "launch",
+//             "targetArchitecture": "x86",
+//             "program": "${workspaceRoot}\\a.exe", //對此檔案進行偵錯
+//             "miDebuggerPath": "gdb.exe",
+//             "args": [],
+//             "stopAtEntry": false,
+//             "cwd": "${workspaceRoot}",
+//             "externalConsole": true,
+//             //"preLaunchTask": "gfortran"
+//             "preLaunchTask": "make" //先執行tasks.json 中的 make
+//         },
+//     ]
+// }
+
+
+
+
 // {
 //     "version": "0.2.0",
 //     "configurations": [
@@ -29,27 +68,43 @@
 //     ]
 // }
 
-{
-    "version": "0.0.1",
-    "configurations": [
-        {
-            "name": "Fortran Launch (GDB)",
-            "type": "cppdbg",
-            "request": "launch",
-            "targetArchitecture": "x86",
-            "program": "${workspaceRoot}\\${fileBasenameNoExtension}.exe",
-            "miDebuggerPath": "gdb.exe",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceRoot}",
-            "externalConsole": true,
-            "preLaunchTask": "gfortran"
-        },
-        {
-            "name": "Intel Debug Attach",
-            "type": "cppvsdbg",
-            "request": "attach",
-            "processId": "${command:pickProcess}"
-        }
-    ]
-}
+// {
+//     "version": "0.0.1",
+//     "configurations": [
+
+//         {
+//             "name": "Fortran Launch (GDB)",
+//             "type": "cppdbg",
+//             "request": "launch",
+//             "targetArchitecture": "x86",
+//             "program": "${workspaceRoot}\\${fileBasenameNoExtension}.exe",
+//             "miDebuggerPath": "gdb.exe",
+//             "args": [],
+//             "stopAtEntry": false,
+//             "cwd": "${workspaceRoot}",
+//             "externalConsole": true,
+//             "preLaunchTask": "gfortran"
+//         },
+//         {
+//             "name": "Intel Debug Attach",
+//             "type": "cppvsdbg",
+//             "request": "attach",
+//             "processId": "${command:pickProcess}"
+//         }
+//     ]
+// }
+
+// {
+//     "version": "0.0.3",
+//     "configurations": [
+//         {
+//             "type": "by-gdb",
+//             "request": "launch",
+//             "name": "Launch(gdb)",
+//             "program": "${fileBasenameNoExtension}.exe",
+//             "cwd": "${workspaceRoot}",
+//             "preLaunchTask": "gfortran"
+//         }
+//     ]
+// }
+

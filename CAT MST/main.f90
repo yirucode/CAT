@@ -1,7 +1,7 @@
 program main
     implicit none
     
-    integer,parameter :: col=300
+    integer,parameter :: col=10
     real :: a(col),b(col),c(col)
     INTEGER:: i
 
@@ -11,7 +11,6 @@ program main
         read(100,*) a(i),b(i),c(i)
     enddo
 
-    i=2
     WRITE(*,*) (a(i),i=1,5)
 
 
