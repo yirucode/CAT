@@ -13,7 +13,7 @@ a.out: main.f90
 
 # cleanup
 clean:
-	del *.exe *.o 
+	del *.exe *.o *.txt
 # rm a.exe 運行時會有問題，待調整
 
 # run
