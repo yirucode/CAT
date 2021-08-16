@@ -1,0 +1,6 @@
+make.exe --dry-run --always-make --keep-going --print-directory
+make.exe: Entering directory 'd:/CAT_inGit/CAT/episode'
+gfortran -c -g -Og -Wall getName.f90
+gfortran helloVSCode.f90 getName.o
+make.exe: Leaving directory 'd:/CAT_inGit/CAT/episode'
+ 
