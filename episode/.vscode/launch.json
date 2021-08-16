@@ -15,7 +15,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            //"miDebuggerPath": "/path/to/gdb",
+            //"miDebuggerPath": "/path/to/gdb", //使用了會有錯誤訊息
             "preLaunchTask": "make",
             "setupCommands": [
                 {

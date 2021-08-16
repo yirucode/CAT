@@ -4,8 +4,8 @@ CC = gfortran
 CXXFLAGS =-c -g -Og -Wall
 
 # linking
-a.out: MST.f90 
-	$(CC) MST.f90
+a.out: main.f90 
+	$(CC) main.f90
 
 # compiling
 # getName.o: getName.f90
@@ -13,7 +13,7 @@ a.out: MST.f90
 
 # cleanup
 clean:
-	del *.exe *.o
+	del *.exe *.o 
 # rm a.exe 運行時會有問題，待調整
 
 # run
