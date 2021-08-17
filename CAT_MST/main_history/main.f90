@@ -5,6 +5,7 @@ program main
     real :: a(col),b(col),c(col)
     INTEGER:: i
 
+
     open(100,file="data/parameter.txt",status="old") 
 
     do i=1,col
