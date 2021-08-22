@@ -1,0 +1,14 @@
+{
+    "version": "0.0.3",
+    "configurations": [
+
+        {
+            "name": "Launch(gdb)",
+            "type": "by-gdb",
+            "request": "launch",
+            "program": "${workspaceRoot}\\a.exe", //對此檔案進行偵錯
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "make" //先執行tasks.json 中的 make
+        },
+    ]
+}

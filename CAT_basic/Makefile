@@ -1,5 +1,3 @@
-# variables
-# Compiler settings - Can be customized.
 CC = gfortran
 CXXFLAGS =-c -g -Og -Wall
 
@@ -14,23 +12,10 @@ main.o: main.f90
 func_information.o: func_information.f90
 	$(CC) $(CXXFLAGS) func_information.f90
 
-func_normalPDF.o: func_normalPDF.f90
-	$(CC) $(CXXFLAGS) func_normalPDF.f90
-
-func_probability.o: func_probability.f90
-	$(CC) $(CXXFLAGS) func_probability.f90
-
-subr_response.o: subr_response.f90
-	$(CC) $(CXXFLAGS) subr_response.f90
-
-# # cleanup
-# clean:
-# 	del *.exe *.o *.txt
-# # rm a.exe 運行時會有問題，待調整
-
-.PHONY : clean 
-clean : 
+	# cleanup
+clean:
 	del *.exe *.o *.txt
+# rm a.exe 運行時會有問題，待調整
 
 # run
 run:

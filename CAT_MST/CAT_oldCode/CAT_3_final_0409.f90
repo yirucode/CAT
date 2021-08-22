@@ -75,7 +75,7 @@ call cpu_time (t1) !開始計時
 
 open(100,file="data/parameter_300.txt",status="old") 
 do i=1,col
-	  read(100,*) a(i),b(i),c(i)
+	read(100,*) a(i),b(i),c(i)
 enddo
 
 !print*, "theta=", theta_hat
@@ -142,17 +142,17 @@ do try=1,row
 			
 		endif
 	enddo
-	
+
 	do i=1,col !400
 		m(try,i)=countA(i)
 	enddo
 	!write(*,*) (m(try,i),i=1,col)
-	
+
 	call sub_omega(OmegaGA1,m,row,col,length,try,1) !計算本次的重疊率
 	call sub_omega(OmegaGA2,m,row,col,length,try,2)
 	call sub_omega(OmegaGA3,m,row,col,length,try,3)
-	
-	!print*, try,(resp(try,i),i=1,length)
+		
+		!print*, try,(resp(try,i),i=1,length)
 enddo
 
 !----------------------------------
