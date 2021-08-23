@@ -2,8 +2,8 @@ CC = gfortran
 CXXFLAGS =-c -g -Og -Wall
 
 # linking
-a.out: main.o func_information.o func_normalPDF.o func_probability.o subr_response.o
-	$(CC) main.o func_information.o func_normalPDF.o func_probability.o subr_response.o
+a.out: main.o 
+	$(CC) main.o 
 
 # compiling
 main.o: main.f90

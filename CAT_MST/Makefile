@@ -1,8 +1,8 @@
 # variables
 # Compiler settings - Can be customized.
+VPATH = D:\CAT_inGit\CAT_MST\bar
 CC = gfortran
-CXXFLAGS =-c -g -Og -Wall
-
+CXXFLAGS =-c -g -Og -Wall -I $(VPATH)
 # linking
 a.out: main.o func_information.o func_normalPDF.o func_probability.o subr_response.o
 	$(CC) main.o func_information.o func_normalPDF.o func_probability.o subr_response.o
