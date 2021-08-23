@@ -1,12 +1,14 @@
 program main
     implicit none
-    INTEGER(kind=4):: n = 10
-    REAL(kind=8):: datav(n)
-
-    datav = 
-
-
-
-INTEGER:: end program main
-
+    INTEGER:: i
+    ! === input data
+    INTEGER, PARAMETER:: n = 5
+    REAL:: a(n) = (/8,(i,i=2,4),6/)
+    ! === output data
+    INTEGER:: maxPlace
+    REAL:: maxvc
+    ! === 
+    CALL subr_maxvReal(a,n,maxvc,maxPlace)
+    WRITE(*,*) INT(maxvc), maxPlace
+end program main
 

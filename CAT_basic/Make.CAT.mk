@@ -3,7 +3,9 @@
 CC = gfortran
 CXXFLAGS =-c -g -Og -Wall 
 exe = a
-obj = test_ex0710.o subr_maxv.o 
+obj = main.o \
+subr_maxvReal.o subr_maxvInt.f90\
+subr_aveReal.o 
 
 # linking 鏈結
 a: $(obj)
