@@ -3,8 +3,7 @@
 CC = gfortran
 CXXFLAGS =-c -g -Og -Wall 
 exe = a
-obj = main.o func_information.o func_normalPDF.o \
-func_probability.o subr_response.o
+obj = main.o
 
 # linking 鏈結
 a: $(obj)
@@ -13,17 +12,6 @@ a: $(obj)
 # compiling 編譯
 %.o:%.f90
 	$(CC) $(CXXFLAGS) $^ -o $@
-# # 原始的寫法
-# main.o: main.f90
-# 	$(CC) $(CXXFLAGS) main.f90
-# func_information.o: func_information.f90
-# 	$(CC) $(CXXFLAGS) func_information.f90
-# func_normalPDF.o: func_normalPDF.f90
-# 	$(CC) $(CXXFLAGS) func_normalPDF.f90
-# func_probability.o: func_probability.f90
-# 	$(CC) $(CXXFLAGS) func_probability.f90
-# subr_response.o: subr_response.f90
-# 	$(CC) $(CXXFLAGS) subr_response.f90
 
 # cleanup
 # 偽目標

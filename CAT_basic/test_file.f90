@@ -9,5 +9,8 @@ Program ex0405
     C = 'c'
     D = .TRUE.
     write(*,*) "A=",A, "B=",B, "C=",C, "D=",D
+    A = A+1
+    write(*,*) "A=",A, "B=",B, "C=",C, "D=",D
+    
 stop
 end program ex0405
