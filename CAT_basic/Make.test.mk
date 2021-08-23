@@ -3,7 +3,7 @@
 CC = gfortran
 CXXFLAGS =-c -g -Og -Wall 
 exe = a
-obj = main.o
+obj = test_file.o
 
 # linking 鏈結
 a: $(obj)
