@@ -1,0 +1,30 @@
+     item pool=  300
+        length=   40
+           try= 1000
+
+           Time       38.43750
+           Mean        0.97673
+           Bias       -0.02327
+       Variance        0.03245
+            MSE        0.03299
+           RMSE        0.18163
+          maxPA        1.00000
+         PAmean        0.13333
+          PAvar        0.08814
+         PoolUR        0.31333
+        overlap        0.79199
+        GA1last        0.79199
+        GA1Mean        0.78768
+          GA1sd        0.02665
+         GA1Max        0.97500
+         GA1Min        0.77313
+        GA2last        0.89145
+        GA2Mean        0.88670
+          GA2sd        0.04026
+         GA2Max        0.94500
+         GA2Min        0.80000
+        GA3last        0.92790
+        GA3Mean        0.92290
+          GA3sd        0.05115
+         GA3Max        0.98333
+         GA3Min        0.84321

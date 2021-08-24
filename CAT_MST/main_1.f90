@@ -75,7 +75,7 @@ call cpu_time (t1) !開始計時
 
 open(100,file="data/parameter_300.txt",status="old") 
 do i=1,col
-	  read(100,*) a(i),b(i),c(i)
+	read(100,*) a(i),b(i),c(i)
 enddo
 
 !print*, "theta=", theta_hat
@@ -331,7 +331,7 @@ end
 real function information(theta,a,b,c) 
 implicit none
 real::theta,a,b,c
-real::prob,probMARK
+real::prob !,probMARK
 prob=c+(1-c)/(1+exp(-1.7*a*(theta-b)))
 !probMARK=1.7*a*(1-prob)*(prob-c)/(1-c)
 !information=probMARK**2/(prob*(1-prob))
