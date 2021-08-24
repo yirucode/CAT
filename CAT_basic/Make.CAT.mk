@@ -1,15 +1,19 @@
 # variables
 # Compiler settings - Can be customized.
+# -O3: 當gcc優化器發現某些變量在某些方面是多餘時，會將其優化掉
+# -O0: 在某些情況下會使用具有相同數值的變量，編譯時應禁用優化。
+# -Og: 它只應用那些不影響可調試性的優化
 CC = gfortran
-CXXFLAGS =-c -g -Og -Wall 
+CXXFLAGS =-c -g -O0 -Og -Wall 
 exe = a
-obj = subr_EAP.o 
-# obj = main_CAT.o\
-# subr_maxvReal.o subr_maxvInt.f90 subr_aveReal.o\
-# subr_resp.o \
-# func_probability.o func_information.o\
-# func_normal.o \
-# subr_EAP.o 
+obj = main_CAT.o\
+subr_maxvReal.o subr_maxvInt.f90 \
+subr_aveReal.o\
+subr_resp.o \
+func_probability.o func_information.o\
+func_normal.o \
+subr_EAP.o 
+# obj = subr_EAP.o 
 
 # linking 鏈結
 a: $(obj)
