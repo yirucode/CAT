@@ -2,7 +2,7 @@ program CAT
     implicit none
     ! === given data ====
     ! === parameter ===
-    integer,parameter :: row = 500 !重複次數
+    integer,parameter :: row = 10000 !重複次數
     integer,parameter :: col = 300 !題庫數
     integer,parameter :: length = 40 !作答題長
     ! === item parameter ===
@@ -14,7 +14,7 @@ program CAT
     real, external :: information, probability, normalPDF
     ! === unknown data ===
     ! === 迴圈用 ===
-    integer :: i
+    integer :: i,j
     integer :: try
     integer :: choose
     ! === 運算暫存用 ===
@@ -35,6 +35,12 @@ program CAT
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
+    ! === output error ===
+    integer :: ierror
+    ! === 輸出資料格式設定 ===
+    character(len = 20), parameter :: input = 'ListCAT_thetaHat.txt'
+    character(len = 20), parameter :: dataINT = '(50I10)'
+    character(len = 20), parameter :: dataF = '(50F10.4)'
     ! === run code ===
     call cpu_time (t1) !開始計時
     ! 讀取資料：輸入試題參數
@@ -80,24 +86,47 @@ program CAT
     !WRITE(*,*) (thetaHat(length, i),i=1,row)
     call subr_aveReal(thetaHat(length,:),row,thetaHatMean)
     WRITE(*,*) 'avg= ',thetaHatMean
-    ! ! === 輸出資料
-    ! !------------------
-    ! open(101,file="summery_CAT_thetaHat.txt",status="replace") !寫下能力估計
+    ! === 輸出資料
+    !------------------
+    open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(A)') "thetaHat = "
+    write(unit = 100, fmt = dataINT) (j, j=1,length)
+    do i=1,row
+        write(unit = 100, fmt = dataF) (thetaHat(j,i),j=1,length)
+    end do
+    close (100)
+    open(unit = 100 , file = 'ListCAT_resp.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(A)') "response = "
+    write(unit = 100, fmt = dataINT) (j, j=1,length)
+    do i=1,row
+        write(unit = 100, fmt = dataINT) (resp(j,i),j=1,length)
+    end do
+    close(100)
+    open(unit = 100 , file = 'ListCAT_item.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(A)') "choose item = "
+    write(unit = 100, fmt = dataINT) (j, j=1,length)
+    do i=1,row
+        write(unit = 100, fmt = dataINT) (place_choose(j,i),j=1,length)
+    end do
+    close(100)
+
+
+
+    !open(101,file="summery_CAT_thetaHat.txt",status="replace") !寫下能力估計
     ! open(102,file="summery_CAT_response.txt",status="replace") !寫下作答反應
     ! open(103,file="summery_CAT_item.txt",status="replace") !寫下所選的試題
     ! open(104,file="summery_CAT_m.txt",status="replace") !紀錄m
-    ! open(106,file="summery_CAT_item_choose.txt",status="replace")
+    
 
-    ! write(101,1011) "ID","true",(i,i=1,length)
     ! write(102,1021) "ID",(i,i=1,length)
     ! write(103,1031) "ID",(i,i=1,length)
     ! write(104,1041) "ID",(i,i=1,col) !紀錄m
 
     ! do i=1,row
-    !     write(101,1012) i,thetaTrue(i),(thetaHat(i,j),j=1,length)
-    !     write(102,1022) i,(resp(i,j),j=1,length) !寫下作答反應
-    !     write(103,1032) i,(place_choose(i,j),j=1,length) !寫下所選的試題
-    !     write(104,1042) i,(usedPool(i,j),j=1,col)
+        ! write(unit = 100, fmt = dataF) (thetaHat(j,i),j=1,length)
+        ! write(102,1022) i,(resp(j,i),j=1,length) !寫下作答反應
+        ! write(103,1032) i,(place_choose(j,i),j=1,length) !寫下所選的試題
+        ! write(104,1042) i,(usedPool(j,i),j=1,col)
     ! end do
 
     ! 1011 Format(A5,A10,50I10)
