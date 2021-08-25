@@ -34,6 +34,8 @@ program CAT
     real::thetaHatVar !估計能力值的變異數
     real::thetaHatMean !估計能力值的平均數
     real::thetaHatMSE !估計能力值的MSE
+    ! item pool 的相關資料紀錄 ===
+    real :: PoolUsedRate
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
@@ -86,16 +88,21 @@ program CAT
         enddo
     end do
     call cpu_time (t2) !結束計時
+    ! thetaHat 計算
     call subr_aveReal(thetaHat(length,:),row,thetaHatMean)
     call subr_varReal(thetaHat(length,:),row,thetaHatVar)
     call subr_mseReal(thetaHat(length,:),thetaTrue(:),row,thetaHatMSE)
+    ! item pool 計算
+    call subr_poolUsedRate(usedPool,row,col,PoolUsedRate)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
-    write(unit = 100, fmt = '(A)') "About thetaHat: "
+    write(unit = 100, fmt = '(/,A)') "About thetaHat: "
     write(unit = 100, fmt = '(A10, F10.5)') "Mean = ", thetaHatMean
     write(unit = 100, fmt = '(A10, F10.5)') "Var = ", thetaHatVar
     write(unit = 100, fmt = '(A10, F10.5)') "MSE = ", thetaHatMSE
+    write(unit = 100, fmt = '(/,A)') "About pool used: "
+    write(unit = 100, fmt = '(A10, F10.5)') "Rate = ", PoolUsedRate
     close(100)
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "thetaHat = "

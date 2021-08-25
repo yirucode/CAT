@@ -1,10 +1,10 @@
-subroutine subr_poolCount(respv,numTest,numPool,respCount)
+subroutine subr_poolCount(poolUsed,numTest,numPool,respCount)
     implicit none 
     ! === local variable ===
     integer, save:: i, j
     ! === input data: rawData(向量資料), length(向量長度)    
     integer, intent(in):: numTest, numPool 
-    integer, intent(in), dimension(numPool, numTest)::respv
+    integer, intent(in), dimension(numPool, numTest)::poolUsed
     ! === output data ===  
     integer, intent(out), dimension(numPool):: respCount
     ! === run code ===
@@ -13,7 +13,7 @@ subroutine subr_poolCount(respv,numTest,numPool,respCount)
         if (respCount(i) == 1 ) cycle
         do j = 1, numTest
             if (respCount(i) == 1 ) exit
-            if ( respv(i ,j) == 1 ) then
+            if ( poolUsed(i ,j) == 1 ) then
                 respCount(i) = 1 
             endif
         enddo

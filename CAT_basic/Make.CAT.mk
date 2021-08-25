@@ -6,16 +6,16 @@
 CC = gfortran
 CXXFLAGS =-c -g -O0 -Og -Wall 
 exe = a
-# obj = main_CAT.o\
-# subr_maxvReal.o subr_maxvInt.f90 \
-# subr_sumReal.o subr_sumInt.o
-# subr_aveReal.o subr_varReal.o subr_mseReal.o\
-# subr_resp.o \
-# subr_poolCount.o subr_poolSum.o subr_poolUsedRate.o\
-# func_probability.o func_information.o\
-# func_normal.o \
-# subr_EAP.o 
-obj = subr_poolSum.o 
+obj = main_CAT.o\
+subr_maxvReal.o subr_maxvInt.f90 \
+subr_sumReal.o subr_sumInt.o\
+subr_aveReal.o subr_varReal.o subr_mseReal.o\
+subr_resp.o \
+subr_poolCount.o subr_poolSum.o subr_poolUsedRate.o\
+func_probability.o func_information.o\
+func_normal.o \
+subr_EAP.o 
+# obj = subr_poolSum.o 
 
 # linking 鏈結
 a: $(obj)

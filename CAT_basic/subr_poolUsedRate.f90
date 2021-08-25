@@ -1,4 +1,4 @@
-subroutine subr_poolUsedRate(respv,numTest,numPool,rate)
+subroutine subr_poolUsedRate(poolUsed,numTest,numPool,rate)
     implicit none 
     ! === local variable ===
     integer, save:: i, j
@@ -6,7 +6,7 @@ subroutine subr_poolUsedRate(respv,numTest,numPool,rate)
     integer, dimension(numPool):: respCount
     ! === input data: rawData(向量資料), length(向量長度)    
     integer, intent(in):: numTest, numPool 
-    integer, intent(in), dimension(numPool, numTest)::respv
+    integer, intent(in), dimension(numPool, numTest)::poolUsed
     ! === output data ===  
     real, intent(out) :: rate
     ! === run code ===
@@ -15,7 +15,7 @@ subroutine subr_poolUsedRate(respv,numTest,numPool,rate)
         if (respCount(i) == 1 ) cycle
         do j = 1, numTest
             if (respCount(i) == 1 ) exit
-            if ( respv(i ,j) == 1 ) then
+            if ( poolUsed(i ,j) == 1 ) then
                 respCount(i) = 1 
             endif
         enddo

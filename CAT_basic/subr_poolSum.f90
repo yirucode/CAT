@@ -1,16 +1,16 @@
-subroutine subr_poolSum(respv,numTest,numPool,respSum)
+subroutine subr_poolSum(poolUsed,numTest,numPool,respSum)
     implicit none 
     ! === local variable ===
     integer, save:: i
     ! === input data: rawData(向量資料), length(向量長度)    
     integer, intent(in):: numTest, numPool 
-    integer, intent(in), dimension(numPool, numTest)::respv
+    integer, intent(in), dimension(numPool, numTest)::poolUsed
     ! === output data ===  
     integer, intent(out) ,dimension(numPool):: respSum
     ! === run code ===
     respSum = 0 ! 設定初始值
     do i = 1, numPool
-        call subr_sumInt(respv(i ,:), numTest, respSum(i))
+        call subr_sumInt(poolUsed(i ,:), numTest, respSum(i))
     enddo
     return
 end subroutine subr_poolSum
