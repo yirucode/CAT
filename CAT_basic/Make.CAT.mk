@@ -15,7 +15,7 @@ exe = a
 # func_probability.o func_information.o\
 # func_normal.o \
 # subr_EAP.o 
-obj = subr_poolCount.o 
+obj = subr_poolUsedRate.o 
 
 # linking 鏈結
 a: $(obj)
