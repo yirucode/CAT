@@ -1,10 +1,12 @@
 program CAT
     implicit none
     ! === given data ====
+    ! === 輸入資料設定 ===
+    character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: row = 10000 !重複次數
+    integer,parameter :: row = 100 !重複次數
     integer,parameter :: col = 300 !題庫數
-    integer,parameter :: length = 40 !作答題長
+    integer,parameter :: length = 100 !作答題長
     ! === item parameter ===
     real::a(col), b(col), c(col) !題庫試題參數
     ! === true theta ===
@@ -37,20 +39,21 @@ program CAT
     real (kind=8) t2 !結束時間
     ! === output error ===
     integer :: ierror
-    ! === 輸出資料格式設定 ===
+    ! === 輸出資料格式設定 === 
     character(len = 20), parameter :: input = 'ListCAT_thetaHat.txt'
-    character(len = 20), parameter :: dataINT = '(50I10)'
-    character(len = 20), parameter :: dataF = '(50F10.4)'
+    character(len = 20), parameter :: dataINT = '(100I10)' ! 隨著 length 改變而改變
+    character(len = 20), parameter :: dataF = '(100F10.4)' ! 隨著 length 改變而改變
+    character(len = 20), parameter :: dataPool = '(500I10)' ! 隨著 pool item number 改變而改變
     ! === run code ===
     call cpu_time (t1) !開始計時
     ! 讀取資料：輸入試題參數
-    open(100,file="data/parameter_300.txt",status="old") 
+    open(100, file= dataPath, status="old") 
     do i=1,col
         read(100,*) a(i),b(i),c(i) !三參數
     enddo
+    close(100)
     ! 開始模擬
     do try = 1, row
-
         do  choose = 1, length
             ! 計算訊息量
             if ( choose == 1 ) then
@@ -81,13 +84,19 @@ program CAT
             a_choose(1:choose, try),b_choose(1:choose, try),c_choose(1:choose, try),&
             resp(1:choose, try), thetaHat(choose, try))
         enddo
-
     end do
-    !WRITE(*,*) (thetaHat(length, i),i=1,row)
+    call cpu_time (t2) !結束計時
     call subr_aveReal(thetaHat(length,:),row,thetaHatMean)
-    WRITE(*,*) 'avg= ',thetaHatMean
-    ! === 輸出資料
-    !------------------
+    call subr_varReal(thetaHat(length,:),row,thetaHatVar)
+    call subr_mseReal(thetaHat(length,:),thetaTrue(:),row,thetaHatMSE)
+    ! === 輸出資料 ===
+    open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
+    write(unit = 100, fmt = '(A)') "About thetaHat: "
+    write(unit = 100, fmt = '(A10, F10.5)') "Mean = ", thetaHatMean
+    write(unit = 100, fmt = '(A10, F10.5)') "Var = ", thetaHatVar
+    write(unit = 100, fmt = '(A10, F10.5)') "MSE = ", thetaHatMSE
+    close(100)
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "thetaHat = "
     write(unit = 100, fmt = dataINT) (j, j=1,length)
@@ -109,7 +118,13 @@ program CAT
         write(unit = 100, fmt = dataINT) (place_choose(j,i),j=1,length)
     end do
     close(100)
-
+    open(unit = 100 , file = 'ListCAT_poolUsed.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(A)') "pool used = "
+    write(unit = 100, fmt = dataPool) (j, j=1,col)
+    do i=1,row
+        write(unit = 100, fmt = dataPool) (usedPool(j,i),j=1,col)
+    end do
+    close(100)
 
 
     !open(101,file="summery_CAT_thetaHat.txt",status="replace") !寫下能力估計

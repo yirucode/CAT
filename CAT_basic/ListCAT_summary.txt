@@ -1,0 +1,5 @@
+      time   2.48438
+About thetaHat: 
+   Mean =    0.97360
+    Var =    0.01661
+    MSE =    0.01730
