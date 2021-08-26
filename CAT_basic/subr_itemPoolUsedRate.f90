@@ -1,4 +1,4 @@
-subroutine subr_poolUsedRate(poolUsed,numTest,numPool,rate)
+subroutine subr_itemPoolUsedRate(poolUsed,numTest,numPool,rate)
     implicit none 
     ! === local variable ===
     integer, save:: i, j
@@ -23,7 +23,8 @@ subroutine subr_poolUsedRate(poolUsed,numTest,numPool,rate)
     call subr_sumInt(respCount, numPool, sumv)
     rate = REAL(sumv)/numPool
     return
-end subroutine subr_poolUsedRate
+end subroutine subr_itemPoolUsedRate
+
 
 ! ! === example ===
 ! program ex
@@ -51,7 +52,7 @@ end subroutine subr_poolUsedRate
 !         read(100, fmt = dataPool, iostat = status) (respv(j,i), j=1,numPool)
 !     enddo
 !     close(100)
-!     CALL subr_poolUsedRate(respv,numTest,numPool,rate)
+!     CALL subr_itemPoolUsedRate(respv,numTest,numPool,rate)
 !     WRITE(*,*) rate
 !     stop
 ! end program ex

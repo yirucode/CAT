@@ -35,7 +35,7 @@ program CAT
     real::thetaHatMean !估計能力值的平均數
     real::thetaHatMSE !估計能力值的MSE
     ! item pool 的相關資料紀錄 ===
-    real :: PoolUsedRate
+    real :: poolUsedRate
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
@@ -93,7 +93,7 @@ program CAT
     call subr_varReal(thetaHat(length,:),row,thetaHatVar)
     call subr_mseReal(thetaHat(length,:),thetaTrue(:),row,thetaHatMSE)
     ! item pool 計算
-    call subr_poolUsedRate(usedPool,row,col,PoolUsedRate)
+    call subr_itemPoolUsedRate(usedPool,row,col,poolUsedRate)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
@@ -102,7 +102,7 @@ program CAT
     write(unit = 100, fmt = '(A10, F10.5)') "Var = ", thetaHatVar
     write(unit = 100, fmt = '(A10, F10.5)') "MSE = ", thetaHatMSE
     write(unit = 100, fmt = '(/,A)') "About pool used: "
-    write(unit = 100, fmt = '(A10, F10.5)') "Rate = ", PoolUsedRate
+    write(unit = 100, fmt = '(A10, F10.5)') "Rate = ", poolUsedRate
     close(100)
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "thetaHat = "
@@ -132,34 +132,6 @@ program CAT
         write(unit = 100, fmt = dataPool) (usedPool(j,i),j=1,col)
     end do
     close(100)
-
-
-    !open(101,file="summery_CAT_thetaHat.txt",status="replace") !寫下能力估計
-    ! open(102,file="summery_CAT_response.txt",status="replace") !寫下作答反應
-    ! open(103,file="summery_CAT_item.txt",status="replace") !寫下所選的試題
-    ! open(104,file="summery_CAT_m.txt",status="replace") !紀錄m
-    
-
-    ! write(102,1021) "ID",(i,i=1,length)
-    ! write(103,1031) "ID",(i,i=1,length)
-    ! write(104,1041) "ID",(i,i=1,col) !紀錄m
-
-    ! do i=1,row
-        ! write(unit = 100, fmt = dataF) (thetaHat(j,i),j=1,length)
-        ! write(102,1022) i,(resp(j,i),j=1,length) !寫下作答反應
-        ! write(103,1032) i,(place_choose(j,i),j=1,length) !寫下所選的試題
-        ! write(104,1042) i,(usedPool(j,i),j=1,col)
-    ! end do
-
-    ! 1011 Format(A5,A10,50I10)
-    ! 1021 Format(I5,50F10.4)
-    ! 1031 Format(A5,50I10)
-    ! 1041 Format(A5,500I10)
-    
-    ! 1012 Format(I5,50F10.4)
-    ! 1022 Format(I5,50I3)
-    ! 1032 Format(I5,50I10)
-    ! 1042 Format(I5,500I10)
     stop
 end program CAT
 

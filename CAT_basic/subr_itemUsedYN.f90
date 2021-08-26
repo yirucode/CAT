@@ -1,4 +1,4 @@
-subroutine subr_poolCount(poolUsed,numTest,numPool,respCount)
+subroutine subr_itemUsedYN(poolUsed,numTest,numPool,usedCount)
     implicit none 
     ! === local variable ===
     integer, save:: i, j
@@ -6,20 +6,20 @@ subroutine subr_poolCount(poolUsed,numTest,numPool,respCount)
     integer, intent(in):: numTest, numPool 
     integer, intent(in), dimension(numPool, numTest)::poolUsed
     ! === output data ===  
-    integer, intent(out), dimension(numPool):: respCount
+    integer, intent(out), dimension(numPool):: usedCount
     ! === run code ===
-    respCount = 0 ! 設定初始值
+    usedCount = 0 ! 設定初始值
     do i = 1, numPool
-        if (respCount(i) == 1 ) cycle
+        if (usedCount(i) == 1 ) cycle
         do j = 1, numTest
-            if (respCount(i) == 1 ) exit
+            if (usedCount(i) == 1 ) exit
             if ( poolUsed(i ,j) == 1 ) then
-                respCount(i) = 1 
+                usedCount(i) = 1 
             endif
         enddo
     enddo
     return
-end subroutine subr_poolCount
+end subroutine subr_itemUsedYN
 
 ! ! === example ===
 ! program ex
@@ -28,7 +28,7 @@ end subroutine subr_poolCount
 !     ! === input data ===
 !     INTEGER, PARAMETER:: numTest = 100 ! 施測次數
 !     INTEGER, PARAMETER:: numPool = 300 ! 題庫
-!     integer, dimension(numPool, numTest):: respv = 99
+!     integer, dimension(numPool, numTest):: poolUsed = 99
 !     ! === data path ===
 !     INTEGER :: status
 !     INTEGER :: nJump = 2 ! 讀取資料時要跳過的行數
@@ -36,7 +36,7 @@ end subroutine subr_poolCount
 !     character(len = 20), parameter :: dataPool = '(300I10)' ! 隨著 pool item number 改變而改變
 !     ! === output data ===
 !     integer :: sum_x
-!     integer, dimension(numPool):: respCount
+!     integer, dimension(numPool):: usedCount
 !     ! === run data ===
 !     ! read data
 !     open(100, file= dataPath, status="old", action = 'read', iostat = status)
@@ -45,12 +45,12 @@ end subroutine subr_poolCount
 !         read(100,*) !// 跳過第一、二行
 !     enddo
 !     do i=1, numTest
-!         read(100, fmt = dataPool, iostat = status) (respv(j,i), j=1,numPool)
+!         read(100, fmt = dataPool, iostat = status) (poolUsed(j,i), j=1,numPool)
 !     enddo
 !     close(100)
-!     CALL subr_poolCount(respv,numTest,numPool,respCount)
-!     call subr_sumInt(respCount, numPool, sum_x)
-!     WRITE(*,*) (respCount(i), i=1, numPool)
+!     CALL subr_itemUsedYN(poolUsed,numTest,numPool,usedCount)
+!     call subr_sumInt(usedCount, numPool, sum_x)
+!     WRITE(*,*) (usedCount(i), i=1, numPool)
 !     WRITE(*,*) sum_x
 !     stop
 ! end program ex

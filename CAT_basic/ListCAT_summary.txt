@@ -1,0 +1,9 @@
+      time   2.46875
+
+About thetaHat: 
+   Mean =    0.99286
+    Var =    0.01536
+    MSE =    0.01541
+
+About pool used: 
+   Rate =    0.50333

@@ -1,4 +1,4 @@
-subroutine subr_poolSum(poolUsed,numTest,numPool,respSum)
+subroutine subr_itemUsedSum(poolUsed,numTest,numPool,usedSum)
     implicit none 
     ! === local variable ===
     integer, save:: i
@@ -6,14 +6,14 @@ subroutine subr_poolSum(poolUsed,numTest,numPool,respSum)
     integer, intent(in):: numTest, numPool 
     integer, intent(in), dimension(numPool, numTest)::poolUsed
     ! === output data ===  
-    integer, intent(out) ,dimension(numPool):: respSum
+    integer, intent(out) ,dimension(numPool):: usedSum
     ! === run code ===
-    respSum = 0 ! 設定初始值
+    usedSum = 0 ! 設定初始值
     do i = 1, numPool
-        call subr_sumInt(poolUsed(i ,:), numTest, respSum(i))
+        call subr_sumInt(poolUsed(i ,:), numTest, usedSum(i))
     enddo
     return
-end subroutine subr_poolSum
+end subroutine subr_itemUsedSum
 
 ! ! === example ===
 ! program ex
@@ -22,7 +22,7 @@ end subroutine subr_poolSum
 !     ! === input data ===
 !     INTEGER, PARAMETER:: numTest = 100 ! 施測次數
 !     INTEGER, PARAMETER:: numPool = 300 ! 題庫
-!     integer, dimension(numPool, numTest):: respv = 99
+!     integer, dimension(numPool, numTest):: poolUsed = 99
 !     ! === data path ===
 !     INTEGER :: status
 !     INTEGER :: nJump = 2 ! 讀取資料時要跳過的行數
@@ -30,7 +30,7 @@ end subroutine subr_poolSum
 !     character(len = 20), parameter :: dataPool = '(500I10)' ! 隨著 pool item number 改變而改變
 !     ! === output data ===
 !     integer :: sum_x
-!     integer, dimension(numPool):: respSum
+!     integer, dimension(numPool):: usedSum
 !     ! === run data ===
 !     ! read data
 !     open(100, file= dataPath, status="old", action = 'read', iostat = status)
@@ -39,12 +39,12 @@ end subroutine subr_poolSum
 !         read(100,*) !// 跳過第一、二行
 !     enddo
 !     do i=1, numTest
-!         read(100, fmt = dataPool, iostat = status) (respv(j,i), j=1,numPool)
+!         read(100, fmt = dataPool, iostat = status) (poolUsed(j,i), j=1,numPool)
 !     enddo
 !     close(100)
-!     CALL subr_poolSum(respv,numTest,numPool,respSum)
-!     WRITE(*,*) (respSum(i), i=1, numPool)
-!     CALL subr_sumInt(respSum, numPool, sum_x)
+!     CALL subr_itemUsedSum(poolUsed,numTest,numPool,usedSum)
+!     WRITE(*,*) (usedSum(i), i=1, numPool)
+!     CALL subr_sumInt(usedSum, numPool, sum_x)
 !     WRITE(*,*) sum_x
 !     stop
 ! end program ex
