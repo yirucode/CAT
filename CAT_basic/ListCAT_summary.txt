@@ -1,9 +1,15 @@
-      time   2.46875
+      time 254.14062
+  test num     10000
+  pool num       300
+    length       100
 
 About thetaHat: 
-   Mean =    0.99286
-    Var =    0.01536
-    MSE =    0.01541
+   Mean =    0.98356
+    Var =    0.01742
+    MSE =    0.01769
 
 About pool used: 
-   Rate =    0.50333
+   Rate =    0.57333
+
+About test overlap: 
+overlap =    0.00000

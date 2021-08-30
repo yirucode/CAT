@@ -4,7 +4,7 @@ program CAT
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: row = 100 !重複次數
+    integer,parameter :: row = 10000 !重複次數
     integer,parameter :: col = 300 !題庫數
     integer,parameter :: length = 100 !作答題長
     ! === item parameter ===
@@ -29,6 +29,8 @@ program CAT
     integer:: place_choose(length, row) !選題的試題位置
     real:: a_choose(length, row),b_choose(length, row), &
     c_choose(length, row) !選題的試題參數
+    ! 測驗重疊率參數
+    real:: testOverlap
     ! 估計能力參數
     real::thetaHat(length, row)
     real::thetaHatVar !估計能力值的變異數
@@ -89,20 +91,27 @@ program CAT
     end do
     call cpu_time (t2) !結束計時
     ! thetaHat 計算
-    call subr_aveReal(thetaHat(length,:),row,thetaHatMean)
-    call subr_varReal(thetaHat(length,:),row,thetaHatVar)
-    call subr_mseReal(thetaHat(length,:),thetaTrue(:),row,thetaHatMSE)
+    call subr_aveReal(thetaHat(length,:), row, thetaHatMean)
+    call subr_varReal(thetaHat(length,:), row, thetaHatVar)
+    call subr_mseReal(thetaHat(length,:), thetaTrue(:), row, thetaHatMSE)
     ! item pool 計算
-    call subr_itemPoolUsedRate(usedPool,row,col,poolUsedRate)
+    call subr_itemPoolUsedRate(usedPool, row, col, poolUsedRate)
+    ! test overlap
+    ! call subr_testOverlap(place_choose, row, length, testOverlap)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
+    write(unit = 100, fmt = '(A10,I10)') "test num", row
+    write(unit = 100, fmt = '(A10,I10)') "pool num", col
+    write(unit = 100, fmt = '(A10,I10)') "length", length
     write(unit = 100, fmt = '(/,A)') "About thetaHat: "
     write(unit = 100, fmt = '(A10, F10.5)') "Mean = ", thetaHatMean
     write(unit = 100, fmt = '(A10, F10.5)') "Var = ", thetaHatVar
     write(unit = 100, fmt = '(A10, F10.5)') "MSE = ", thetaHatMSE
     write(unit = 100, fmt = '(/,A)') "About pool used: "
     write(unit = 100, fmt = '(A10, F10.5)') "Rate = ", poolUsedRate
+    write(unit = 100, fmt = '(/,A)') "About test overlap: "
+    write(unit = 100, fmt = '(A10, F10.5)') "overlap = ", testOverlap
     close(100)
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "thetaHat = "
