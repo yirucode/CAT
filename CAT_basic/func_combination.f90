@@ -25,14 +25,14 @@ endif
 return
 end function combination
 
-
+! ! === example ===
 ! program ex
 !     implicit none
 !     integer::n, k
 !     real::outv
 !     real,external:: combination
-!     n = 2
-!     k = 3
+!     n = 10000
+!     k = 2
 !     outv = combination(n,k)
 !     WRITE(*,*) outv
 ! end program ex

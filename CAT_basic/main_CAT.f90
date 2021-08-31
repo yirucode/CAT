@@ -97,7 +97,7 @@ program CAT
     ! item pool 計算
     call subr_itemPoolUsedRate(usedPool, row, col, poolUsedRate)
     ! test overlap
-    ! call subr_testOverlap(place_choose, row, length, testOverlap)
+    call subr_testOverlap(place_choose, row, length, testOverlap)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
