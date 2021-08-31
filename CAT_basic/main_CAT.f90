@@ -6,11 +6,12 @@ program CAT
     ! === parameter ===
     integer,parameter :: row = 10000 !重複次數
     integer,parameter :: col = 300 !題庫數
-    integer,parameter :: length = 100 !作答題長
+    integer,parameter :: length = 40 !作答題長
     ! === item parameter ===
     real::a(col), b(col), c(col) !題庫試題參數
     ! === true theta ===
     real :: thetaTrue(row) = 1. !真實能力值
+    real :: thetaTrueMean !真實能力值之平均
     real :: thetaBegin = 0.
     ! === function ===
     real, external :: information, probability, normalPDF
@@ -21,6 +22,7 @@ program CAT
     integer :: choose
     ! === 運算暫存用 ===
     real :: maxv !最大值 
+    integer :: place
     real :: infor(col) !題庫各試題的訊息量
     integer :: usedPool(col, row) !被使用過的題目  
     real :: randv(length, row)
@@ -29,12 +31,18 @@ program CAT
     integer:: place_choose(length, row) !選題的試題位置
     real:: a_choose(length, row),b_choose(length, row), &
     c_choose(length, row) !選題的試題參數
+    ! 試題使用率
+    real:: usedRate(col)
+    real:: usedRateMax
+    real:: usedRateMean
+    real:: usedRateVar
     ! 測驗重疊率參數
     real:: testOverlap
     ! 估計能力參數
     real::thetaHat(length, row)
-    real::thetaHatVar !估計能力值的變異數
     real::thetaHatMean !估計能力值的平均數
+    real::thetaBias !估計能力值與真值的差之平均
+    real::thetaHatVar !估計能力值的變異數
     real::thetaHatMSE !估計能力值的MSE
     ! item pool 的相關資料紀錄 ===
     real :: poolUsedRate
@@ -91,9 +99,16 @@ program CAT
     end do
     call cpu_time (t2) !結束計時
     ! thetaHat 計算
+    call subr_aveReal(thetaTrue, row, thetaTrueMean)
     call subr_aveReal(thetaHat(length,:), row, thetaHatMean)
+    thetaBias = thetaHatMean - thetaTrueMean
     call subr_varReal(thetaHat(length,:), row, thetaHatVar)
     call subr_mseReal(thetaHat(length,:), thetaTrue(:), row, thetaHatMSE)
+    ! item used rate 計算
+    call subr_itemUsedRate(usedPool, row, col, usedRate)
+    call subr_maxvReal(usedRate, col, usedRateMax, place)
+    call subr_aveReal(usedRate, col, usedRateMean)
+    call subr_varReal(usedRate, col, usedRateVar)
     ! item pool 計算
     call subr_itemPoolUsedRate(usedPool, row, col, poolUsedRate)
     ! test overlap
@@ -106,8 +121,14 @@ program CAT
     write(unit = 100, fmt = '(A10,I10)') "length", length
     write(unit = 100, fmt = '(/,A)') "About thetaHat: "
     write(unit = 100, fmt = '(A10, F10.5)') "Mean = ", thetaHatMean
+    write(unit = 100, fmt = '(A10, F10.5)') "Bias = ", thetaBias
     write(unit = 100, fmt = '(A10, F10.5)') "Var = ", thetaHatVar
     write(unit = 100, fmt = '(A10, F10.5)') "MSE = ", thetaHatMSE
+    write(unit = 100, fmt = '(A10, F10.5)') "RMSE = ", thetaHatMSE**0.5
+    write(unit = 100, fmt = '(/,A)') "About item used rate: "
+    write(unit = 100, fmt = '(A10, F10.5)') "max = ", usedRateMax
+    write(unit = 100, fmt = '(A10, F10.5)') "mean = ", usedRateMean
+    write(unit = 100, fmt = '(A10, F10.5)') "var = ", usedRateVar
     write(unit = 100, fmt = '(/,A)') "About pool used: "
     write(unit = 100, fmt = '(A10, F10.5)') "Rate = ", poolUsedRate
     write(unit = 100, fmt = '(/,A)') "About test overlap: "

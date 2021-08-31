@@ -1,15 +1,22 @@
-      time 254.14062
+      time  42.81250
   test num     10000
   pool num       300
-    length       100
+    length        40
 
 About thetaHat: 
-   Mean =    0.98356
-    Var =    0.01742
-    MSE =    0.01769
+   Mean =    0.96865
+   Bias =   -0.03135
+    Var =    0.03099
+    MSE =    0.03198
+   RMSE =    0.17882
+
+About item used rate: 
+    max =    1.00000
+   mean =    0.13333
+    var =    0.08892
 
 About pool used: 
-   Rate =    0.57333
+   Rate =    0.32667
 
 About test overlap: 
-overlap =    0.00000
+overlap =    0.80020

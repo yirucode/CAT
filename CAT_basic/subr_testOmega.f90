@@ -1,14 +1,14 @@
     !-----------------------
     ! Omega subroutine
     !-----------------------
-    subroutine subr_testOmega(Omega,itemUsed,numTest,numPool,length,try,gamma) !(item,numTest,length,num,overlap)
+    subroutine subr_testOmega(numTest,numPool,itemUsed,length,try,alpha,Omega)
         implicit none
         ! === output ===
         real, intent(out), dimension(numTest)::Omega
         ! === input data ===
         integer, intent(in) ::numTest, numPool
         integer, intent(in) ::length, try
-        integer, intent(in) ::gamma
+        integer, intent(in) ::alpha
         integer, intent(in), dimension(numTest,numPool)::itemUsed !numPool = 題庫數、numTest = 人數
         ! === local variable ===
         real, external :: combination
@@ -17,13 +17,13 @@
         ! === run code ===
         sumv=0.0
         do i=1,numPool
-            sumv = sumv + (itemUsed(try,i)-itemUsed(try-1,i)) * combination(try-itemUsed(try,i),gamma)
+            sumv = sumv + (itemUsed(try,i)-itemUsed(try-1,i)) * combination(try-itemUsed(try,i),alpha)
         enddo
-        if (try<=gamma)then
+        if (try<=alpha)then
             Omega(try)=0
         else
-            Omega(try) = REAL(try-gamma-1)/try * Omega(try-1) + REAL(gamma+1)/try &
-            - sumv / (length * combination(try,gamma+1))
+            Omega(try) = REAL(try-alpha-1)/try * Omega(try-1) + REAL(alpha+1)/try &
+            - sumv / (length * combination(try,alpha+1))
         endif
         return
     end subroutine subr_testOmega
@@ -37,7 +37,7 @@ program ex
     INTEGER, PARAMETER:: numPool = 300 ! 題庫
     integer, dimension(numPool, numTest):: itemUsed !numPool = 題庫數、numTest = 人數
     integer::length, try
-    integer::gamma
+    integer::alpha
     ! === data path ===
     INTEGER :: status
     INTEGER :: nJump = 2 ! 讀取資料時要跳過的行數
@@ -53,12 +53,12 @@ program ex
         read(100,*) !// 跳過第一、二行
     enddo
     do i=1, numTest
-        read(100, fmt = dataPool, iostat = status) (respv(j,i), j=1,numPool)
+        read(100, fmt = dataPool, iostat = status) (itemUsed(j,i), j=1,numPool)
     enddo
     close(100)
     ! run the subroutine
-    CALL subr_testOmega(Omega,itemUsed,numTest,numPool,length,try,gamma)
-    WRITE(*,*) rate
+    CALL subr_testOmega(numTest,numPool,itemUsed,length,try,alpha,Omega) 
+    WRITE(*,*) Omega
     stop
 end program ex
 

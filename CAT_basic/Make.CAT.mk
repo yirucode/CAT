@@ -6,18 +6,20 @@
 CC = gfortran
 CXXFLAGS =-c -g -O0 -Og -Wall 
 exe = a
-# obj = main_CAT.o\
-# subr_maxvReal.o subr_maxvInt.o \
-# subr_sumReal.o subr_sumInt.o\
-# subr_aveReal.o subr_varReal.o subr_mseReal.o\
-# subr_resp.o \
-# subr_itemUsedYN.o subr_itemUsedSum.o \
-# subr_itemUsedRate.o subr_itemPoolUsedRate.o\
-# func_probability.o func_information.o\
-# func_normal.o \
-# func_combination.o subr_testOverlap.o\
-# subr_EAP.o 
-obj = subr_testOverlap.o
+obj = main_CAT.o\
+subr_maxvReal.o subr_maxvInt.o \
+subr_sumReal.o subr_sumInt.o\
+subr_aveReal.o subr_varReal.o subr_mseReal.o\
+subr_resp.o \
+subr_itemUsedYN.o subr_itemUsedSum.o \
+subr_itemUsedRate.o subr_itemPoolUsedRate.o\
+subr_testOverlap.o \
+func_probability.o func_information.o\
+func_normal.o \
+func_combination.o \
+subr_EAP.o 
+# subr_testOmega.o \
+# obj = subr_testOmega.o
 
 # linking 鏈結
 a: $(obj)
