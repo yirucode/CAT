@@ -65,7 +65,12 @@ program MST
     enddo
     close(100)
     ! 開始模擬
+
+
+
+
     
+
     stop
 end program MST
 

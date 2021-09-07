@@ -12,10 +12,10 @@
         integer, intent(in), dimension(numTest,numPool)::itemUsed !numPool = 題庫數、numTest = 人數
         ! === local variable ===
         real, external :: combination
-        integer::i !計算用
-        real::sumv !計算用
+        integer, save::i !計算用
+        real, save::sumv !計算用
         ! === run code ===
-        sumv=0.0
+        sumv=0
         do i=1,numPool
             sumv = sumv + (itemUsed(try,i)-itemUsed(try-1,i)) * combination(try-itemUsed(try,i),alpha)
         enddo
@@ -33,15 +33,16 @@ program ex
     implicit none
     INTEGER:: i, j
     ! === input data ===
-    INTEGER, PARAMETER:: numTest = 100 ! 施測次數
+    INTEGER, PARAMETER:: numTest = 10000 ! 施測次數
     INTEGER, PARAMETER:: numPool = 300 ! 題庫
     integer, dimension(numPool, numTest):: itemUsed !numPool = 題庫數、numTest = 人數
-    integer::length, try
-    integer::alpha
+    integer::length = 40
+    integer::try = 10000
+    integer::alpha = 1
     ! === data path ===
     INTEGER :: status
     INTEGER :: nJump = 2 ! 讀取資料時要跳過的行數
-    character(len = 50), parameter :: dataPath = "ListCAT_poolUsed.txt"
+    character(len = 50), parameter :: dataPath = "ListCAT_poolUsedSum.txt"
     character(len = 20), parameter :: dataPool = '(300I10)' ! 隨著 pool item number 改變而改變
     ! === output data ===
     real, dimension(numTest)::Omega

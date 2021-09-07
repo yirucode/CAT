@@ -9,17 +9,21 @@ exe = a
 obj = main_CAT.o\
 subr_maxvReal.o subr_maxvInt.o \
 subr_sumReal.o subr_sumInt.o\
-subr_aveReal.o subr_varReal.o subr_mseReal.o\
+subr_aveReal.o subr_aveIntToReal.o \
+subr_varReal.o subr_mseReal.o\
 subr_resp.o \
 subr_itemUsedYN.o subr_itemUsedSum.o \
 subr_itemUsedRate.o subr_itemPoolUsedRate.o\
 subr_testOverlap.o \
+subr_contentCount.o \
 func_probability.o func_information.o\
 func_normal.o \
 func_combination.o \
 subr_EAP.o 
-# subr_testOmega.o \
-# obj = subr_testOmega.o
+
+# subr_testOmega.o 
+
+# obj = subr_contentCount.o
 
 # linking 鏈結
 a: $(obj)
