@@ -6,7 +6,7 @@
 CC = gfortran
 CXXFLAGS =-c -g -O0 -Og -Wall 
 exe = a
-obj = main_CAT.o\
+obj = main_CAT.o \
 subr_maxvReal.o subr_maxvInt.o \
 subr_sumReal.o subr_sumInt.o\
 subr_aveReal.o subr_aveIntToReal.o \
@@ -15,15 +15,17 @@ subr_resp.o \
 subr_itemUsedYN.o subr_itemUsedSum.o \
 subr_itemUsedRate.o subr_itemPoolUsedRate.o\
 subr_testOverlap.o \
-subr_contentCount.o \
+subr_contentCount.o subr_contentTargetP.o \
 func_probability.o func_information.o\
 func_normal.o \
 func_combination.o \
 subr_EAP.o 
 
+# 待更新的代碼
+# main_CAT_contentControl.o
 # subr_testOmega.o 
 
-# obj = subr_contentCount.o
+# obj = subr_contentTargetP.o
 
 # linking 鏈結
 a: $(obj)

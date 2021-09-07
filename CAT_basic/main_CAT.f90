@@ -4,7 +4,7 @@ program CAT
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 100 !重複次數
+    integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
@@ -161,6 +161,7 @@ program CAT
     write(unit = 100, fmt = '(/,A)') "About test overlap: "
     write(unit = 100, fmt = '(A10, F10.5)') "overlap = ", testOverlap
     close(100)
+    ! == theta hat ==
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "thetaHat = "
     write(unit = 100, fmt = dataINT) (j, j=1,length)
@@ -168,6 +169,7 @@ program CAT
         write(unit = 100, fmt = dataF) (thetaHat(j,i),j=1,length)
     end do
     close (100)
+    ! == response ==
     open(unit = 100 , file = 'ListCAT_resp.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "response = "
     write(unit = 100, fmt = dataINT) (j, j=1,length)
@@ -175,6 +177,7 @@ program CAT
         write(unit = 100, fmt = dataINT) (resp(j,i),j=1,length)
     end do
     close(100)
+    ! == item choose ==
     open(unit = 100 , file = 'ListCAT_item.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "choose item = "
     write(unit = 100, fmt = dataINT) (j, j=1,length)
@@ -182,6 +185,7 @@ program CAT
         write(unit = 100, fmt = dataINT) (place_choose(j,i),j=1,length)
     end do
     close(100)
+    ! == content ==
     open(unit = 100 , file = 'ListCAT_content.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "choose content = "
     write(unit = 100, fmt = dataINT) (j, j=1,length)
@@ -189,6 +193,7 @@ program CAT
         write(unit = 100, fmt = dataINT) (content_choose(j,i),j=1,length)
     end do
     close(100)
+    ! == content summary ==
     open(unit = 100 , file = 'ListCAT_contentSum.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "content mean = "
     write(unit = 100, fmt = dataContentINT) (j, j=1,numContentType)
