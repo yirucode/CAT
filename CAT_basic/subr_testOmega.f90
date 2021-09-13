@@ -1,7 +1,7 @@
     !-----------------------
     ! Omega subroutine
     !-----------------------
-    subroutine subr_testOmega(numTest,numPool,itemUsed,length,try,alpha,Omega)
+    subroutine subr_testOmega(numTest,numPool,alpha,itemUsed,length,try,Omega)
         implicit none
         ! === output ===
         real, intent(out), dimension(numTest)::Omega
@@ -9,7 +9,7 @@
         integer, intent(in) ::numTest, numPool
         integer, intent(in) ::length, try
         integer, intent(in) ::alpha
-        integer, intent(in), dimension(numTest,numPool)::itemUsed !numPool = 題庫數、numTest = 人數
+        integer, intent(in), dimension(numPool,numTest)::itemUsed !numPool = 題庫數、numTest = 人數
         ! === local variable ===
         real, external :: combination
         integer, save::i !計算用
@@ -17,7 +17,7 @@
         ! === run code ===
         sumv=0
         do i=1,numPool
-            sumv = sumv + (itemUsed(try,i)-itemUsed(try-1,i)) * combination(try-itemUsed(try,i),alpha)
+            sumv = sumv + (itemUsed(i,try)-itemUsed(i,try-1)) * combination(try-itemUsed(i,try),alpha)
         enddo
         if (try<=alpha)then
             Omega(try)=0
@@ -33,12 +33,12 @@ program ex
     implicit none
     INTEGER:: i, j
     ! === input data ===
-    INTEGER, PARAMETER:: numTest = 100 ! 施測次數
+    INTEGER, PARAMETER:: numTest = 10000 ! 施測次數
     INTEGER, PARAMETER:: numPool = 300 ! 題庫
     integer, dimension(numPool, numTest):: itemUsed !numPool = 題庫數、numTest = 人數
     integer::length = 40
-    integer::try = 100
-    integer::alpha = 1
+    integer::try 
+    integer::alpha = 2
     ! === data path ===
     INTEGER :: status
     INTEGER :: nJump = 2 ! 讀取資料時要跳過的行數
@@ -58,7 +58,9 @@ program ex
     enddo
     close(100)
     ! run the subroutine
-    CALL subr_testOmega(numTest,numPool,itemUsed,length,try,alpha,Omega) 
+    do try=1, numTest
+        CALL subr_testOmega(numTest,numPool,alpha,itemUsed,length,try,Omega) 
+    enddo
     do i=1,numTest
         WRITE(*,*) Omega(i)
     enddo

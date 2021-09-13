@@ -4,7 +4,7 @@ program CAT
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 100 !重複次數
+    integer,parameter :: numTest = 1000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
@@ -36,6 +36,8 @@ program CAT
     integer:: content_choose(length, numTest)
     integer, dimension(numContentType, numTest)::contentResult
     real, dimension(numContentType)::contentResultMean
+    integer, dimension(numContentType)::contentResultMax
+    integer, dimension(numContentType)::contentResultMin
     !選題的試題參數
     real:: a_choose(length, numTest),b_choose(length, numTest), &
     c_choose(length, numTest) 
@@ -139,6 +141,8 @@ program CAT
     ! content mean 計算
     do i = 1, numContentType
         call subr_aveIntToReal(contentResult(i,:), numTest, contentResultMean(i))
+        call subr_maxvInt(contentResult(i,:), numTest, contentResultMax(i))
+        call subr_minvInt(contentResult(i,:), numTest, contentResultMin(i))
     enddo
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
@@ -196,11 +200,15 @@ program CAT
     close(100)
     ! == content summary ==
     open(unit = 100 , file = 'ListCAT_contentSum.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A)') "content mean = "
+    write(unit = 100, fmt = '(A)') "type = "
     write(unit = 100, fmt = dataContentINT) (j, j=1,numContentType)
+    write(unit = 100, fmt = '(/,A)') "mean = "
     write(unit = 100, fmt = dataContentReal) (contentResultMean(j),j=1,numContentType)
+    write(unit = 100, fmt = '(/,A)') "max = "
+    write(unit = 100, fmt = dataContentINT) (contentResultMax(j),j=1,numContentType)
+    write(unit = 100, fmt = '(/,A)') "min = "
+    write(unit = 100, fmt = dataContentINT) (contentResultMin(j),j=1,numContentType)
     write(unit = 100, fmt = '(/,A)') "content sum = "
-    write(unit = 100, fmt = dataContentINT) (j, j=1,numContentType)
     do i=1,numTest
         write(unit = 100, fmt = dataContentINT) (contentResult(j,i),j=1,numContentType)
     end do
@@ -212,6 +220,7 @@ program CAT
         write(unit = 100, fmt = dataPool) (usedPool(j,i),j=1,numPool)
     end do
     close(100)
+    ! == pool used ==
     open(unit = 100 , file = 'ListCAT_poolUsedSum.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "pool used sum = "
     write(unit = 100, fmt = dataPool) (j, j=1,numPool)
