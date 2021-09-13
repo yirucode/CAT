@@ -6,7 +6,7 @@
 CC = gfortran
 CXXFLAGS =-c -g -O0 -Og -Wall 
 exe = a
-obj = main_CAT_contentControl.o \
+obj = main_CAT.o \
 subr_maxvReal.o subr_maxvInt.o \
 subr_minvInt.o subr_minvReal.o\
 subr_sumReal.o subr_sumInt.o\
@@ -16,6 +16,7 @@ subr_resp.o \
 subr_itemUsedYN.o subr_itemUsedSum.o \
 subr_itemUsedRate.o subr_itemPoolUsedRate.o\
 subr_testOverlap.o \
+subr_testOmega.o subr_testPsi.o\
 subr_contentCount.o subr_contentTargetP.o \
 func_probability.o func_information.o\
 func_normal.o \
@@ -24,7 +25,7 @@ subr_EAP.o
 
 # 待更新的代碼
 # main_CAT_contentControl.o
-# subr_testOmega.o 
+# subr_testOmega.o subr_testPsi.o
 
 # obj = subr_testOmega.o
 

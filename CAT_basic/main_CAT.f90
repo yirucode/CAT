@@ -48,6 +48,20 @@ program CAT
     real:: usedRateVar
     ! 測驗重疊率參數
     real:: testOverlap
+    ! Omega
+    real, dimension(numTest)::omegaOne
+    real, dimension(numTest)::omegaTwo
+    real, dimension(numTest)::omegaThree
+    real:: omegaOneMean, omegaTwoMean, omegaThreeMean !平均
+    real:: omegaOneMax, omegaTwoMax, omegaThreeMax 
+    real:: omegaOneMin, omegaTwoMin, omegaThreeMin
+    ! Psi
+    real, dimension(numTest)::psiOne
+    real, dimension(numTest)::psiTwo
+    real, dimension(numTest)::psiThree
+    real:: psiOneMean, psiTwoMean, psiThreeMean
+    real:: psiOneMax, psiTwoMax, psiThreeMax
+    real:: psiOneMin, psiTwoMin, psiThreeMin
     ! 估計能力參數
     real::thetaHat(length, numTest)
     real::thetaHatMean !估計能力值的平均數
@@ -144,6 +158,33 @@ program CAT
         call subr_maxvInt(contentResult(i,:), numTest, contentResultMax(i))
         call subr_minvInt(contentResult(i,:), numTest, contentResultMin(i))
     enddo
+    ! == 計算Omega&Psi ==
+    do try = 1, numTest
+        call subr_testOmega(numTest,numPool,1,usedSum,length,try,omegaOne)
+        call subr_testOmega(numTest,numPool,2,usedSum,length,try,omegaTwo)
+        call subr_testOmega(numTest,numPool,3,usedSum,length,try,omegaThree)
+        call subr_testPsi(numTest,numPool,1,usedSum,length,try,psiOne)
+        call subr_testPsi(numTest,numPool,2,usedSum,length,try,psiTwo)
+        call subr_testPsi(numTest,numPool,3,usedSum,length,try,psiThree)
+    enddo
+    call subr_aveReal(omegaOne, numTest, omegaOneMean)
+    call subr_aveReal(omegaTwo, numTest, omegaTwoMean)
+    call subr_aveReal(omegaThree, numTest, omegaThreeMean)
+    call subr_maxvReal(omegaOne, numTest, omegaOneMax, place)
+    call subr_maxvReal(omegaTwo, numTest, omegaTwoMax, place)
+    call subr_maxvReal(omegaThree, numTest, omegaThreeMax, place)
+    call subr_minvReal(omegaOne, numTest, omegaOnemin, place)
+    call subr_minvReal(omegaTwo, numTest, omegaTwomin, place)
+    call subr_minvReal(omegaThree, numTest, omegaThreemin, place)
+    call subr_aveReal(psiOne, numTest, psiOneMean)
+    call subr_aveReal(psiTwo, numTest, psiTwoMean)
+    call subr_aveReal(psiThree, numTest, psiThreeMean)
+    call subr_maxvReal(psiOne, numTest, psiOneMax, place)
+    call subr_maxvReal(psiTwo, numTest, psiTwoMax, place)
+    call subr_maxvReal(psiThree, numTest, psiThreeMax, place)
+    call subr_minvReal(psiOne, numTest, psiOnemin, place)
+    call subr_minvReal(psiTwo, numTest, psiTwomin, place)
+    call subr_minvReal(psiThree, numTest, psiThreemin, place)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,A)') "method", "CAT"
@@ -228,6 +269,23 @@ program CAT
         write(unit = 100, fmt = dataPool) (usedSum(j,i),j=1,numPool)
     end do
     close(100)
+    ! == Omega & Psi ==
+    open(unit = 100 , file = 'ListCAT_testOmega&Psi.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(6A10)') "Omega 1", "Omega 2", "Omega 3", "Psi 1", "Psi 2", "Psi 3"
+    write(unit = 100, fmt = '(A)') "Mean = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOneMean, omegaTwoMean, omegaThreeMean,&
+    psiOneMean, psiTwoMean, psiThreeMean
+    write(unit = 100, fmt = '(A)') "Max = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOneMax, omegaTwoMax, omegaThreeMax,&
+    psiOneMax, psiTwoMax, psiThreeMax
+    write(unit = 100, fmt = '(A)') "Min = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOneMin, omegaTwoMin, omegaThreeMin,&
+    psiOneMin, psiTwoMin, psiThreeMin
+    write(unit = 100, fmt = '(A)') "data = "
+    do i=1,numTest
+        write(unit = 100, fmt = '(6F10.5)') omegaOne(i), omegaTwo(i), omegaThree(i),&
+        psiOne(i), psiTwo(i), psiThree(i)
+    end do
     stop
 end program CAT
 
