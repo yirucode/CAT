@@ -171,9 +171,10 @@ program CAT_contentControl
     enddo
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
-    write(unit = 100, fmt = '(A10,I10)') "test num", numTest
-    write(unit = 100, fmt = '(A10,I10)') "pool num", numPool
+    write(unit = 100, fmt = '(A10,A)') "method = ", "CAT with content balance"
+    write(unit = 100, fmt = '(A10,F10.5)') "time = ", t2-t1
+    write(unit = 100, fmt = '(A10,I10)') "test n = ", numTest
+    write(unit = 100, fmt = '(A10,I10)') "pool n = ", numPool
     write(unit = 100, fmt = '(A10,I10)') "length", length
     write(unit = 100, fmt = '(/,A)') "About thetaHat: "
     write(unit = 100, fmt = '(A10, F10.5)') "Mean = ", thetaHatMean

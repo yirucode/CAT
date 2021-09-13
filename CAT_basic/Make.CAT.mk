@@ -8,6 +8,7 @@ CXXFLAGS =-c -g -O0 -Og -Wall
 exe = a
 obj = main_CAT.o \
 subr_maxvReal.o subr_maxvInt.o \
+subr_minvInt.o subr_minvReal.o\
 subr_sumReal.o subr_sumInt.o\
 subr_aveReal.o subr_aveIntToReal.o \
 subr_varReal.o subr_mseReal.o\
@@ -25,7 +26,7 @@ subr_EAP.o
 # main_CAT_contentControl.o
 # subr_testOmega.o 
 
-# obj = subr_contentTargetP.o
+# obj = subr_testOmega.o
 
 # linking 鏈結
 a: $(obj)

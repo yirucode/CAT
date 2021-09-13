@@ -4,7 +4,7 @@ program CAT
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 10000 !重複次數
+    integer,parameter :: numTest = 100 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
@@ -142,6 +142,7 @@ program CAT
     enddo
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(A10,A)') "method", "CAT"
     write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test num", numTest
     write(unit = 100, fmt = '(A10,I10)') "pool num", numPool

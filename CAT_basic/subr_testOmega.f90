@@ -33,11 +33,11 @@ program ex
     implicit none
     INTEGER:: i, j
     ! === input data ===
-    INTEGER, PARAMETER:: numTest = 10000 ! 施測次數
+    INTEGER, PARAMETER:: numTest = 100 ! 施測次數
     INTEGER, PARAMETER:: numPool = 300 ! 題庫
     integer, dimension(numPool, numTest):: itemUsed !numPool = 題庫數、numTest = 人數
     integer::length = 40
-    integer::try = 10000
+    integer::try = 100
     integer::alpha = 1
     ! === data path ===
     INTEGER :: status
@@ -59,7 +59,9 @@ program ex
     close(100)
     ! run the subroutine
     CALL subr_testOmega(numTest,numPool,itemUsed,length,try,alpha,Omega) 
-    WRITE(*,*) Omega
+    do i=1,numTest
+        WRITE(*,*) Omega(i)
+    enddo
     stop
 end program ex
 
