@@ -29,12 +29,12 @@ end
 !     INTEGER:: i
 !     ! === input data ===
 !     INTEGER, PARAMETER:: n = 5
-!     REAL:: a(n) = (/8,(i,i=2,4),6/)
+!     REAL:: a(n) = (/8,(i,i=2,4),1/)
 !     ! === output data ===
 !     INTEGER:: maxPlace
 !     REAL:: maxvc
 !     ! === run data ===
-!     CALL subr_maxvReal(a,n,maxvc,maxPlace)
+!     CALL subr_maxvReal(a(2:n),n-1,maxvc,maxPlace)
 !     WRITE(*,*) INT(maxvc), maxPlace
 ! end program main
 

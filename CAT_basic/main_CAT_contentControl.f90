@@ -53,6 +53,7 @@ program CAT_contentControl
     real:: usedRateMean
     real:: usedRateVar
     ! 測驗重疊率參數
+    real:: testOverlapData
     real:: testOverlap
     ! 估計能力參數
     real::thetaHat(length, numTest)
@@ -60,6 +61,20 @@ program CAT_contentControl
     real::thetaBias !估計能力值與真值的差之平均
     real::thetaHatVar !估計能力值的變異數
     real::thetaHatMSE !估計能力值的MSE
+    ! Omega
+    real, dimension(numTest)::omegaOne
+    real, dimension(numTest)::omegaTwo
+    real, dimension(numTest)::omegaThree
+    real:: omegaOneMean, omegaTwoMean, omegaThreeMean !平均
+    real:: omegaOneMax, omegaTwoMax, omegaThreeMax 
+    real:: omegaOneMin, omegaTwoMin, omegaThreeMin
+    ! Psi
+    real, dimension(numTest)::psiOne
+    real, dimension(numTest)::psiTwo
+    real, dimension(numTest)::psiThree
+    real:: psiOneMean, psiTwoMean, psiThreeMean
+    real:: psiOneMax, psiTwoMax, psiThreeMax
+    real:: psiOneMin, psiTwoMin, psiThreeMin
     ! item pool 的相關資料紀錄 ===
     real :: poolUsedRate
     ! === 存取時間 ===
@@ -166,13 +181,41 @@ program CAT_contentControl
     ! item pool 計算
     call subr_itemPoolUsedRate(usedPool, numTest, numPool, poolUsedRate)
     ! test overlap
-    call subr_testOverlap(place_choose, numTest, length, testOverlap)
+    call subr_testOverlap(place_choose, numTest, length, testOverlapData) ! 不知為何會受下面subr_maxvInt的影響，待查證
+    testOverlap = testOverlapData
     ! content mean 計算
     do i = 1, numContentType
         call subr_aveIntToReal(contentResult(i,:), numTest, contentResultMean(i))
         call subr_maxvInt(contentResult(i,:), numTest, contentResultMax(i))
         call subr_minvInt(contentResult(i,:), numTest, contentResultMin(i))
     enddo
+    ! == 計算Omega&Psi ==
+    do try = 1, numTest
+        call subr_testOmega(numTest,numPool,1,usedSum,length,try,omegaOne)
+        call subr_testOmega(numTest,numPool,2,usedSum,length,try,omegaTwo)
+        call subr_testOmega(numTest,numPool,3,usedSum,length,try,omegaThree)
+        call subr_testPsi(numTest,numPool,1,usedSum,length,try,psiOne)
+        call subr_testPsi(numTest,numPool,2,usedSum,length,try,psiTwo)
+        call subr_testPsi(numTest,numPool,3,usedSum,length,try,psiThree)
+    enddo
+    call subr_aveReal(omegaOne, numTest, omegaOneMean)
+    call subr_aveReal(omegaTwo, numTest, omegaTwoMean)
+    call subr_aveReal(omegaThree, numTest, omegaThreeMean)
+    call subr_maxvReal(omegaOne(2:numTest), numTest-1, omegaOneMax, place)
+    call subr_maxvReal(omegaTwo(3:numTest), numTest-2, omegaTwoMax, place)
+    call subr_maxvReal(omegaThree(4:numTest), numTest-3, omegaThreeMax, place)
+    call subr_minvReal(omegaOne(2:numTest), numTest-1, omegaOnemin, place)
+    call subr_minvReal(omegaTwo(3:numTest), numTest-2, omegaTwomin, place)
+    call subr_minvReal(omegaThree(4:numTest), numTest-3, omegaThreemin, place)
+    call subr_aveReal(psiOne, numTest, psiOneMean)
+    call subr_aveReal(psiTwo, numTest, psiTwoMean)
+    call subr_aveReal(psiThree, numTest, psiThreeMean)
+    call subr_maxvReal(psiOne(2:numTest), numTest-1, psiOneMax, place)
+    call subr_maxvReal(psiTwo(3:numTest), numTest-2, psiTwoMax, place)
+    call subr_maxvReal(psiThree(4:numTest), numTest-3, psiThreeMax, place)
+    call subr_minvReal(psiOne(2:numTest), numTest-1, psiOnemin, place)
+    call subr_minvReal(psiTwo(3:numTest), numTest-2, psiTwomin, place)
+    call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreemin, place)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,A)') "method = ", "CAT with content balance"
@@ -257,6 +300,23 @@ program CAT_contentControl
         write(unit = 100, fmt = dataPool) (usedSum(j,i),j=1,numPool)
     end do
     close(100)
+    ! == Omega & Psi ==
+    open(unit = 100 , file = 'ListCAT_testOmega&Psi.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(6A10)') "Omega 1", "Omega 2", "Omega 3", "Psi 1", "Psi 2", "Psi 3"
+    write(unit = 100, fmt = '(A)') "Mean = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOneMean, omegaTwoMean, omegaThreeMean,&
+    psiOneMean, psiTwoMean, psiThreeMean
+    write(unit = 100, fmt = '(A)') "Max = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOneMax, omegaTwoMax, omegaThreeMax,&
+    psiOneMax, psiTwoMax, psiThreeMax
+    write(unit = 100, fmt = '(A)') "Min = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOneMin, omegaTwoMin, omegaThreeMin,&
+    psiOneMin, psiTwoMin, psiThreeMin
+    write(unit = 100, fmt = '(/,A)') "data = "
+    do i=1,numTest
+        write(unit = 100, fmt = '(6F10.5)') omegaOne(i), omegaTwo(i), omegaThree(i),&
+        psiOne(i), psiTwo(i), psiThree(i)
+    end do
     stop
 end program CAT_contentControl
 

@@ -47,6 +47,7 @@ program CAT
     real:: usedRateMean
     real:: usedRateVar
     ! 測驗重疊率參數
+    real:: testOverlapData
     real:: testOverlap
     ! Omega
     real, dimension(numTest)::omegaOne
@@ -151,7 +152,8 @@ program CAT
     ! item pool 計算
     call subr_itemPoolUsedRate(usedPool, numTest, numPool, poolUsedRate)
     ! test overlap
-    call subr_testOverlap(place_choose, numTest, length, testOverlap)
+    call subr_testOverlap(place_choose, numTest, length, testOverlapData)     ! 不知為何會受下面subr_maxvInt的影響，待查證
+    testOverlap = testOverlapData
     ! content mean 計算
     do i = 1, numContentType
         call subr_aveIntToReal(contentResult(i,:), numTest, contentResultMean(i))
@@ -170,21 +172,21 @@ program CAT
     call subr_aveReal(omegaOne, numTest, omegaOneMean)
     call subr_aveReal(omegaTwo, numTest, omegaTwoMean)
     call subr_aveReal(omegaThree, numTest, omegaThreeMean)
-    call subr_maxvReal(omegaOne, numTest, omegaOneMax, place)
-    call subr_maxvReal(omegaTwo, numTest, omegaTwoMax, place)
-    call subr_maxvReal(omegaThree, numTest, omegaThreeMax, place)
-    call subr_minvReal(omegaOne, numTest, omegaOnemin, place)
-    call subr_minvReal(omegaTwo, numTest, omegaTwomin, place)
-    call subr_minvReal(omegaThree, numTest, omegaThreemin, place)
+    call subr_maxvReal(omegaOne(2:numTest), numTest-1, omegaOneMax, place)
+    call subr_maxvReal(omegaTwo(3:numTest), numTest-2, omegaTwoMax, place)
+    call subr_maxvReal(omegaThree(4:numTest), numTest-3, omegaThreeMax, place)
+    call subr_minvReal(omegaOne(2:numTest), numTest-1, omegaOnemin, place)
+    call subr_minvReal(omegaTwo(3:numTest), numTest-2, omegaTwomin, place)
+    call subr_minvReal(omegaThree(4:numTest), numTest-3, omegaThreemin, place)
     call subr_aveReal(psiOne, numTest, psiOneMean)
     call subr_aveReal(psiTwo, numTest, psiTwoMean)
     call subr_aveReal(psiThree, numTest, psiThreeMean)
-    call subr_maxvReal(psiOne, numTest, psiOneMax, place)
-    call subr_maxvReal(psiTwo, numTest, psiTwoMax, place)
-    call subr_maxvReal(psiThree, numTest, psiThreeMax, place)
-    call subr_minvReal(psiOne, numTest, psiOnemin, place)
-    call subr_minvReal(psiTwo, numTest, psiTwomin, place)
-    call subr_minvReal(psiThree, numTest, psiThreemin, place)
+    call subr_maxvReal(psiOne(2:numTest), numTest-1, psiOneMax, place)
+    call subr_maxvReal(psiTwo(3:numTest), numTest-2, psiTwoMax, place)
+    call subr_maxvReal(psiThree(4:numTest), numTest-3, psiThreeMax, place)
+    call subr_minvReal(psiOne(2:numTest), numTest-1, psiOnemin, place)
+    call subr_minvReal(psiTwo(3:numTest), numTest-2, psiTwomin, place)
+    call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreemin, place)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,A)') "method", "CAT"
@@ -281,7 +283,10 @@ program CAT
     write(unit = 100, fmt = '(A)') "Min = "
     write(unit = 100, fmt = '(6F10.5)') omegaOneMin, omegaTwoMin, omegaThreeMin,&
     psiOneMin, psiTwoMin, psiThreeMin
-    write(unit = 100, fmt = '(A)') "data = "
+    write(unit = 100, fmt = '(A)') "Last = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOne(numTest), omegaTwo(numTest), omegaThree(numTest),&
+    psiOne(numTest), psiTwo(numTest), psiThree(numTest)
+    write(unit = 100, fmt = '(/,A)') "data = "
     do i=1,numTest
         write(unit = 100, fmt = '(6F10.5)') omegaOne(i), omegaTwo(i), omegaThree(i),&
         psiOne(i), psiTwo(i), psiThree(i)
