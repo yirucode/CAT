@@ -1,6 +1,18 @@
 {
     "version": "0.0.3",
     "configurations": [
+        {
+            "name": "Run GDB",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}\\a.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "make",
+        },
 
         {
             "name": "Launch(gdb)",
@@ -10,5 +22,7 @@
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "make" //先執行tasks.json 中的 make
         },
+
+
     ]
 }

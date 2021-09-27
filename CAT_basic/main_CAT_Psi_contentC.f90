@@ -115,7 +115,7 @@ program CAT
     do try = 1, numTest
         
         ! Psi 控制設定
-        if (try == 1) then 
+        if (try <= alpha) then 
             do i=1,numPool
                 eta(i, try) = 0 !combination(try-1,alpha) !mit=0 !選出符合條件者 予以施測
             enddo
@@ -124,8 +124,8 @@ program CAT
                 eta(i,try) = combination(try-(usedSum(i,try-1)+1),alpha) !mit=0 !選出符合條件者 予以施測
             enddo
         endif
-        delta(try) = func_deltaPsi(try,alpha,psiMax,length)
-        deltaChange(1, try) = delta(try) !紀錄delta的變化
+        ! delta(try) = func_deltaPsi(try,alpha,psiMax,length)
+        ! deltaChange(1, try) = delta(try) !紀錄delta的變化
 
         do  choose = 1, length
             

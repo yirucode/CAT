@@ -4,7 +4,7 @@ program CAT
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 1000 !重複次數
+    integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
@@ -116,15 +116,13 @@ program CAT
             enddo
         else
             do i=1,numPool 
-                eta(i,try) = combination(try-usedSum(i,try-1)+1,alpha) !mit=0 !選出符合條件者 予以施測
+                eta(i,try) = combination(try-(usedSum(i,try-1)+1),alpha) !mit=0 !選出符合條件者 予以施測
             enddo
         endif
-        !delta(try) = func_deltaPsi(try,alpha,psiMax,choose)
-        !deltaCriteria(1, try) = delta(try) !紀錄delta的變化
-
+        
         do  choose = 1, length
             
-            if (try<=alpha) then 
+            if (try <= alpha) then 
                 ! 計算訊息量
                 if ( choose == 1 ) then
                     do i = 1, numPool
@@ -149,9 +147,6 @@ program CAT
                         else
                             infor(i) = 0
                         endif
-                    enddo
-                    do i = 1, numPool
-                        infor(i) = information(thetaBegin, a(i), b(i), c(i))
                     enddo
                 else
                     ! 設定Psi控制
