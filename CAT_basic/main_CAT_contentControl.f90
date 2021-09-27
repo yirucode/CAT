@@ -218,11 +218,11 @@ program CAT_contentControl
     call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreemin, place)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A10,A)') "method = ", "CAT with content balance"
+    write(unit = 100, fmt = '(A10,A)') "method = ", " CAT with content balance"
     write(unit = 100, fmt = '(A10,F10.5)') "time = ", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test n = ", numTest
     write(unit = 100, fmt = '(A10,I10)') "pool n = ", numPool
-    write(unit = 100, fmt = '(A10,I10)') "length", length
+    write(unit = 100, fmt = '(A10,I10)') "length = ", length
     write(unit = 100, fmt = '(/,A)') "About thetaHat: "
     write(unit = 100, fmt = '(A10, F10.5)') "Mean = ", thetaHatMean
     write(unit = 100, fmt = '(A10, F10.5)') "Bias = ", thetaBias
@@ -274,11 +274,11 @@ program CAT_contentControl
     open(unit = 100 , file = 'ListCAT_contentSum.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "type = "
     write(unit = 100, fmt = dataContentINT) (j, j=1,numContentType)
-    write(unit = 100, fmt = '(/,A)') "mean = "
+    write(unit = 100, fmt = '(A)') "mean = "
     write(unit = 100, fmt = dataContentReal) (contentResultMean(j),j=1,numContentType)
-    write(unit = 100, fmt = '(/,A)') "max = "
+    write(unit = 100, fmt = '(A)') "max = "
     write(unit = 100, fmt = dataContentINT) (contentResultMax(j),j=1,numContentType)
-    write(unit = 100, fmt = '(/,A)') "min = "
+    write(unit = 100, fmt = '(A)') "min = "
     write(unit = 100, fmt = dataContentINT) (contentResultMin(j),j=1,numContentType)
     write(unit = 100, fmt = '(/,A)') "content sum = "
     do i=1,numTest
@@ -312,11 +312,15 @@ program CAT_contentControl
     write(unit = 100, fmt = '(A)') "Min = "
     write(unit = 100, fmt = '(6F10.5)') omegaOneMin, omegaTwoMin, omegaThreeMin,&
     psiOneMin, psiTwoMin, psiThreeMin
+    write(unit = 100, fmt = '(A)') "Last = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOne(numTest), omegaTwo(numTest), omegaThree(numTest),&
+    psiOne(numTest), psiTwo(numTest), psiThree(numTest)
     write(unit = 100, fmt = '(/,A)') "data = "
     do i=1,numTest
         write(unit = 100, fmt = '(6F10.5)') omegaOne(i), omegaTwo(i), omegaThree(i),&
         psiOne(i), psiTwo(i), psiThree(i)
     end do
+    close(100)
     stop
 end program CAT_contentControl
 

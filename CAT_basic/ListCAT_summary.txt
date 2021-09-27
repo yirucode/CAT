@@ -1,23 +1,25 @@
-    methodCAT
-      time   4.32812
-  test num      1000
-  pool num       300
-    length        40
+ method =  CAT with Psi
+   time =    6.68750
+ test n =       1000
+ pool n =        300
+ length =         40
+psi max =    0.30000
+  alpha =          1
 
 About thetaHat: 
-   Mean =    0.98207
-   Bias =   -0.01793
-    Var =    0.03000
-    MSE =    0.03032
-   RMSE =    0.17412
+   Mean =    0.66347
+   Bias =   -0.33653
+    Var =    0.16552
+    MSE =    0.27877
+   RMSE =    0.52799
 
 About item used rate: 
     max =    1.00000
-   mean =    0.13333
-    var =    0.08919
+   mean =    0.00692
+    var =    0.00661
 
 About pool used: 
-   Rate =    0.30000
+   Rate =    0.22333
 
 About test overlap: 
-overlap =    0.80208
+overlap =    0.99620
