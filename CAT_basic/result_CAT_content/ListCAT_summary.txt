@@ -1,23 +1,23 @@
  method =  CAT with content balance
-   time =   39.03125
+   time =   44.60938
  test n =      10000
  pool n =        300
  length =         40
 
 About thetaHat: 
-   Mean =    0.97322
-   Bias =   -0.02678
-    Var =    0.03272
-    MSE =    0.03343
-   RMSE =    0.18285
+   Mean =    0.97566
+   Bias =   -0.02434
+    Var =    0.03248
+    MSE =    0.03308
+   RMSE =    0.18187
 
 About item used rate: 
     max =    1.00000
    mean =    0.13333
-    var =    0.08982
+    var =    0.09005
 
 About pool used: 
-   Rate =    0.37000
+   Rate =    0.36667
 
 About test overlap: 
-overlap =    0.80696
+overlap =    0.80866

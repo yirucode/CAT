@@ -10,7 +10,7 @@ program CAT_contentControl
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
-    integer :: contentTarget(numContentType) = (/14,13,13/)
+    integer :: contentTarget(numContentType) = (/20,10,10/)
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
