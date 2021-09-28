@@ -4,7 +4,7 @@ program CAT
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 100 !重複次數
+    integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
@@ -67,7 +67,7 @@ program CAT
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 1
-    real:: psiMax = 0.5
+    real:: psiMax = 0.2
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi

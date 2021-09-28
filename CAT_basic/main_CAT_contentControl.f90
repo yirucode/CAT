@@ -10,7 +10,7 @@ program CAT_contentControl
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
-    integer :: contentTarget(numContentType) = (/20,10,10/)
+    integer :: contentTarget(numContentType) = (/14,13,13/)
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
@@ -68,6 +68,7 @@ program CAT_contentControl
     real:: omegaOneMean, omegaTwoMean, omegaThreeMean !平均
     real:: omegaOneMax, omegaTwoMax, omegaThreeMax 
     real:: omegaOneMin, omegaTwoMin, omegaThreeMin
+    real:: omegaOneVar, omegaTwoVar, omegaThreeVar
     ! Psi
     real, dimension(numTest)::psiOne
     real, dimension(numTest)::psiTwo
@@ -75,6 +76,7 @@ program CAT_contentControl
     real:: psiOneMean, psiTwoMean, psiThreeMean
     real:: psiOneMax, psiTwoMax, psiThreeMax
     real:: psiOneMin, psiTwoMin, psiThreeMin
+    real:: psiOneVar, psiTwoVar, psiThreeVar
     ! item pool 的相關資料紀錄 ===
     real :: poolUsedRate
     ! === 存取時間 ===
@@ -207,6 +209,9 @@ program CAT_contentControl
     call subr_minvReal(omegaOne(2:numTest), numTest-1, omegaOnemin, place)
     call subr_minvReal(omegaTwo(3:numTest), numTest-2, omegaTwomin, place)
     call subr_minvReal(omegaThree(4:numTest), numTest-3, omegaThreemin, place)
+    call subr_varReal(omegaOne(2:numTest), numTest-1, omegaOneVar)
+    call subr_varReal(omegaTwo(3:numTest), numTest-2, omegaTwoVar)
+    call subr_varReal(omegaThree(4:numTest), numTest-3, omegaThreeVar)
     call subr_aveReal(psiOne, numTest, psiOneMean)
     call subr_aveReal(psiTwo, numTest, psiTwoMean)
     call subr_aveReal(psiThree, numTest, psiThreeMean)
@@ -216,6 +221,9 @@ program CAT_contentControl
     call subr_minvReal(psiOne(2:numTest), numTest-1, psiOnemin, place)
     call subr_minvReal(psiTwo(3:numTest), numTest-2, psiTwomin, place)
     call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreemin, place)
+    call subr_varReal(psiOne(2:numTest), numTest-1, psiOneVar)
+    call subr_varReal(psiTwo(3:numTest), numTest-2, psiTwoVar)
+    call subr_varReal(psiThree(4:numTest), numTest-3, psiThreeVar)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,A)') "method = ", " CAT with content balance"
@@ -312,6 +320,9 @@ program CAT_contentControl
     write(unit = 100, fmt = '(A)') "Min = "
     write(unit = 100, fmt = '(6F10.5)') omegaOneMin, omegaTwoMin, omegaThreeMin,&
     psiOneMin, psiTwoMin, psiThreeMin
+    write(unit = 100, fmt = '(A)') "SD = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOneVar**0.5, omegaTwoVar**0.5, omegaThreeVar**0.5,&
+    psiOneVar**0.5, psiTwoVar**0.5, psiThreeVar**0.5
     write(unit = 100, fmt = '(A)') "Last = "
     write(unit = 100, fmt = '(6F10.5)') omegaOne(numTest), omegaTwo(numTest), omegaThree(numTest),&
     psiOne(numTest), psiTwo(numTest), psiThree(numTest)

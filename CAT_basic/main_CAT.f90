@@ -4,7 +4,7 @@ program CAT
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 1000 !重複次數
+    integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
