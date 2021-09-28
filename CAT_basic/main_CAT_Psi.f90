@@ -4,7 +4,7 @@ program CAT
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 10000 !重複次數
+    integer,parameter :: numTest = 100 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
@@ -55,7 +55,8 @@ program CAT
     real, dimension(numTest)::omegaThree
     real:: omegaOneMean, omegaTwoMean, omegaThreeMean !平均
     real:: omegaOneMax, omegaTwoMax, omegaThreeMax 
-    real:: omegaOneMin, omegaTwoMin, omegaThreeMin
+    real:: omegaOneMin, omegaTwoMin, omegaThreeMin 
+    real:: omegaOneVar, omegaTwoVar, omegaThreeVar
     ! Psi
     real, dimension(numTest)::psiOne
     real, dimension(numTest)::psiTwo
@@ -63,9 +64,10 @@ program CAT
     real:: psiOneMean, psiTwoMean, psiThreeMean
     real:: psiOneMax, psiTwoMax, psiThreeMax
     real:: psiOneMin, psiTwoMin, psiThreeMin
+    real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 1
-    real:: psiMax = 0.3
+    real:: psiMax = 0.5
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
@@ -73,7 +75,7 @@ program CAT
     !real:: delta(numTest)
     real, dimension(length, numTest):: deltaCriteria
     !real::lambda 
-    real::sumEta
+    !real::sumEta
     real, dimension(numPool, numTest)::eta !item contribution
     real::eta_choose(length, numTest) !選中的eta
     ! 估計能力參數
@@ -138,9 +140,9 @@ program CAT
                     enddo
                 endif
             else
+                ! 設定Psi控制
+                deltaCriteria(choose, try) = func_deltaPsi(try,alpha,psiMax,1)
                 if ( choose == 1 ) then
-                    ! 設定Psi控制
-                    deltaCriteria(choose, try) = func_deltaPsi(try,alpha,psiMax,choose)
                     do i = 1, numPool
                         if (eta(i,try) >= deltaCriteria(choose, try)) then
                             infor(i) = information(thetaBegin, a(i), b(i), c(i))
@@ -168,13 +170,6 @@ program CAT
             content_choose(choose, try) = content(place_choose(choose, try))
             ! 紀錄與更新Psi控制指標
             eta_choose(choose,try) = eta(place_choose(choose, try),try)
-            if ( try > alpha ) then 
-                if ( choose+1 <= length ) then
-                    deltaCriteria(choose+1, try) = func_deltaPsi(try,alpha,psiMax,choose+1)
-                    call subr_sumReal(eta_choose(1:choose,try),choose,sumEta)
-                    deltaCriteria(choose+1, try) = deltaCriteria(choose+1, try) - sumEta
-                endif
-            endif
             ! 模擬作答反應
             call subr_resp(thetaTrue(try), &
             a_choose(choose, try),b_choose(choose, try),c_choose(choose, try),&
@@ -235,18 +230,26 @@ program CAT
     call subr_maxvReal(omegaOne(2:numTest), numTest-1, omegaOneMax, place)
     call subr_maxvReal(omegaTwo(3:numTest), numTest-2, omegaTwoMax, place)
     call subr_maxvReal(omegaThree(4:numTest), numTest-3, omegaThreeMax, place)
-    call subr_minvReal(omegaOne(2:numTest), numTest-1, omegaOnemin, place)
-    call subr_minvReal(omegaTwo(3:numTest), numTest-2, omegaTwomin, place)
-    call subr_minvReal(omegaThree(4:numTest), numTest-3, omegaThreemin, place)
+    call subr_minvReal(omegaOne(2:numTest), numTest-1, omegaOneMin, place)
+    call subr_minvReal(omegaTwo(3:numTest), numTest-2, omegaTwoMin, place)
+    call subr_minvReal(omegaThree(4:numTest), numTest-3, omegaThreeMin, place)
+    call subr_varReal(omegaOne(2:numTest), numTest-1, omegaOneVar)
+    call subr_varReal(omegaTwo(3:numTest), numTest-2, omegaTwoVar)
+    call subr_varReal(omegaThree(4:numTest), numTest-3, omegaThreeVar)
     call subr_aveReal(psiOne, numTest, psiOneMean)
     call subr_aveReal(psiTwo, numTest, psiTwoMean)
     call subr_aveReal(psiThree, numTest, psiThreeMean)
     call subr_maxvReal(psiOne(2:numTest), numTest-1, psiOneMax, place)
     call subr_maxvReal(psiTwo(3:numTest), numTest-2, psiTwoMax, place)
     call subr_maxvReal(psiThree(4:numTest), numTest-3, psiThreeMax, place)
-    call subr_minvReal(psiOne(2:numTest), numTest-1, psiOnemin, place)
-    call subr_minvReal(psiTwo(3:numTest), numTest-2, psiTwomin, place)
-    call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreemin, place)
+    call subr_minvReal(psiOne(2:numTest), numTest-1, psiOneMin, place)
+    call subr_minvReal(psiTwo(3:numTest), numTest-2, psiTwoMin, place)
+    call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreeMin, place)
+    call subr_varReal(psiOne(2:numTest), numTest-1, psiOneVar)
+    call subr_varReal(psiTwo(3:numTest), numTest-2, psiTwoVar)
+    call subr_varReal(psiThree(4:numTest), numTest-3, psiThreeVar)
+    
+    
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,A)') "method = ", " CAT with Psi"
@@ -345,6 +348,9 @@ program CAT
     write(unit = 100, fmt = '(A)') "Min = "
     write(unit = 100, fmt = '(6F10.5)') omegaOneMin, omegaTwoMin, omegaThreeMin,&
     psiOneMin, psiTwoMin, psiThreeMin
+    write(unit = 100, fmt = '(A)') "SD = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOneVar**0.5, omegaTwoVar**0.5, omegaThreeVar**0.5,&
+    psiOneVar**0.5, psiTwoVar**0.5, psiThreeVar**0.5
     write(unit = 100, fmt = '(A)') "Last = "
     write(unit = 100, fmt = '(6F10.5)') omegaOne(numTest), omegaTwo(numTest), omegaThree(numTest),&
     psiOne(numTest), psiTwo(numTest), psiThree(numTest)

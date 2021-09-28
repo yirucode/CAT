@@ -4,7 +4,7 @@ program CAT
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 10000 !重複次數
+    integer,parameter :: numTest = 1000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
@@ -56,6 +56,7 @@ program CAT
     real:: omegaOneMean, omegaTwoMean, omegaThreeMean !平均
     real:: omegaOneMax, omegaTwoMax, omegaThreeMax 
     real:: omegaOneMin, omegaTwoMin, omegaThreeMin
+    real:: omegaOneVar, omegaTwoVar, omegaThreeVar
     ! Psi
     real, dimension(numTest)::psiOne
     real, dimension(numTest)::psiTwo
@@ -63,6 +64,7 @@ program CAT
     real:: psiOneMean, psiTwoMean, psiThreeMean
     real:: psiOneMax, psiTwoMax, psiThreeMax
     real:: psiOneMin, psiTwoMin, psiThreeMin
+    real:: psiOneVar, psiTwoVar, psiThreeVar
     ! 估計能力參數
     real::thetaHat(length, numTest)
     real::thetaHatMean !估計能力值的平均數
@@ -178,6 +180,9 @@ program CAT
     call subr_minvReal(omegaOne(2:numTest), numTest-1, omegaOnemin, place)
     call subr_minvReal(omegaTwo(3:numTest), numTest-2, omegaTwomin, place)
     call subr_minvReal(omegaThree(4:numTest), numTest-3, omegaThreemin, place)
+    call subr_varReal(omegaOne(2:numTest), numTest-1, omegaOneVar)
+    call subr_varReal(omegaTwo(3:numTest), numTest-2, omegaTwoVar)
+    call subr_varReal(omegaThree(4:numTest), numTest-3, omegaThreeVar)
     call subr_aveReal(psiOne, numTest, psiOneMean)
     call subr_aveReal(psiTwo, numTest, psiTwoMean)
     call subr_aveReal(psiThree, numTest, psiThreeMean)
@@ -187,6 +192,10 @@ program CAT
     call subr_minvReal(psiOne(2:numTest), numTest-1, psiOnemin, place)
     call subr_minvReal(psiTwo(3:numTest), numTest-2, psiTwomin, place)
     call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreemin, place)
+    call subr_varReal(psiOne(2:numTest), numTest-1, psiOneVar)
+    call subr_varReal(psiTwo(3:numTest), numTest-2, psiTwoVar)
+    call subr_varReal(psiThree(4:numTest), numTest-3, psiThreeVar)
+
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,A)') "method = ", " CAT"
@@ -283,6 +292,9 @@ program CAT
     write(unit = 100, fmt = '(A)') "Min = "
     write(unit = 100, fmt = '(6F10.5)') omegaOneMin, omegaTwoMin, omegaThreeMin,&
     psiOneMin, psiTwoMin, psiThreeMin
+    write(unit = 100, fmt = '(A)') "SD = "
+    write(unit = 100, fmt = '(6F10.5)') omegaOneVar**0.5, omegaTwoVar**0.5, omegaThreeVar**0.5,&
+    psiOneVar**0.5, psiTwoVar**0.5, psiThreeVar**0.5
     write(unit = 100, fmt = '(A)') "Last = "
     write(unit = 100, fmt = '(6F10.5)') omegaOne(numTest), omegaTwo(numTest), omegaThree(numTest),&
     psiOne(numTest), psiTwo(numTest), psiThree(numTest)

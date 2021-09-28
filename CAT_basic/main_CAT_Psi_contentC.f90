@@ -28,6 +28,8 @@ program CAT
     integer :: i,j
     integer :: try
     integer :: choose
+    ! === 判斷題庫是否有試題可選 ===
+    real:: sumInfor
     ! === 運算暫存用 ===
     real :: maxv !最大值 
     integer :: place
@@ -71,14 +73,15 @@ program CAT
     real:: psiOneMin, psiTwoMin, psiThreeMin
     ! Psi 控制參數 
     integer:: alpha = 1
-    real:: psiMax = 0.3
+    real:: psiMax = 0.2
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
-    real:: criteria 
-    real:: delta(numTest)
-    real, dimension(length, numTest):: deltaChange
+    !real:: criteria 
+    !real:: delta(numTest)
+    real, dimension(length, numTest):: deltaCriteria
     !real::lambda 
+    real:: sumEta
     real, dimension(numPool, numTest)::eta !item contribution
     real::eta_choose(length, numTest) !選中的eta
     ! 估計能力參數
@@ -124,8 +127,6 @@ program CAT
                 eta(i,try) = combination(try-(usedSum(i,try-1)+1),alpha) !mit=0 !選出符合條件者 予以施測
             enddo
         endif
-        ! delta(try) = func_deltaPsi(try,alpha,psiMax,length)
-        ! deltaChange(1, try) = delta(try) !紀錄delta的變化
 
         do  choose = 1, length
             
@@ -168,25 +169,19 @@ program CAT
                 endif
             else
                 if ( choose == 1 ) then
-                    ! criteria = deltaChange(choose,try)/length
-                    ! do i = 1, numPool
-                    !     if (eta(i,try) >= criteria) then
-                    !         infor(i) = information(thetaBegin, a(i), b(i), c(i))
-                    !     else
-                    !         infor(i) = 0
-                    !     endif
-                    ! enddo
+                    ! 設定Psi控制
+                    deltaCriteria(choose, try) = func_deltaPsi(try,alpha,psiMax,choose)
                     do i = 1, numPool
-                        if ( content(i) == contentGoal ) then
+                        if ( ( content(i) == contentGoal ) .AND. (eta(i,try) >= deltaCriteria(choose, try)) ) then
                             infor(i) = information(thetaBegin, a(i), b(i), c(i))
                         else
                             infor(i) = 0
                         endif
                     enddo
                 else
-                    criteria = deltaChange(choose,try)/(length-(choose-1))
                     do i = 1, numPool
-                        if ( ( usedPool(i, try) == 0 ) .AND. ( content(i) == contentGoal ) .AND. (eta(i,try) >= criteria) ) then
+                        if ( ( usedPool(i, try) == 0 ) .AND. ( content(i) == contentGoal ) .AND. &
+                        (eta(i,try) >= deltaCriteria(choose, try)) ) then ! Psi控制標準在下方更動
                             infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
                         else
                             infor(i) = 0
@@ -194,28 +189,42 @@ program CAT
                     enddo
                 endif
             endif
-            call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
-            usedPool(place_choose(choose, try), try) = 1 !紀錄使用試題
-            ! 紀錄使用的試題參數
-            a_choose(choose, try) = a(place_choose(choose, try))
-            b_choose(choose, try) = b(place_choose(choose, try))
-            c_choose(choose, try) = c(place_choose(choose, try))
-            content_choose(choose, try) = content(place_choose(choose, try))
-            ! 紀錄與更新Psi控制指標
-            eta_choose(choose,try) = eta(place_choose(choose, try),try)
-            if ( choose+1 <= length ) then
-                deltaChange(choose+1,try) = deltaChange(choose,try) - eta(place_choose(choose, try),try)
-            else
-                deltaChange(choose,try) = deltaChange(choose,try)
+            call subr_sumReal(infor,numPool,sumInfor)
+            if (sumInfor > 0) then ! 判斷題庫內是否還有試題可選
+                call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
+                usedPool(place_choose(choose, try), try) = 1 !紀錄使用試題
+                ! 紀錄使用的試題參數
+                a_choose(choose, try) = a(place_choose(choose, try))
+                b_choose(choose, try) = b(place_choose(choose, try))
+                c_choose(choose, try) = c(place_choose(choose, try))
+                content_choose(choose, try) = content(place_choose(choose, try))
+                ! 紀錄與更新Psi控制指標
+                eta_choose(choose,try) = eta(place_choose(choose, try),try)
+                if ( try > alpha ) then 
+                    if ( choose+1 <= length ) then
+                        deltaCriteria(choose+1, try) = func_deltaPsi(try,alpha,psiMax,1)
+                        ! deltaCriteria(choose+1, try) = func_deltaPsi(try,alpha,psiMax,choose+1)
+                        ! call subr_sumReal(eta_choose(1:choose,try),choose,sumEta)
+                        ! deltaCriteria(choose+1, try) = deltaCriteria(choose+1, try) - sumEta
+                    endif
+                endif
+                ! 模擬作答反應
+                call subr_resp(thetaTrue(try), &
+                a_choose(choose, try),b_choose(choose, try),c_choose(choose, try),&
+                resp(choose, try),randv(choose, try))
+                ! EAP能力估計
+                call subr_EAP(choose, &
+                a_choose(1:choose, try),b_choose(1:choose, try),c_choose(1:choose, try),&
+                resp(1:choose, try), thetaHat(choose, try))
+            else ! 如果題庫內沒有試題可選時
+                place_choose(choose, try) = 0
+                a_choose(choose, try) = 99
+                b_choose(choose, try) = 99
+                c_choose(choose, try) = 99
+                content_choose(choose, try) = 99
+                resp(choose, try) = 99
+                thetaHat(choose, try) = 99
             endif
-            ! 模擬作答反應
-            call subr_resp(thetaTrue(try), &
-            a_choose(choose, try),b_choose(choose, try),c_choose(choose, try),&
-            resp(choose, try),randv(choose, try))
-            ! EAP能力估計
-            call subr_EAP(choose, &
-            a_choose(1:choose, try),b_choose(1:choose, try),c_choose(1:choose, try),&
-            resp(1:choose, try), thetaHat(choose, try))
         enddo
         ! 紀錄試題累計使用次數
         do i=1, numPool
@@ -395,11 +404,11 @@ program CAT
         write(unit = 100, fmt = dataPoolFS) (eta(j,i),j=1,numPool)
     end do
     close(100) 
-    open(unit = 100 , file = 'ListCAT_testPsiDeltaChange.txt' , status = 'replace', action = 'write', iostat= ierror)
+    open(unit = 100 , file = 'ListCAT_testPsideltaCriteria.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "delta change = "
     write(unit = 100, fmt = dataINT) (j, j=1,length)
     do i=1,numTest
-        write(unit = 100, fmt = dataFS) (deltaChange(j,i),j=1,length)
+        write(unit = 100, fmt = dataFS) (deltaCriteria(j,i),j=1,length)
     end do
     close(100)
     stop
