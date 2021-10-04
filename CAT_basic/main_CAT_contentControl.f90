@@ -102,6 +102,7 @@ program CAT_contentControl
     ! 開始模擬
     do try = 1, numTest
         do  choose = 1, length
+            ! 隨機選擇要施測的內容領域
             if ( choose == 1 ) then
                 contentChange = contentTarget ! 重設內容領域控制參數
             endif
@@ -139,7 +140,6 @@ program CAT_contentControl
                 enddo
             endif
             call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
-            
             usedPool(place_choose(choose, try), try) = 1 !紀錄使用試題
             ! 紀錄使用的試題參數
             a_choose(choose, try) = a(place_choose(choose, try))
