@@ -4,12 +4,14 @@ program CAT
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 100 !重複次數
+    integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
+    !integer :: contentGoal_before
+    integer :: contentAgain = 0
     integer :: contentTarget(numContentType) = (/14,13,13/)
     integer :: contentChange(numContentType) 
     real :: randContent
@@ -28,8 +30,10 @@ program CAT
     integer :: i,j
     integer :: try
     integer :: choose
+    !integer :: choose_before
     ! === 判斷題庫是否有試題可選 ===
-    real:: sumInfor
+    !real:: sumInfor
+    integer :: count_InforZero
     ! === 運算暫存用 ===
     real :: maxv !最大值 
     integer :: place
@@ -75,7 +79,7 @@ program CAT
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 1
-    real:: psiMax = 0.2
+    real:: psiMax = 0.25
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
@@ -118,7 +122,7 @@ program CAT
     close(100)
     ! 開始模擬
     do try = 1, numTest
-        
+
         ! Psi 控制設定
         if (try <= alpha) then 
             do i=1,numPool
@@ -129,7 +133,11 @@ program CAT
                 eta(i,try) = combination(try-(usedSum(i,try-1)+1),alpha) !mit=0 !選出符合條件者 予以施測
             enddo
         endif
-        do  choose = 1, length
+
+        choose = 1
+
+        do while (choose <= length)
+
             ! 隨機選擇要施測的內容領域
             if ( choose == 1 ) then
                 contentChange = contentTarget ! 重設內容領域控制參數
@@ -150,8 +158,9 @@ program CAT
             enddo
             contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除選中的內容題數
 
+            
             if (try <= alpha) then 
-                ! 計算訊息量+內容領域控制
+                ! 計算訊息量
                 if ( (choose == 1) ) then                
                     do i = 1, numPool
                         if ( content(i) == contentGoal ) then
@@ -170,63 +179,106 @@ program CAT
                     enddo
                 endif
             else
-                ! 加入Psi控制
+                ! 設定Psi控制
                 deltaCriteria(choose, try) = func_deltaPsi(try,alpha,psiMax,1)
-                if ( choose == 1 ) then
+                ! 計算訊息量
+                if ( (choose == 1) ) then                
                     do i = 1, numPool
-                        if ( ( content(i) == contentGoal ) .AND. (eta(i,try) >= deltaCriteria(choose, try)) ) then
+                        if ( (content(i) == contentGoal) .AND. (eta(i,try) >= deltaCriteria(choose, try)) ) then
                             infor(i) = information(thetaBegin, a(i), b(i), c(i))
                         else
                             infor(i) = 0
                         endif
                     enddo
                 else
-                    ! 加入Psi控制
+                    count_InforZero = 0
                     do i = 1, numPool
-                        if (( usedPool(i, try) == 0 ) .AND. ( content(i) == contentGoal ) .AND. &
-                        (eta(i,try) >= deltaCriteria(choose, try))) then
+                        if ( ( usedPool(i, try) == 0 ) .AND. ( content(i) == contentGoal ) &
+                        .AND. (eta(i,try) >= deltaCriteria(choose, try))) then
                             infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
                         else
                             infor(i) = 0
+                            count_InforZero = count_InforZero + 1 
+                        endif
+                        if (count_InforZero == numPool) then 
+                            WRITE(*,*) "no item can be used"
+                            WRITE(*,*) "try = ", try
+                            WRITE(*,*) "choose = ", choose
+                            contentAgain = 1
+                            stop ! 如果沒題目可選，則結束程式
+                        else
+                            contentAgain = 0
                         endif
                     enddo
-                    call subr_sumReal(infor,numPool,sumInfor)
-                    if (sumInfor > 0) then
                 endif
-                
 
-
-
-
+                ! do while (contentAgain == 1) 
+                !     contentChange(contentGoal) = contentChange(contentGoal)+1
+                !     WRITE(*,*) "Reselect contentGoal"
+                !     ! WRITE(*,*) "try = ", try
+                !     ! WRITE(*,*) "choose = ", choose
+                !     ! 隨機選擇要施測的內容領域
+                !     call subr_contentTargetP(contentChange, numContentType, contentTP)
+                !     call random_number(randContent)
+                !     !WRITE(*,*) randContent
+                !     do i = 1, numContentType
+                !         if (i.EQ.1) then
+                !             if ((randContent > 0) .AND. (randContent <= contentTP(i))) then
+                !                 contentGoal = i
+                !             endif
+                !         else
+                !             if ((randContent >= contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
+                !                 contentGoal = i
+                !             endif
+                !         endif
+                !     enddo
+                !     contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除選中的內容題數
+                    
+                !     count_InforZero = 0
+                !     do i = 1, numPool
+                !         if ( ( usedPool(i, try) == 0 ) .AND. ( content(i) == contentGoal ) &
+                !         .AND. (eta(i,try) >= deltaCriteria(choose, try))) then
+                !             infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
+                !         else
+                !             infor(i) = 0
+                !             count_InforZero = count_InforZero + 1 
+                !         endif
+                !         if (count_InforZero == numPool) then 
+                !             WRITE(*,*) "no item can be used"
+                !             WRITE(*,*) "try = ", try
+                !             WRITE(*,*) "choose = ", choose
+                !             contentAgain = 1
+                !             !stop
+                !         else
+                !             contentAgain = 0
+                !         endif
+                !     enddo
+                !     if (contentAgain == 0) then
+                !         WRITE(*,*) "Find the item to used"
+                !         WRITE(*,*) "try = ", try
+                !         WRITE(*,*) "choose = ", choose
+                !         exit
+                !     endif
+                ! enddo
             endif
-            call subr_sumReal(infor,numPool,sumInfor)
-            if (sumInfor > 0) then ! 判斷題庫內是否還有試題可選
-                call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
-                usedPool(place_choose(choose, try), try) = 1 !紀錄使用試題
-                ! 紀錄使用的試題參數
-                a_choose(choose, try) = a(place_choose(choose, try))
-                b_choose(choose, try) = b(place_choose(choose, try))
-                c_choose(choose, try) = c(place_choose(choose, try))
-                content_choose(choose, try) = content(place_choose(choose, try))
-                ! 紀錄與更新Psi控制指標
-                eta_choose(choose,try) = eta(place_choose(choose, try),try)
-                ! 模擬作答反應
-                call subr_resp(thetaTrue(try), &
-                a_choose(choose, try),b_choose(choose, try),c_choose(choose, try),&
-                resp(choose, try),randv(choose, try))
-                ! EAP能力估計
-                call subr_EAP(choose, &
-                a_choose(1:choose, try),b_choose(1:choose, try),c_choose(1:choose, try),&
-                resp(1:choose, try), thetaHat(choose, try))
-            else ! 如果題庫內沒有試題可選時
-                place_choose(choose, try) = 0
-                a_choose(choose, try) = 99
-                b_choose(choose, try) = 99
-                c_choose(choose, try) = 99
-                content_choose(choose, try) = 99
-                resp(choose, try) = 99
-                thetaHat(choose, try) = 99
-            endif
+            call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
+            usedPool(place_choose(choose, try), try) = 1 !紀錄使用試題
+            ! 紀錄使用的試題參數
+            a_choose(choose, try) = a(place_choose(choose, try))
+            b_choose(choose, try) = b(place_choose(choose, try))
+            c_choose(choose, try) = c(place_choose(choose, try))
+            content_choose(choose, try) = content(place_choose(choose, try))
+            ! 紀錄與更新Psi控制指標
+            eta_choose(choose,try) = eta(place_choose(choose, try),try)
+            ! 模擬作答反應
+            call subr_resp(thetaTrue(try), &
+            a_choose(choose, try),b_choose(choose, try),c_choose(choose, try),&
+            resp(choose, try),randv(choose, try))
+            ! EAP能力估計
+            call subr_EAP(choose, &
+            a_choose(1:choose, try),b_choose(1:choose, try),c_choose(1:choose, try),&
+            resp(1:choose, try), thetaHat(choose, try))
+            choose = choose + 1
         enddo
         ! 紀錄試題累計使用次數
         do i=1, numPool
