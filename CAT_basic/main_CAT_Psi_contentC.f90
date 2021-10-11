@@ -3,6 +3,7 @@ program CAT
     ! === given data ====
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
@@ -30,6 +31,7 @@ program CAT
     integer :: i,j
     integer :: try
     integer :: choose
+    real :: x
     !integer :: choose_before
     ! === 判斷題庫是否有試題可選 ===
     !real:: sumInfor
@@ -79,7 +81,7 @@ program CAT
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 1
-    real:: psiMax = 0.25
+    real:: psiMax = 0.24
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
@@ -120,6 +122,14 @@ program CAT
         read(100,*) a(i),b(i),c(i),content(i) !三參數
     enddo
     close(100)
+
+    open(100, file= dataPath2, status="old") 
+    read(100,*)  ! 跳過第一列
+    do i=1,numTest
+        read(100,*) x, thetaTrue(i) !三參數
+    enddo
+    close(100)
+
     ! 開始模擬
     do try = 1, numTest
 
@@ -261,23 +271,27 @@ program CAT
                 !     endif
                 ! enddo
             endif
-            call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
-            usedPool(place_choose(choose, try), try) = 1 !紀錄使用試題
-            ! 紀錄使用的試題參數
-            a_choose(choose, try) = a(place_choose(choose, try))
-            b_choose(choose, try) = b(place_choose(choose, try))
-            c_choose(choose, try) = c(place_choose(choose, try))
-            content_choose(choose, try) = content(place_choose(choose, try))
-            ! 紀錄與更新Psi控制指標
-            eta_choose(choose,try) = eta(place_choose(choose, try),try)
-            ! 模擬作答反應
-            call subr_resp(thetaTrue(try), &
-            a_choose(choose, try),b_choose(choose, try),c_choose(choose, try),&
-            resp(choose, try),randv(choose, try))
-            ! EAP能力估計
-            call subr_EAP(choose, &
-            a_choose(1:choose, try),b_choose(1:choose, try),c_choose(1:choose, try),&
-            resp(1:choose, try), thetaHat(choose, try))
+            if (contentAgain /= 1) then
+                call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
+                usedPool(place_choose(choose, try), try) = 1 !紀錄使用試題
+                ! 紀錄使用的試題參數
+                a_choose(choose, try) = a(place_choose(choose, try))
+                b_choose(choose, try) = b(place_choose(choose, try))
+                c_choose(choose, try) = c(place_choose(choose, try))
+                content_choose(choose, try) = content(place_choose(choose, try))
+                ! 紀錄與更新Psi控制指標
+                eta_choose(choose,try) = eta(place_choose(choose, try),try)
+                ! 模擬作答反應
+                call subr_resp(thetaTrue(try), &
+                a_choose(choose, try),b_choose(choose, try),c_choose(choose, try),&
+                resp(choose, try),randv(choose, try))
+                ! EAP能力估計
+                call subr_EAP(choose, &
+                a_choose(1:choose, try),b_choose(1:choose, try),c_choose(1:choose, try),&
+                resp(1:choose, try), thetaHat(choose, try))
+            else
+                content_choose(choose, try) = 0
+            endif
             choose = choose + 1
         enddo
         ! 紀錄試題累計使用次數

@@ -1,0 +1,64 @@
+---
+title: "Normal_Random_for_Population"
+author: "Yi Lu, Lin"
+date: "2021/10/11"
+output: html_document
+---
+
+```{r}
+# 產生從0到1的均等分配中隨機抽樣
+n <- 10000
+x <- runif(n,min=0,max=1)
+# x[1:10]
+plot(x)
+summary(x)
+```
+
+```{r}
+# 產生從0到1的均等分配中隨機抽樣
+n <- 10000
+x <- rnorm(n)
+x[1:10]
+plot(x)
+summary(x)
+```
+
+```{r}
+# 輸出資料
+write.table(x, file = "D:\\CAT_inGit\\CAT_basic\\data\\Normal_Population.txt",sep = "\t", quote = FALSE, na = "NA")
+
+# write.table(x, file = "D:\\CAT_inGit\\CAT_basic\\data\\Normal_Population.txt",sep = "\t", quote = FALSE, na = "NA", append = T,col.names = F)
+
+# sep 是放記錄值之間的間隔符號,這裡的例子是空白鍵當作變數的區別符號," "。
+# na是指遺失值的記錄方式是什麼? 這裡是用 NA 作為遺失值
+# append表示現在要匯出的資料集，要直接加在原有的資料後面還是直接覆蓋資料? T是加在後面, F是覆蓋
+# col.names表示是否匯出變數名稱? T是匯出, F是不匯出
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
