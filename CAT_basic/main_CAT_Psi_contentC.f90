@@ -117,19 +117,19 @@ program CAT
     ! === run code ===
     call cpu_time (t1) !開始計時
     ! 讀取資料：輸入試題參數
+    ! 輸入試題參數
     open(100, file= dataPath, status="old") 
     do i=1,numPool
         read(100,*) a(i),b(i),c(i),content(i) !三參數
     enddo
     close(100)
-
+    ! 輸入受試者真實能力值
     open(100, file= dataPath2, status="old") 
     read(100,*)  ! 跳過第一列
     do i=1,numTest
         read(100,*) x, thetaTrue(i) !三參數
     enddo
     close(100)
-
     ! 開始模擬
     do try = 1, numTest
 
