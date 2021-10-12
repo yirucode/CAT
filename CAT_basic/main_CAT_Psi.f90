@@ -3,6 +3,7 @@ program CAT
     ! === given data ====
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
@@ -22,6 +23,7 @@ program CAT
     integer :: i,j
     integer :: try
     integer :: choose
+    real :: x
     ! === 運算暫存用 ===
     real :: maxv !最大值 
     integer :: place
@@ -67,7 +69,7 @@ program CAT
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 1
-    real:: psiMax = 0.2
+    real:: psiMax = 0.3
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
@@ -102,10 +104,18 @@ program CAT
     character(len = 20), parameter :: dataContentInt = '(10I10)'
     ! === run code ===
     call cpu_time (t1) !開始計時
-    ! 讀取資料：輸入試題參數
+    ! 讀取資料
+    ! 輸入試題參數
     open(100, file= dataPath, status="old") 
     do i=1,numPool
         read(100,*) a(i),b(i),c(i),content(i) !三參數
+    enddo
+    close(100)
+    ! 輸入受試者真實能力值
+    open(100, file= dataPath2, status="old") 
+    read(100,*)  ! 跳過第一列
+    do i=1,numTest
+        read(100,*) x, thetaTrue(i) !三參數
     enddo
     close(100)
     ! 開始模擬

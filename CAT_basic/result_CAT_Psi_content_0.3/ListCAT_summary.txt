@@ -1,0 +1,25 @@
+ method =  CAT with Psi + con
+   time =   43.82812
+ test n =      10000
+ pool n =        300
+ length =         40
+psi max =    0.30000
+  alpha =          1
+
+About thetaHat: 
+   Mean =    0.00334
+   Bias =   -0.00089
+    Var =    0.94188
+    MSE =    0.05833
+   RMSE =    0.24151
+
+About item used rate: 
+    max =    0.30000
+   mean =    0.13333
+    var =    0.01599
+
+About pool used: 
+   Rate =    0.82000
+
+About test overlap: 
+overlap =    0.25320

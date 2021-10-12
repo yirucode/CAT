@@ -3,6 +3,7 @@ program CAT_contentControl
     ! === given data ====
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
@@ -10,7 +11,7 @@ program CAT_contentControl
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
-    integer :: contentTarget(numContentType) = (/25,5,10/)
+    integer :: contentTarget(numContentType) = (/16,16,8/)
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
@@ -28,6 +29,7 @@ program CAT_contentControl
     integer :: i,j
     integer :: try
     integer :: choose
+    real :: x
     ! === 運算暫存用 ===
     real :: maxv !最大值 
     integer :: place
@@ -93,10 +95,18 @@ program CAT_contentControl
     character(len = 20), parameter :: dataContentInt = '(10I10)'
     ! === run code ===
     call cpu_time (t1) !開始計時
-    ! 讀取資料：輸入試題參數
+    ! 讀取資料
+    ! 輸入試題參數
     open(100, file= dataPath, status="old") 
     do i=1,numPool
         read(100,*) a(i),b(i),c(i),content(i) !三參數
+    enddo
+    close(100)
+    ! 輸入受試者真實能力值
+    open(100, file= dataPath2, status="old") 
+    read(100,*)  ! 跳過第一列
+    do i=1,numTest
+        read(100,*) x, thetaTrue(i) !三參數
     enddo
     close(100)
     ! 開始模擬
@@ -115,7 +125,7 @@ program CAT_contentControl
                         contentGoal = i
                     endif
                 else
-                    if ((randContent >= contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
+                    if ((randContent > contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
                         contentGoal = i
                     endif
                 endif

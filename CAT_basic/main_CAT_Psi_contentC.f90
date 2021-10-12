@@ -13,7 +13,7 @@ program CAT
     integer :: contentGoal
     !integer :: contentGoal_before
     integer :: contentAgain = 0
-    integer :: contentTarget(numContentType) = (/14,13,13/)
+    integer :: contentTarget(numContentType) = (/16,16,8/)
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
@@ -81,7 +81,7 @@ program CAT
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 1
-    real:: psiMax = 0.24
+    real:: psiMax = 0.15
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
@@ -143,31 +143,39 @@ program CAT
                 eta(i,try) = combination(try-(usedSum(i,try-1)+1),alpha) !mit=0 !選出符合條件者 予以施測
             enddo
         endif
-
-        choose = 1
-
-        do while (choose <= length)
-
+        ! choose = 1
+        ! do while (choose <= length)
+        do choose = 1,length
             ! 隨機選擇要施測的內容領域
             if ( choose == 1 ) then
                 contentChange = contentTarget ! 重設內容領域控制參數
             endif
             call subr_contentTargetP(contentChange, numContentType, contentTP)
             call random_number(randContent)
-            !WRITE(*,*) randContent
+            ! WRITE(*,*) randContent
+            contentGoal = 0
             do i = 1, numContentType
-                if (i.EQ.1) then
-                    if ((randContent > 0) .AND. (randContent <= contentTP(i))) then
+                if (i .EQ. 1) then 
+                    if ((randContent > 0) .AND. (randContent <= contentTP(i))) then 
                         contentGoal = i
                     endif
                 else
-                    if ((randContent >= contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
+                    if ((randContent > contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
                         contentGoal = i
                     endif
                 endif
+                if ((i == numContentType) .AND. (contentGoal == 0)) then 
+                    WRITE(*,*) "try = ",try
+                    WRITE(*,*) "choose = ",choose
+                    WRITE(*,*) "can't find the content to fit in"
+                    stop
+                endif
             enddo
             contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除選中的內容題數
-
+            ! debug 用
+            ! if ((try == 5) .AND. (choose == 21))then 
+            !     WRITE(*,*) "check here!"
+            ! endif
             
             if (try <= alpha) then 
                 ! 計算訊息量
@@ -214,6 +222,23 @@ program CAT
                             WRITE(*,*) "no item can be used"
                             WRITE(*,*) "try = ", try
                             WRITE(*,*) "choose = ", choose
+                            ! 寫下問題資料細節
+                            open(unit = 100 , file = 'ListCAT_debug.txt' , status = 'replace', action = 'write', iostat= ierror)
+                            write(unit = 100, fmt = *) "try = ", try
+                            write(unit = 100, fmt = *) "choose = ", choose
+                            write(unit = 100, fmt = *) "contentGoal = ", contentGoal
+                            write(unit = 100, fmt = *) "eta Criteria = ", deltaCriteria(choose, try)
+                            write(unit = 100, fmt = *) "item ID = "
+                            write(unit = 100, fmt = dataPool) (j, j=1,numPool)
+                            write(unit = 100, fmt = *) "item content = "
+                            write(unit = 100, fmt = dataPool) (content(j), j=1,numPool)
+                            write(unit = 100, fmt = *) "item used = "
+                            write(unit = 100, fmt = dataPool) (usedPool(j,try),j=1,numPool)
+                            write(unit = 100, fmt = *) "item used sum = "
+                            write(unit = 100, fmt = dataPool) (usedSum(j,try-1)+1,j=1,numPool)
+                            write(unit = 100, fmt = *) "eta = "
+                            write(unit = 100, fmt = dataPoolFS) (eta(j,try),j=1,numPool)
+                            close(100)
                             contentAgain = 1
                             stop ! 如果沒題目可選，則結束程式
                         else
@@ -221,55 +246,6 @@ program CAT
                         endif
                     enddo
                 endif
-
-                ! do while (contentAgain == 1) 
-                !     contentChange(contentGoal) = contentChange(contentGoal)+1
-                !     WRITE(*,*) "Reselect contentGoal"
-                !     ! WRITE(*,*) "try = ", try
-                !     ! WRITE(*,*) "choose = ", choose
-                !     ! 隨機選擇要施測的內容領域
-                !     call subr_contentTargetP(contentChange, numContentType, contentTP)
-                !     call random_number(randContent)
-                !     !WRITE(*,*) randContent
-                !     do i = 1, numContentType
-                !         if (i.EQ.1) then
-                !             if ((randContent > 0) .AND. (randContent <= contentTP(i))) then
-                !                 contentGoal = i
-                !             endif
-                !         else
-                !             if ((randContent >= contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
-                !                 contentGoal = i
-                !             endif
-                !         endif
-                !     enddo
-                !     contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除選中的內容題數
-                    
-                !     count_InforZero = 0
-                !     do i = 1, numPool
-                !         if ( ( usedPool(i, try) == 0 ) .AND. ( content(i) == contentGoal ) &
-                !         .AND. (eta(i,try) >= deltaCriteria(choose, try))) then
-                !             infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
-                !         else
-                !             infor(i) = 0
-                !             count_InforZero = count_InforZero + 1 
-                !         endif
-                !         if (count_InforZero == numPool) then 
-                !             WRITE(*,*) "no item can be used"
-                !             WRITE(*,*) "try = ", try
-                !             WRITE(*,*) "choose = ", choose
-                !             contentAgain = 1
-                !             !stop
-                !         else
-                !             contentAgain = 0
-                !         endif
-                !     enddo
-                !     if (contentAgain == 0) then
-                !         WRITE(*,*) "Find the item to used"
-                !         WRITE(*,*) "try = ", try
-                !         WRITE(*,*) "choose = ", choose
-                !         exit
-                !     endif
-                ! enddo
             endif
             if (contentAgain /= 1) then
                 call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
@@ -292,7 +268,14 @@ program CAT
             else
                 content_choose(choose, try) = 0
             endif
-            choose = choose + 1
+
+            ! ! 確認用
+            ! do j=1,numContentType
+            !     call subr_contentCount(content_choose(:,try),length,j,contentResult(j,try))
+            ! enddo
+            ! WRITE(*,*) "try = ",try, " & choose = ", choose
+            ! WRITE(*,*) "content SUM =", (contentResult(i,try),i=1,numContentType)
+
         enddo
         ! 紀錄試題累計使用次數
         do i=1, numPool
