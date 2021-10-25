@@ -7,7 +7,7 @@ program CAT
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 40 !作答題長
+    integer,parameter :: length = 20 !作答題長
     integer,parameter :: numContentType = 3
     ! === item parameter ===
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數
@@ -68,7 +68,7 @@ program CAT
     real:: psiOneMin, psiTwoMin, psiThreeMin
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
-    integer:: alpha = 1
+    integer:: alpha = 3
     real:: psiMax = 0.3
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
