@@ -7,7 +7,7 @@ program CAT
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 40 !作答題長
+    integer,parameter :: length = 20 !作答題長
     integer,parameter :: numContentType = 3
     ! === item parameter ===
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數

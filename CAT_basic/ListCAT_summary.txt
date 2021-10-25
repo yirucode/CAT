@@ -1,23 +1,23 @@
  method =  CAT
-   time =    0.14062
+   time =    3.06250
  test n =      10000
  pool n =        300
  length =         40
 
 About thetaHat: 
-   Mean =    0.00000
-   Bias =   -0.00423
-    Var =    0.00000
-    MSE =    1.01369
-   RMSE =    1.00682
+   Mean =    0.00591
+   Bias =    0.00168
+    Var =    0.92088
+    MSE =    0.08710
+   RMSE =    0.29512
 
 About item used rate: 
-    max =    0.00000
-   mean =    0.00000
-    var =    0.00000
+    max =    1.00000
+   mean =    0.14467
+    var =    0.06779
 
 About pool used: 
-   Rate =    0.00000
+   Rate =    0.56000
 
 About test overlap: 
-overlap =    1.00000
+overlap =    0.60693
