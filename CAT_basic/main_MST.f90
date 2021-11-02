@@ -139,7 +139,7 @@ program MST
                 numItemInModule,inforSum(i))
             enddo
             call subr_maxvReal(inforSum, maxModule, maxv, placeModule_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
-            do i = (placeModule_choose(choose, try)-1)*numItemInModule-1, placeModule_choose(choose, try)*numItemInModule
+            do i = (placeModule_choose(choose, try)-1)*numItemInModule+1, placeModule_choose(choose, try)*numItemInModule
                 usedPool(i,try) = 1 !紀錄使用試題
             enddo
             do j = (choose-1)*numItemInModule+1, choose*numItemInModule
@@ -232,7 +232,7 @@ program MST
 
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A10,A)') "method = ", " CAT"
+    write(unit = 100, fmt = '(A10,A)') "method = ", " MST"
     write(unit = 100, fmt = '(A10,F10.5)') "time = ", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test n = ", numTest
     write(unit = 100, fmt = '(A10,I10)') "pool n = ", numPool
