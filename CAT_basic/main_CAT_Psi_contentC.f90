@@ -80,8 +80,8 @@ program CAT
     real:: psiOneMin, psiTwoMin, psiThreeMin
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
-    integer:: alpha = 1
-    real:: psiMax = 0.15
+    integer:: alpha = 2
+    real:: psiMax = 0.2
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi

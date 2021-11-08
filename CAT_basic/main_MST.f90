@@ -143,16 +143,16 @@ program MST
                 usedPool(i,try) = 1 !紀錄使用試題
             enddo
             do j = (choose-1)*numItemInModule+1, choose*numItemInModule
-                place_choose(j,try) = (placeModule_choose(choose, try)-1)*numItemInModule+j
-                ! 紀錄使用的試題參數
-                a_choose(j, try) = a(place_choose(j,try))
-                b_choose(j, try) = b(place_choose(j,try))
-                c_choose(j, try) = c(place_choose(j,try))
-                content_choose(j, try) = content(place_choose(j,try))
-                ! 模擬作答反應
-                call subr_resp(thetaTrue(try), &
-                a_choose(j, try),b_choose(j, try),c_choose(j, try),&
-                resp(j, try),randv(j, try))
+                    place_choose(j,try) = (placeModule_choose(choose, try)-1)*numItemInModule+(j-(choose-1)*numItemInModule)
+                    ! 紀錄使用的試題參數
+                    a_choose(j, try) = a(place_choose(j,try))
+                    b_choose(j, try) = b(place_choose(j,try))
+                    c_choose(j, try) = c(place_choose(j,try))
+                    content_choose(j, try) = content(place_choose(j,try))
+                    ! 模擬作答反應
+                    call subr_resp(thetaTrue(try), &
+                    a_choose(j, try),b_choose(j, try),c_choose(j, try),&
+                    resp(j, try),randv(j, try))
             enddo
             ! EAP能力估計
             i = choose*numItemInModule

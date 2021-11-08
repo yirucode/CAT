@@ -5,8 +5,8 @@ program MST
     character(len = 50), parameter :: dataPath = "data/parameter_MST_15.txt"
     character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
     ! === MST set ===
-    integer,parameter :: numStages = 2
-    integer,parameter :: maxLevel = 3
+    integer, parameter :: numStages = 2
+    integer, parameter :: maxLevel = 3
     integer, parameter :: numModuleInLevel = 5
     integer, parameter :: maxModule = maxLevel*numModuleInLevel
     integer, parameter :: numItemInModule = 20
@@ -63,6 +63,14 @@ program MST
     ! 測驗重疊率參數
     real:: testOverlapData
     real:: testOverlap
+    ! Psi 控制參數 
+    integer:: alpha = 2
+    real:: psiMax = 0.3
+    ! Psi 控制過程中的各類指標
+    real, external :: combination, func_deltaPsi
+    real, dimension(length, numTest):: deltaCriteria
+    real, dimension(numPool, numTest)::eta !item contribution
+    real::eta_choose(length, numTest) !選中的eta
     ! Omega
     real, dimension(numTest)::omegaOne
     real, dimension(numTest)::omegaTwo
@@ -97,7 +105,9 @@ program MST
     character(len = 20), parameter :: input = 'ListCAT_thetaHat.txt'
     character(len = 20), parameter :: dataINT = '(100I10)' ! 隨著 length 改變而改變
     character(len = 20), parameter :: dataF = '(100F10.4)' ! 隨著 length 改變而改變
+    character(len = 20), parameter :: dataFS = '(100F10.2)' ! 隨著 length 改變而改變
     character(len = 20), parameter :: dataPool = '(500I10)' ! 隨著 pool item number 改變而改變
+    character(len = 20), parameter :: dataPoolFS = '(500F10.2)' ! 隨著 pool item number 改變而改變
     character(len = 20), parameter :: dataContentReal = '(10F10.4)'  ! 隨著 content type number 改變
     character(len = 20), parameter :: dataContentInt = '(10I10)'
     ! === run code ===
@@ -118,21 +128,57 @@ program MST
     close(100)
     ! 開始模擬
     do try = 1,numTest
+        
+        ! Psi 控制設定
+        if (try <= alpha) then 
+            do i=1,numPool
+                eta(i, try) = 0 !combination(try-1,alpha) !mit=0 !選出符合條件者 予以施測
+            enddo
+        else
+            do i=1,numPool 
+                eta(i,try) = combination(try-(usedSum(i,try-1)+1),alpha) !mit=0 !選出符合條件者 予以施測
+            enddo
+
+        endif
+
         do  choose = 1, numStages
 
-            if (choose == 1) then 
-                do i = 1, numPool
-                    infor(i) = information(thetaBegin, a(i), b(i), c(i))
-                enddo
+            if (try <= alpha) then 
+                if (choose == 1) then 
+                    do i = 1, numPool
+                        infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                    enddo
+                else
+                    do i = 1, numPool
+                        if ( usedPool(i, try) == 0 ) then
+                            infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
+                        else
+                            infor(i) = 0
+                        endif
+                    enddo
+                endif
             else
-                do i = 1, numPool
-                    if ( usedPool(i, try) == 0 ) then
-                        infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
-                    else
-                        infor(i) = 0
-                    endif
-                enddo
+                ! 設定Psi控制
+                deltaCriteria(choose, try) = func_deltaPsi(try,alpha,psiMax,1)
+                if (choose == 1) then 
+                    do i = 1, numPool
+                        if (eta(i,try) >= deltaCriteria(choose, try)) then
+                            infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                        else
+                            infor(i) = 0
+                        endif
+                    enddo
+                else
+                    do i = 1, numPool
+                        if (( usedPool(i, try) == 0 ) .AND. (eta(i,try) >= deltaCriteria(choose, try))) then
+                            infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
+                        else
+                            infor(i) = 0
+                        endif
+                    enddo
+                endif
             endif
+
             ! 計算 information in each module 的總和
             do i = 1,maxModule
                 call subr_sumReal(infor(((i-1)*numItemInModule+1):(i*numItemInModule)),&
@@ -143,16 +189,18 @@ program MST
                 usedPool(i,try) = 1 !紀錄使用試題
             enddo
             do j = (choose-1)*numItemInModule+1, choose*numItemInModule
-                place_choose(j,try) = (placeModule_choose(choose, try)-1)*numItemInModule+j
-                ! 紀錄使用的試題參數
-                a_choose(j, try) = a(place_choose(j,try))
-                b_choose(j, try) = b(place_choose(j,try))
-                c_choose(j, try) = c(place_choose(j,try))
-                content_choose(j, try) = content(place_choose(j,try))
-                ! 模擬作答反應
-                call subr_resp(thetaTrue(try), &
-                a_choose(j, try),b_choose(j, try),c_choose(j, try),&
-                resp(j, try),randv(j, try))
+                    place_choose(j,try) = (placeModule_choose(choose, try)-1)*numItemInModule+(j-(choose-1)*numItemInModule)
+                    ! 紀錄使用的試題參數
+                    a_choose(j, try) = a(place_choose(j,try))
+                    b_choose(j, try) = b(place_choose(j,try))
+                    c_choose(j, try) = c(place_choose(j,try))
+                    content_choose(j, try) = content(place_choose(j,try))
+                    ! 紀錄與更新Psi控制指標
+                    eta_choose(j,try) = eta(place_choose(j, try),try)
+                    ! 模擬作答反應
+                    call subr_resp(thetaTrue(try), &
+                    a_choose(j, try),b_choose(j, try),c_choose(j, try),&
+                    resp(j, try),randv(j, try))
             enddo
             ! EAP能力估計
             i = choose*numItemInModule
@@ -232,11 +280,13 @@ program MST
 
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A10,A)') "method = ", " CAT"
+    write(unit = 100, fmt = '(A10,A)') "method = ", " MST+Psi"
     write(unit = 100, fmt = '(A10,F10.5)') "time = ", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test n = ", numTest
     write(unit = 100, fmt = '(A10,I10)') "pool n = ", numPool
     write(unit = 100, fmt = '(A10,I10)') "length = ", length
+    write(unit = 100, fmt = '(A10,F10.5)') "psi max = ", psiMax ! 增加Psi的設定指標
+    write(unit = 100, fmt = '(A10,I10)') "alpha = ", alpha ! 增加Psi的設定指標
     write(unit = 100, fmt = '(/,A)') "About thetaHat: "
     write(unit = 100, fmt = '(A10, F10.5)') "Mean = ", thetaHatMean
     write(unit = 100, fmt = '(A10, F10.5)') "Bias = ", thetaBias
@@ -345,6 +395,21 @@ program MST
     do i=1,numTest
         write(unit = 100, fmt = '(6F10.5)') omegaOne(i), omegaTwo(i), omegaThree(i),&
         psiOne(i), psiTwo(i), psiThree(i)
+    end do
+    close(100)
+    ! == Psi Control Data ==
+    open(unit = 100 , file = 'ListCAT_testPsiEta.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(A)') "eta = "
+    write(unit = 100, fmt = dataPool) (j, j=1,numPool)
+    do i=1,numTest
+        write(unit = 100, fmt = dataPoolFS) (eta(j,i),j=1,numPool)
+    end do
+    close(100) 
+    open(unit = 100 , file = 'ListCAT_testPsideltaCriteria.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(A)') "delta change = "
+    write(unit = 100, fmt = dataINT) (j, j=1,length)
+    do i=1,numTest
+        write(unit = 100, fmt = dataFS) (deltaCriteria(j,i),j=1,length)
     end do
     close(100)
     stop
