@@ -2,18 +2,18 @@ program CAT
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
+    character(len = 50), parameter :: dataPath = "data/parameter_324.txt"
     character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
-    integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 40 !作答題長
+    integer,parameter :: numPool = 324 !題庫數
+    integer,parameter :: length = 12 !作答題長
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
     !integer :: contentGoal_before
     integer :: contentAgain = 0
-    integer :: contentTarget(numContentType) = (/16,16,8/)
+    integer :: contentTarget(numContentType) = (/4,4,4/) !16,16,8
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
