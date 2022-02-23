@@ -2,16 +2,16 @@ program MST
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_15.txt" !parameter_MST_15
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_30.txt" !parameter_MST_15
     character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
     ! === MST set ===
-    integer, parameter :: numStages = 2
+    integer, parameter :: numStages = 4
     integer, parameter :: maxLevel = 3
-    integer, parameter :: numModuleInLevel = 5 !5 !18
+    integer, parameter :: numModuleInLevel = 10 !5 !18
     integer, parameter :: maxModule = maxLevel*numModuleInLevel
-    integer, parameter :: numItemInModule = 20 !20 !6
+    integer, parameter :: numItemInModule = 10 !20 !6
     ! === parameter ===
-    integer,parameter :: numTest = 1000 !重複次數
+    integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數 300 !324
     integer,parameter :: length = numStages*numItemInModule !作答題長
     integer,parameter :: numContentType = 3
@@ -64,7 +64,7 @@ program MST
     real:: testOverlapData
     real:: testOverlap
     ! Psi 控制參數 
-    integer:: alpha = 3
+    integer:: alpha = 1
     real:: psiMax = 0.4
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
@@ -255,7 +255,6 @@ program MST
         call subr_testPsi(numTest,numPool,2,usedSum,length,try,psiTwo)
         call subr_testPsi(numTest,numPool,3,usedSum,length,try,psiThree)
     enddo
-
     if (alpha==1) then
         do i = 1,3
             alphaSet(i)=i
@@ -269,7 +268,6 @@ program MST
             endif
         enddo
     endif
-
     call subr_aveReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMean)
     call subr_aveReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMean)
     call subr_aveReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMean)
@@ -294,7 +292,6 @@ program MST
     call subr_varReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneVar)
     call subr_varReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoVar)
     call subr_varReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeVar)
-
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,A)') "method = ", " MST+Psi"

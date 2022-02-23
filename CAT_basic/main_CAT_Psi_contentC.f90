@@ -2,18 +2,18 @@ program CAT
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_324.txt"
+    character(len = 50), parameter :: dataPath = "data/parameter_300.txt" 
     character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
-    integer,parameter :: numPool = 324 !題庫數
-    integer,parameter :: length = 12 !作答題長
+    integer,parameter :: numPool = 300 !題庫數
+    integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
     !integer :: contentGoal_before
     integer :: contentAgain = 0
-    integer :: contentTarget(numContentType) = (/4,4,4/) !16,16,8
+    integer :: contentTarget(numContentType) = (/16,16,8/) !16,16,8
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
@@ -81,7 +81,9 @@ program CAT
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 2
-    real:: psiMax = 0.2
+    real:: psiMax = 0.3
+    ! 因應alpha>1
+    integer,dimension(3)::alphaSet
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
@@ -322,30 +324,43 @@ program CAT
         call subr_testPsi(numTest,numPool,2,usedSum,length,try,psiTwo)
         call subr_testPsi(numTest,numPool,3,usedSum,length,try,psiThree)
     enddo
-    call subr_aveReal(omegaOne, numTest, omegaOneMean)
-    call subr_aveReal(omegaTwo, numTest, omegaTwoMean)
-    call subr_aveReal(omegaThree, numTest, omegaThreeMean)
-    call subr_maxvReal(omegaOne(2:numTest), numTest-1, omegaOneMax, place)
-    call subr_maxvReal(omegaTwo(3:numTest), numTest-2, omegaTwoMax, place)
-    call subr_maxvReal(omegaThree(4:numTest), numTest-3, omegaThreeMax, place)
-    call subr_minvReal(omegaOne(2:numTest), numTest-1, omegaOnemin, place)
-    call subr_minvReal(omegaTwo(3:numTest), numTest-2, omegaTwomin, place)
-    call subr_minvReal(omegaThree(4:numTest), numTest-3, omegaThreemin, place)
-    call subr_varReal(omegaOne(2:numTest), numTest-1, omegaOneVar)
-    call subr_varReal(omegaTwo(3:numTest), numTest-2, omegaTwoVar)
-    call subr_varReal(omegaThree(4:numTest), numTest-3, omegaThreeVar)
-    call subr_aveReal(psiOne, numTest, psiOneMean)
-    call subr_aveReal(psiTwo, numTest, psiTwoMean)
-    call subr_aveReal(psiThree, numTest, psiThreeMean)
-    call subr_maxvReal(psiOne(2:numTest), numTest-1, psiOneMax, place)
-    call subr_maxvReal(psiTwo(3:numTest), numTest-2, psiTwoMax, place)
-    call subr_maxvReal(psiThree(4:numTest), numTest-3, psiThreeMax, place)
-    call subr_minvReal(psiOne(2:numTest), numTest-1, psiOnemin, place)
-    call subr_minvReal(psiTwo(3:numTest), numTest-2, psiTwomin, place)
-    call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreemin, place)
-    call subr_varReal(psiOne(2:numTest), numTest-1, psiOneVar)
-    call subr_varReal(psiTwo(3:numTest), numTest-2, psiTwoVar)
-    call subr_varReal(psiThree(4:numTest), numTest-3, psiThreeVar)
+    if (alpha==1) then
+        do i = 1,3
+            alphaSet(i)=i
+        enddo
+    else
+        do i = 1,3
+            if (i > alpha) then 
+                alphaSet(i)=i
+            else
+                alphaSet(i)=alpha
+            endif
+        enddo
+    endif
+    call subr_aveReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMean)
+    call subr_aveReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMean)
+    call subr_aveReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMean)
+    call subr_maxvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMax, place)
+    call subr_maxvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMax, place)
+    call subr_maxvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMax, place)
+    call subr_minvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOnemin, place)
+    call subr_minvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwomin, place)
+    call subr_minvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreemin, place)
+    call subr_varReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneVar)
+    call subr_varReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoVar)
+    call subr_varReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeVar)
+    call subr_aveReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMean)
+    call subr_aveReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMean)
+    call subr_aveReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMean)
+    call subr_maxvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMax, place)
+    call subr_maxvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMax, place)
+    call subr_maxvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMax, place)
+    call subr_minvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOnemin, place)
+    call subr_minvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwomin, place)
+    call subr_minvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreemin, place)
+    call subr_varReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneVar)
+    call subr_varReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoVar)
+    call subr_varReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeVar)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A10,A)') "method = ", " CAT with Psi + con"
