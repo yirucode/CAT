@@ -64,8 +64,8 @@ program MST
     real:: testOverlapData
     real:: testOverlap
     ! Psi 控制參數 
-    integer:: alpha = 1
-    real:: psiMax = 0.4
+    integer:: alpha = 2
+    real:: psiMax = 0.3
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
     real, dimension(length, numTest):: deltaCriteria

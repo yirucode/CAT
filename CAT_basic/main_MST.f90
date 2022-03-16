@@ -2,7 +2,7 @@ program MST
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_15.txt"
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_15_R.txt"
     character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
     ! === MST set ===
     integer,parameter :: numStages = 2
