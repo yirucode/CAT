@@ -3,7 +3,7 @@ program CAT_contentControl
     ! === given data ====
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
-    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt"!"data/Normal_Population.txt"
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數

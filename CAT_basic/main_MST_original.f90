@@ -2,21 +2,19 @@ program MST_original
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST.txt"
-    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_original_1-2.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt" !Normal_Population.txt
     ! === MST set ===
     integer,parameter :: numStages = 2
     integer,parameter :: maxLevel = 3
-    integer, parameter :: numModuleInLevel = 5 !5
+    integer, parameter :: numModuleInLevel = 1
     integer, parameter :: maxModule = maxLevel*numModuleInLevel
     integer, parameter :: numItemInModule = 20
     ! === parameter ===
-    integer,parameter :: numTest = 1000 !重複次數
-    integer,parameter :: numPool = 300 !題庫數 !300
+    integer,parameter :: numTest = 10000 !重複次數
+    integer,parameter :: numPool = 60 !題庫數
     integer,parameter :: length = numStages*numItemInModule !作答題長
     integer,parameter :: numContentType = 3
-    ! === random choose module ===
-    real :: nrand_module(numTest)
     ! === item parameter ===
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數
     integer:: content(numPool)
@@ -35,14 +33,14 @@ program MST_original
     integer :: choose
     real :: x
     ! === 運算暫存用 ===
-    !real :: maxv !最大值 
+    real :: maxv !最大值 
     integer :: place
-    !real :: infor(numPool) !題庫各試題的訊息量
+    real :: infor(numPool) !題庫各試題的訊息量
     integer :: usedPool(numPool, numTest) !紀錄試題是否被使用過
     integer :: usedSum(numPool, numTest) !試題被使用過的累加次數
     real :: randv(length, numTest)
     ! === MST 的運算暫存 ===
-    !real :: inforSum(maxModule)
+    real :: inforSum(maxModule)
     ! integer :: usedModule(maxModule)
     ! === output data ===
     integer :: resp(length, numTest) !作答反應
@@ -119,21 +117,28 @@ program MST_original
     enddo
     close(100)
     ! 開始模擬
-    call random_number(nrand_module)
     do try = 1,numTest
         do  choose = 1, numStages
+
             if (choose == 1) then 
-                placeModule_choose(choose, try) = 1+FLOOR(numModuleInLevel*nrand_module(try))
-            else if (choose == 2) then
-                if (thetaHat(choose-1, try)>thetaBegin)then 
-                    placeModule_choose(choose, try) = numModuleInLevel+1+FLOOR(numModuleInLevel*nrand_module(try))
-                else
-                    placeModule_choose(choose, try) = choose*numModuleInLevel+1+FLOOR(numModuleInLevel*nrand_module(try))
-                endif
+                do i = 1, numPool
+                    infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                enddo
             else
-                placeModule_choose(choose, try) = 1
+                do i = 1, numPool
+                    if ( usedPool(i, try) == 0 ) then
+                        infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
+                    else
+                        infor(i) = 0
+                    endif
+                enddo
             endif
-            
+            ! 計算 information in each module 的總和
+            do i = 1,maxModule
+                call subr_sumReal(infor(((i-1)*numItemInModule+1):(i*numItemInModule)),&
+                numItemInModule,inforSum(i))
+            enddo
+            call subr_maxvReal(inforSum, maxModule, maxv, placeModule_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
             do i = (placeModule_choose(choose, try)-1)*numItemInModule+1, placeModule_choose(choose, try)*numItemInModule
                 usedPool(i,try) = 1 !紀錄使用試題
             enddo
@@ -227,7 +232,7 @@ program MST_original
 
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A10,A)') "method = ", " MST"
+    write(unit = 100, fmt = '(A10,A)') "method = ", " MST original"
     write(unit = 100, fmt = '(A10,F10.5)') "time = ", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test n = ", numTest
     write(unit = 100, fmt = '(A10,I10)') "pool n = ", numPool

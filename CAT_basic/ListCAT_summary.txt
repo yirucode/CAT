@@ -1,23 +1,23 @@
  method =  MST
-   time =    3.23438
+   time =    3.18750
  test n =      10000
  pool n =        300
  length =         40
 
 About thetaHat: 
-   Mean =    0.00203
-   Bias =   -0.00220
-    Var =    0.92932
-    MSE =    0.08102
-   RMSE =    0.28464
+   Mean =    0.04355
+   Bias =    0.03930
+    Var =    2.25752
+    MSE =    0.15751
+   RMSE =    0.39687
 
 About item used rate: 
     max =    1.00000
    mean =    0.13333
-    var =    0.06983
+    var =    0.06434
 
 About pool used: 
    Rate =    0.40000
 
 About test overlap: 
-overlap =    0.65699
+overlap =    0.61586
