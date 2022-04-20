@@ -1,23 +1,23 @@
- method =  MST
-   time =    3.18750
+ method =  OMST with content balance
+   time =    5.59375
  test n =      10000
  pool n =        300
  length =         40
 
 About thetaHat: 
-   Mean =    0.04355
-   Bias =    0.03930
-    Var =    2.25752
-    MSE =    0.15751
-   RMSE =    0.39687
+   Mean =    0.06810
+   Bias =    0.06385
+    Var =    1.80042
+    MSE =    0.31300
+   RMSE =    0.55947
 
 About item used rate: 
     max =    1.00000
-   mean =    0.13333
-    var =    0.06434
+   mean =    0.07667
+    var =    0.07079
 
 About pool used: 
-   Rate =    0.40000
+   Rate =    0.07667
 
 About test overlap: 
-overlap =    0.61586
+overlap =    1.00000

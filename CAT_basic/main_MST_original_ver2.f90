@@ -1,9 +1,9 @@
-program MST
+program MST_original_ver2
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_MST_15_R_cut3.txt"
-    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt" !Normal_Population.txt
+    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt" !Population_Uniform.txt !Normal_Population.txt
     ! === MST set ===
     integer,parameter :: numStages = 2
     integer,parameter :: maxLevel = 3
@@ -12,7 +12,7 @@ program MST
     integer, parameter :: numItemInModule = 20
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
-    integer,parameter :: numPool = 60 !題庫數
+    integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = numStages*numItemInModule !作答題長
     integer,parameter :: numContentType = 3
     ! === item parameter ===
@@ -124,12 +124,12 @@ program MST
     do try = 1,numTest
         do choose = 1, numStages
                 if (choose == 1) then
-                    placeModule_choose(choose, try) = 1+FLOOR(5*rand_module(choose,try))
+                    placeModule_choose(choose, try) = INT(1+FLOOR(5*rand_module(choose,try)))
                 else if (choose == 2) then
-                    if (thetaHat(choose-1, try)>thetaBegin) then 
-                        placeModule_choose(choose, try) = 5+1+FLOOR(5*rand_module(choose,try))
+                    if (thetaHat(choose-1, try)>thetaBegin) then
+                        placeModule_choose(choose, try) = INT(5+1+FLOOR(5*rand_module(choose,try)))
                     else
-                        placeModule_choose(choose, try) = 10+1+FLOOR(5*rand_module(choose,try))
+                        placeModule_choose(choose, try) = INT(10+1+FLOOR(5*rand_module(choose,try)))
                     endif
                 endif
 
@@ -230,7 +230,7 @@ enddo
 
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A10,A)') "method = ", " MST original"
+    write(unit = 100, fmt = '(A10,A)') "method = ", " MST original ver2"
     write(unit = 100, fmt = '(A10,F10.5)') "time = ", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test n = ", numTest
     write(unit = 100, fmt = '(A10,I10)') "pool n = ", numPool
@@ -346,5 +346,5 @@ enddo
     end do
     close(100)
     stop
-end program MST
+end program MST_original_ver2
 
