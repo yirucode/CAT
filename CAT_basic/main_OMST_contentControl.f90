@@ -1,17 +1,27 @@
-program OMST
+program OMST_contentControl
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_400.txt" !300
-    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt"!Population_Uniform.txt"!"data/Normal_Population.txt"
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
-    integer,parameter :: numPool = 400 !題庫數
-    integer,parameter :: length = 20 !作答題長
+    integer,parameter :: numPool = 300 !題庫數
+    integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
+    ! === module set ===
+    integer :: contentScale(numContentType) = (/2,2,1/)
+    integer :: contentMultiplier = 2
     ! === OMST set ===
     integer :: usedStages
-    integer,parameter :: numStages = 2
+    integer,parameter :: numStages = 4
+    integer :: realChoose
+    ! === content target ===
+    integer :: contentGoal
+    integer :: contentTarget(numContentType) != (/16,16,8/)
+    integer :: contentChange(numContentType) 
+    real :: randContent
+    real :: contentTP(numContentType)
     ! === item parameter ===
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數
     integer:: content(numPool)
@@ -54,6 +64,12 @@ program OMST
     ! 測驗重疊率參數
     real:: testOverlapData
     real:: testOverlap
+    ! 估計能力參數
+    real::thetaHat(numStages, numTest)
+    real::thetaHatMean !估計能力值的平均數
+    real::thetaBias !估計能力值與真值的差之平均
+    real::thetaHatVar !估計能力值的變異數
+    real::thetaHatMSE !估計能力值的MSE
     ! Omega
     real, dimension(numTest)::omegaOne
     real, dimension(numTest)::omegaTwo
@@ -70,12 +86,6 @@ program OMST
     real:: psiOneMax, psiTwoMax, psiThreeMax
     real:: psiOneMin, psiTwoMin, psiThreeMin
     real:: psiOneVar, psiTwoVar, psiThreeVar
-    ! 估計能力參數
-    real::thetaHat(numStages, numTest) ! 跟著設定變
-    real::thetaHatMean !估計能力值的平均數
-    real::thetaBias !估計能力值與真值的差之平均
-    real::thetaHatVar !估計能力值的變異數
-    real::thetaHatMSE !估計能力值的MSE
     ! item pool 的相關資料紀錄 ===
     real :: poolUsedRate
     ! === 存取時間 ===
@@ -107,60 +117,90 @@ program OMST
     enddo
     close(100)
     ! 開始模擬
+    ! set module content constraint
+    contentTarget = contentScale*contentMultiplier
+    ! 開始施測
     do try = 1, numTest
         do usedStages = 1, numStages
-            do  choose = 1, length/numStages
+            do choose = 1, length/numStages
+                ! 隨機選擇要施測的內容領域
+                if ( choose == 1 ) then
+                    contentChange = contentTarget ! 重設內容領域控制參數
+                endif
+                call subr_contentTargetP(contentChange, numContentType, contentTP)
+                call random_number(randContent)
+                !WRITE(*,*) randContent
+                do i = 1, numContentType
+                    if (i.EQ.1) then
+                        if ((randContent > 0) .AND. (randContent <= contentTP(i))) then
+                            contentGoal = i
+                        endif
+                    else
+                        if ((randContent > contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
+                            contentGoal = i
+                        endif
+                    endif
+                enddo
+                contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除選中的內容題數
                 ! 計算訊息量
-                if (  usedStages == 1 ) then
+                if ( usedStages == 1 ) then                
                     do i = 1, numPool
-                        infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                        if ( content(i) == contentGoal ) then
+                            infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                        else
+                            infor(i) = 0
+                        endif
                     enddo
                 else
                     do i = 1, numPool
-                        if ( usedPool(i, try) == 0 ) then
+                        if ( ( usedPool(i, try) == 0 ) .AND. ( content(i) == contentGoal ) ) then
                             infor(i) = information(thetaHat(usedStages-1, try), a(i), b(i), c(i))
                         else
                             infor(i) = 0
                         endif
                     enddo
                 endif
-                call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
-                usedPool(place_choose(choose, try), try) = 1 !紀錄使用試題
+                realChoose = (usedStages-1)*(length/numStages)+choose
+                call subr_maxvReal(infor, numPool, maxv, place_choose(realChoose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
+                usedPool(place_choose(realChoose, try), try) = 1 !紀錄使用試題
                 ! 紀錄使用的試題參數
-                a_choose(choose, try) = a(place_choose(choose, try))
-                b_choose(choose, try) = b(place_choose(choose, try))
-                c_choose(choose, try) = c(place_choose(choose, try))
-                content_choose(choose, try) = content(place_choose(choose, try))
+                a_choose(realChoose, try) = a(place_choose(realChoose, try))
+                b_choose(realChoose, try) = b(place_choose(realChoose, try))
+                c_choose(realChoose, try) = c(place_choose(realChoose, try))
+                content_choose(realChoose, try) = content(place_choose(realChoose, try))
                 ! 模擬作答反應
                 call subr_resp(thetaTrue(try), &
-                a_choose(choose, try),b_choose(choose, try),c_choose(choose, try),&
-                resp(choose, try),randv(choose, try))
-                ! EAP能力估計
-                call subr_EAP(choose, &
-                a_choose(1:choose, try),b_choose(1:choose, try),c_choose(1:choose, try),&
-                resp(1:choose, try), thetaHat(choose, try))
+                a_choose(realChoose, try),b_choose(realChoose, try),c_choose(realChoose, try),&
+                resp(realChoose, try),randv(realChoose, try))
             enddo
-        enddo
-        ! 紀錄試題累計使用次數
-        do i=1, numPool
-            if ( try == 1 ) then
-                usedSum(i,try) = usedPool(i,try)
-            else
-                usedSum(i,try) = usedSum(i,try-1) + usedPool(i,try)
-            endif
-        enddo
-        ! 計算每位受試者於不同內容領域中用了幾題
-        do j=1,numContentType
-            call subr_contentCount(content_choose(:,try),length,j,contentResult(j,try))
+
+            ! 紀錄試題累計使用次數
+            do i=1, numPool
+                if ( try == 1 ) then
+                    usedSum(i,try) = usedPool(i,try)
+                else
+                    usedSum(i,try) = usedSum(i,try-1) + usedPool(i,try)
+                endif
+            enddo
+            ! 計算每位受試者於不同內容領域中用了幾題
+            do j=1,numContentType
+                call subr_contentCount(content_choose(:,try),length,j,contentResult(j,try))
+            enddo
+            ! EAP能力估計
+            call subr_EAP(realChoose, &
+            a_choose(1:usedStages*(length/numStages), try),&
+            b_choose(1:usedStages*(length/numStages), try),&
+            c_choose(1:usedStages*(length/numStages), try),&
+            resp(1:usedStages*(length/numStages), try), thetaHat(usedStages, try))
         enddo
     end do
     call cpu_time (t2) !結束計時
-    ! thetaHat 計算
+    ! thetaHat 計算 (根據OMST調整)
     call subr_aveReal(thetaTrue, numTest, thetaTrueMean)
-    call subr_aveReal(thetaHat(length,:), numTest, thetaHatMean)
+    call subr_aveReal(thetaHat(numStages,:), numTest, thetaHatMean)
     thetaBias = thetaHatMean - thetaTrueMean
-    call subr_varReal(thetaHat(length,:), numTest, thetaHatVar)
-    call subr_mseReal(thetaHat(length,:), thetaTrue(:), numTest, thetaHatMSE)
+    call subr_varReal(thetaHat(numStages,:), numTest, thetaHatVar)
+    call subr_mseReal(thetaHat(numStages,:), thetaTrue(:), numTest, thetaHatMSE)
     ! item used rate 計算
     call subr_itemUsedRate(usedPool, numTest, numPool, usedRate)
     call subr_maxvReal(usedRate, numPool, usedRateMax, place)
@@ -169,7 +209,7 @@ program OMST
     ! item pool 計算
     call subr_itemPoolUsedRate(usedPool, numTest, numPool, poolUsedRate)
     ! test overlap
-    call subr_testOverlap(place_choose, numTest, length, testOverlapData)     ! 不知為何會受下面subr_maxvInt的影響，待查證
+    call subr_testOverlap(place_choose, numTest, length, testOverlapData) ! 不知為何會受下面subr_maxvInt的影響，待查證
     testOverlap = testOverlapData
     ! content mean 計算
     do i = 1, numContentType
@@ -210,10 +250,9 @@ program OMST
     call subr_varReal(psiOne(2:numTest), numTest-1, psiOneVar)
     call subr_varReal(psiTwo(3:numTest), numTest-2, psiTwoVar)
     call subr_varReal(psiThree(4:numTest), numTest-3, psiThreeVar)
-
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A10,A)') "method = ", " OMST"
+    write(unit = 100, fmt = '(A10,A)') "method = ", " OMST with content balance"
     write(unit = 100, fmt = '(A10,F10.5)') "time = ", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test n = ", numTest
     write(unit = 100, fmt = '(A10,I10)') "pool n = ", numPool
@@ -236,9 +275,9 @@ program OMST
     ! == theta hat ==
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "thetaHat = "
-    write(unit = 100, fmt = dataINT) (j, j=1,length)
+    write(unit = 100, fmt = dataINT) (j, j=1,numStages)
     do i=1,numTest
-        write(unit = 100, fmt = dataF) (thetaHat(j,i),j=1,length)
+        write(unit = 100, fmt = dataF) (thetaHat(j,i),j=1,numStages)
     end do
     close (100)
     ! == response ==
@@ -280,6 +319,7 @@ program OMST
         write(unit = 100, fmt = dataContentINT) (contentResult(j,i),j=1,numContentType)
     end do
     close(100)
+    ! == pool used ==
     open(unit = 100 , file = 'ListCAT_poolUsed.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "pool used = "
     write(unit = 100, fmt = dataPool) (j, j=1,numPool)
@@ -287,7 +327,6 @@ program OMST
         write(unit = 100, fmt = dataPool) (usedPool(j,i),j=1,numPool)
     end do
     close(100)
-    ! == pool used ==
     open(unit = 100 , file = 'ListCAT_poolUsedSum.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "pool used sum = "
     write(unit = 100, fmt = dataPool) (j, j=1,numPool)
@@ -320,5 +359,5 @@ program OMST
     end do
     close(100)
     stop
-end program OMST
+end program OMST_contentControl
 
