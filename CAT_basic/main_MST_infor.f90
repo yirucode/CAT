@@ -3,10 +3,10 @@ program MST
     ! === given data ====
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_MST_len10_1-2_P.txt" !parameter_MST_1-3-3-3_data_P.txt !data/parameter_MST_1-2-3-4_data_P.txt
-    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt"  !Population_Uniform.txt" !"data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"  !Population_Uniform.txt" !"data/Normal_Population.txt"
     ! === MST set ===
     integer,parameter :: numStages = 2
-    integer, parameter :: maxModule = 3 !20
+    integer, parameter :: maxModule = 20 !有平行測驗時記得改
     integer, parameter :: numItemInModule = 10
     !integer :: MSTdesign(numStages) = (/1,2,3,4/)
     integer :: MSTnump(numStages) = (/10,5/) !(/4,3,2,1/) (/3,1,1,1/) !每階段之每module平行測驗數
@@ -17,7 +17,9 @@ program MST
     integer,parameter :: length = numStages*numItemInModule !作答題長
     integer,parameter :: numContentType = 3
     ! === MST set 2 ===
-    real :: rand_module(numStages, numTest)
+    real :: rand_module
+    integer :: randToInt
+    !real :: rand_module(numStages, numTest)
     ! === item parameter ===
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數
     integer:: content(numPool)
@@ -123,15 +125,18 @@ program MST
         read(100,*) x, thetaTrue(i) !三參數
     enddo
     close(100)
-    call random_number(rand_module)
     ! 開始模擬
+    call random_number(rand_module)
+    randToInt = INT(1+FLOOR(MSTnump(choose)*rand_module))
     do try = 1,numTest
         do  choose = 1, numStages
-
-            if (choose == 1) then   
+            if (choose == 1) then 
                 do i = 1, numPool
-                    if ( (stage(i)==choose).AND.&
-                    (pnum(i)==INT(1+FLOOR(MSTnump(choose)*rand_module(choose,try)))) ) then
+                    if ( (i>1).AND.(level(i-1).NE.level(i)) ) then 
+                        call random_number(rand_module)
+                        randToInt = INT(1+FLOOR(MSTnump(choose)*rand_module))
+                    endif
+                    if ( (stage(i)==choose).AND.(usedPool(i, try) == 0).AND.(pnum(i)==randToInt) ) then 
                         infor(i) = information(thetaBegin, a(i), b(i), c(i))
                     else
                         infor(i) = 0
@@ -139,8 +144,11 @@ program MST
                 enddo
             else
                 do i = 1, numPool
-                    if ( (stage(i)==choose).AND.&
-                    (pnum(i)==INT(1+FLOOR(MSTnump(choose)*rand_module(choose,try)))) ) then
+                    if ( (i>1).AND.(level(i-1).NE.level(i)) ) then 
+                        call random_number(rand_module)
+                        randToInt = INT(1+FLOOR(MSTnump(choose)*rand_module))
+                    endif
+                    if ( (stage(i)==choose).AND.(usedPool(i, try) == 0).AND.(pnum(i)==randToInt) ) then
                         infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
                     else
                         infor(i) = 0

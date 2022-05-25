@@ -3,18 +3,18 @@ program OMST_contentControl
     ! === given data ====
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
-    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"!Population_Uniform.txt"!"data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt"!Population_Uniform.txt"!"data/Normal_Population.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 10 !重複次數
+    integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 20 !作答題長
     integer,parameter :: numContentType = 3
     ! === module set ===
     integer :: contentScale(numContentType) = (/2,2,1/)
-    integer :: contentMultiplier = 2
+    integer :: contentMultiplier = 1
     ! === OMST set ===
     integer :: usedStages
-    integer,parameter :: numStages = 2
+    integer,parameter :: numStages = 4
     integer :: realChoose
     ! === content target ===
     integer :: contentGoal
@@ -121,6 +121,7 @@ program OMST_contentControl
     contentTarget = contentScale*contentMultiplier
     ! 開始施測
     do try = 1, numTest
+        realChoose = 0
         do usedStages = 1, numStages
             do choose = 1, length/numStages
                 ! 隨機選擇要施測的內容領域
@@ -145,7 +146,7 @@ program OMST_contentControl
                 ! 計算訊息量
                 if ( usedStages == 1 ) then                
                     do i = 1, numPool
-                        if ( content(i) == contentGoal ) then
+                        if ( ( usedPool(i, try) == 0 ) .AND. (content(i) == contentGoal) ) then
                             infor(i) = information(thetaBegin, a(i), b(i), c(i))
                         else
                             infor(i) = 0
@@ -160,7 +161,8 @@ program OMST_contentControl
                         endif
                     enddo
                 endif
-                realChoose = (usedStages-1)*(length/numStages)+choose
+                realChoose = realChoose + 1
+                !realChoose = (usedStages-1)*(length/numStages)+choose
                 call subr_maxvReal(infor, numPool, maxv, place_choose(realChoose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
                 usedPool(place_choose(realChoose, try), try) = 1 !紀錄使用試題
                 ! 紀錄使用的試題參數

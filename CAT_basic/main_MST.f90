@@ -2,14 +2,14 @@ program MST
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_len10.txt"
-    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"  !Population_Uniform.txt" !"data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_len5.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt"  !Population_Uniform.txt" !"data/Normal_Population.txt"
     ! === MST set ===
-    integer,parameter :: numStages = 2
+    integer,parameter :: numStages = 4
     integer,parameter :: maxLevel = 3
-    integer, parameter :: numModuleInLevel = 10
+    integer, parameter :: numModuleInLevel = 20
     integer, parameter :: maxModule = maxLevel*numModuleInLevel
-    integer, parameter :: numItemInModule = 10
+    integer, parameter :: numItemInModule = 5
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
