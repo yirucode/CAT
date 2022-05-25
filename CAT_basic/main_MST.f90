@@ -2,10 +2,10 @@ program MST
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_30_R.txt"
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_len10.txt"
     character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"  !Population_Uniform.txt" !"data/Normal_Population.txt"
     ! === MST set ===
-    integer,parameter :: numStages = 4
+    integer,parameter :: numStages = 2
     integer,parameter :: maxLevel = 3
     integer, parameter :: numModuleInLevel = 10
     integer, parameter :: maxModule = maxLevel*numModuleInLevel

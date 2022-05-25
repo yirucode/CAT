@@ -3,18 +3,18 @@ program OMST_contentControl
     ! === given data ====
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
-    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt"!Population_Uniform.txt"!"data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"!Population_Uniform.txt"!"data/Normal_Population.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 10000 !重複次數
+    integer,parameter :: numTest = 10 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 40 !作答題長
+    integer,parameter :: length = 20 !作答題長
     integer,parameter :: numContentType = 3
     ! === module set ===
     integer :: contentScale(numContentType) = (/2,2,1/)
     integer :: contentMultiplier = 2
     ! === OMST set ===
     integer :: usedStages
-    integer,parameter :: numStages = 4
+    integer,parameter :: numStages = 2
     integer :: realChoose
     ! === content target ===
     integer :: contentGoal
