@@ -2,18 +2,18 @@ program MST
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_len10_1-2_P.txt" !parameter_MST_1-3-3-3_data_P.txt !data/parameter_MST_1-2-3-4_data_P.txt
-    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"  !Population_Uniform.txt" !"data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_len10_1-2-3-4.txt" !parameter_MST_1-3-3-3_data_P.txt !data/parameter_MST_1-2-3-4_data_P.txt
+    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt"  !Uniform Normal"
     ! === MST set ===
-    integer,parameter :: numStages = 2
-    integer, parameter :: maxModule = 20 !有平行測驗時記得改
-    integer, parameter :: numItemInModule = 10
+    integer,parameter :: numStages = 4
+    integer, parameter :: maxModule = 10 !有平行測驗時記得改
+    integer, parameter :: numItemInModule = 5
     !integer :: MSTdesign(numStages) = (/1,2,3,4/)
-    integer :: MSTnump(numStages) = (/10,5/) !(/4,3,2,1/) (/3,1,1,1/) !每階段之每module平行測驗數
+    integer :: MSTnump(numStages) = (/1,1,1,1/) !(/10,5/) (/4,3,2,1/) (/3,1,1,1/) !每階段之每module平行測驗數
     
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
-    integer,parameter :: numPool = 200 !200 !題庫數
+    integer,parameter :: numPool = maxModule*numItemInModule !題庫數
     integer,parameter :: length = numStages*numItemInModule !作答題長
     integer,parameter :: numContentType = 3
     ! === MST set 2 ===
@@ -126,13 +126,13 @@ program MST
     enddo
     close(100)
     ! 開始模擬
-    call random_number(rand_module)
-    randToInt = INT(1+FLOOR(MSTnump(choose)*rand_module))
+    !call random_number(rand_module)
+    !randToInt = INT(1+FLOOR(MSTnump(choose)*rand_module))
     do try = 1,numTest
         do  choose = 1, numStages
             if (choose == 1) then 
                 do i = 1, numPool
-                    if ( (i>1).AND.(level(i-1).NE.level(i)) ) then 
+                    if ((i==1).OR.(level(i-1).NE.level(i))) then 
                         call random_number(rand_module)
                         randToInt = INT(1+FLOOR(MSTnump(choose)*rand_module))
                     endif
@@ -144,7 +144,7 @@ program MST
                 enddo
             else
                 do i = 1, numPool
-                    if ( (i>1).AND.(level(i-1).NE.level(i)) ) then 
+                    if ((i==1).OR.(level(i-1).NE.level(i))) then 
                         call random_number(rand_module)
                         randToInt = INT(1+FLOOR(MSTnump(choose)*rand_module))
                     endif
