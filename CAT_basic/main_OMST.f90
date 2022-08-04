@@ -1,12 +1,13 @@
 program OMST
+    ! 2022/7/10 不完整 待修改
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_400.txt" !300
-    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath = "data/parameter_300.txt" !300
+    character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
-    integer,parameter :: numPool = 400 !題庫數
+    integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 20 !作答題長
     integer,parameter :: numContentType = 3
     ! === OMST set ===
@@ -236,9 +237,9 @@ program OMST
     ! == theta hat ==
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "thetaHat = "
-    write(unit = 100, fmt = dataINT) (j, j=1,length)
+    write(unit = 100, fmt = dataINT) (j, j=1,numStages)
     do i=1,numTest
-        write(unit = 100, fmt = dataF) (thetaHat(j,i),j=1,length)
+        write(unit = 100, fmt = dataF) (thetaHat(j,i),j=1,numStages)
     end do
     close (100)
     ! == response ==

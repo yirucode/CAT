@@ -29,7 +29,7 @@ subr_EAP.o
 # main_CAT_contentControl.o
 # main_CAT_Psi
 # main_CAT_Psi_contentC
-# main_MST
+# main_CA_MST
 # main_MST_Psi
 # main_MST_moduleReCount
 # main_MST_12designP

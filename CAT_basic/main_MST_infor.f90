@@ -2,20 +2,28 @@ program MST
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_len10_1-2-3-4.txt" !parameter_MST_1-3-3-3_data_P.txt !data/parameter_MST_1-2-3-4_data_P.txt
-    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt"  !Uniform Normal"
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_len5_1-2-3-4_P.txt" !parameter_MST_1-3-3-3_data_P.txt !data/parameter_MST_1-2-3-4_data_P.txt
+    character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"  !Uniform Normal
     ! === MST set ===
-    integer,parameter :: numStages = 4
-    integer, parameter :: maxModule = 10 !有平行測驗時記得改
-    integer, parameter :: numItemInModule = 5
+    integer,parameter :: numStages = 4 !2 4
+    integer, parameter :: maxModule =  !有平行測驗時記得改 3 20 10
+    integer, parameter :: numItemInModule = 5 !10
     !integer :: MSTdesign(numStages) = (/1,2,3,4/)
-    integer :: MSTnump(numStages) = (/1,1,1,1/) !(/10,5/) (/4,3,2,1/) (/3,1,1,1/) !每階段之每module平行測驗數
-    
+    integer :: MSTnump(numStages) = (/4,3,2,1/) !(/1,1/) !(/10,5/) (/1,1,1,1/) (/4,3,2,1/) (/3,1,1,1/) !每階段之每module平行測驗數
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = maxModule*numItemInModule !題庫數
     integer,parameter :: length = numStages*numItemInModule !作答題長
     integer,parameter :: numContentType = 3
+    ! === 擴展試題 ===
+    integer, parameter :: ori_numPool = 300
+    integer :: ori_usedPool(ori_numPool, numTest) !紀錄試題是否被使用過
+    integer :: ori_usedSum(ori_numPool, numTest) !試題被使用過的累加次數
+    real:: ori_usedRate(ori_numPool)
+    real:: ori_usedRateMax
+    real:: ori_usedRateMean
+    real:: ori_usedRateVar
+    real:: ori_poolUsedRate
     ! === MST set 2 ===
     real :: rand_module
     integer :: randToInt
@@ -202,6 +210,26 @@ program MST
     thetaBias = thetaHatMean - thetaTrueMean
     call subr_varReal(thetaHat(numStages,:), numTest, thetaHatVar)
     call subr_mseReal(thetaHat(numStages,:), thetaTrue(:), numTest, thetaHatMSE)
+
+    ! item used 題庫調整
+    do i = 1, numTest
+        do j = 1, ori_numPool
+            if ( j < numPool ) then 
+                ori_usedPool(j, i) = usedPool(j, i)
+                ori_usedSum(j, i) = usedSum(j, i)
+            else 
+                ori_usedPool(j, i) = 0
+                ori_usedSum(j, i) = 0
+            endif
+        enddo
+    enddo
+    ! 擴展過的 item used rate 計算
+    call subr_itemUsedRate(ori_usedPool, numTest, ori_numPool, ori_usedRate)
+    call subr_maxvReal(ori_usedRate, ori_numPool, ori_usedRateMax, place)
+    call subr_aveReal(ori_usedRate, ori_numPool, ori_usedRateMean)
+    call subr_varReal(ori_usedRate, ori_numPool, ori_usedRateVar)
+    ! 擴展過的 item pool 計算
+    call subr_itemPoolUsedRate(ori_usedPool, numTest, ori_numPool, ori_poolUsedRate)
     ! item used rate 計算
     call subr_itemUsedRate(usedPool, numTest, numPool, usedRate)
     call subr_maxvReal(usedRate, numPool, usedRateMax, place)
@@ -273,6 +301,13 @@ program MST
     write(unit = 100, fmt = '(A10, F10.5)') "Rate = ", poolUsedRate
     write(unit = 100, fmt = '(/,A)') "About test overlap: "
     write(unit = 100, fmt = '(A10, F10.5)') "overlap = ", testOverlap
+
+    write(unit = 100, fmt = '(/,A)') "About original item used rate: "
+    write(unit = 100, fmt = '(A10, F10.5)') "max = ", ori_usedRateMax
+    write(unit = 100, fmt = '(A10, F10.5)') "mean = ", ori_usedRateMean
+    write(unit = 100, fmt = '(A10, F10.5)') "var = ", ori_usedRateVar
+    write(unit = 100, fmt = '(/,A)') "About original pool used: "
+    write(unit = 100, fmt = '(A10, F10.5)') "Rate = ", ori_poolUsedRate
     close(100)
     ! == theta hat ==
     ! === 因MST而修改

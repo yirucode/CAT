@@ -3,15 +3,15 @@ program CAT_contentControl
     ! === given data ====
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
-    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt" !data/Population_Uniform.txt  data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt" !data/Population_Uniform.txt  data/Normal_Population.txt"
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 20 !作答題長
+    integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
-    integer :: contentTarget(numContentType) = (/8,8,4/)
+    integer :: contentTarget(numContentType) = (/16,16,8/)
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
