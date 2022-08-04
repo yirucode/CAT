@@ -1,0 +1,46 @@
+make.exe --dry-run --always-make --keep-going --print-directory
+make.exe: Entering directory 'd:/CAT_inGit/CAT_basic'
+gfortran -c -g -O0 -Og -Wall  main_MST_infor.f90 -o main_MST_infor.o
+ 
+gfortran -c -g -O0 -Og -Wall  subr_maxvReal.f90 -o subr_maxvReal.o
+ 
+gfortran -c -g -O0 -Og -Wall  subr_maxvInt.f90 -o subr_maxvInt.o
+ 
+gfortran -c -g -O0 -Og -Wall  subr_minvInt.f90 -o subr_minvInt.o
+ 
+gfortran -c -g -O0 -Og -Wall  subr_minvReal.f90 -o subr_minvReal.o
+ 
+gfortran -c -g -O0 -Og -Wall  subr_sumReal.f90 -o subr_sumReal.o
+ 
+gfortran -c -g -O0 -Og -Wall  subr_sumInt.f90 -o subr_sumInt.o
+ 
+gfortran -c -g -O0 -Og -Wall  subr_aveReal.f90 -o subr_aveReal.o
+gfortran -c -g -O0 -Og -Wall  subr_aveIntToReal.f90 -o subr_aveIntToReal.o
+gfortran -c -g -O0 -Og -Wall  subr_varReal.f90 -o subr_varReal.o
+gfortran -c -g -O0 -Og -Wall  subr_mseReal.f90 -o subr_mseReal.o
+gfortran -c -g -O0 -Og -Wall  subr_resp.f90 -o subr_resp.o
+gfortran -c -g -O0 -Og -Wall  subr_itemUsedYN.f90 -o subr_itemUsedYN.o
+gfortran -c -g -O0 -Og -Wall  subr_itemUsedSum.f90 -o subr_itemUsedSum.o
+gfortran -c -g -O0 -Og -Wall  subr_itemUsedRate.f90 -o subr_itemUsedRate.o
+gfortran -c -g -O0 -Og -Wall  subr_itemPoolUsedRate.f90 -o subr_itemPoolUsedRate.o
+gfortran -c -g -O0 -Og -Wall  subr_testOverlap.f90 -o subr_testOverlap.o
+gfortran -c -g -O0 -Og -Wall  subr_testOmega.f90 -o subr_testOmega.o
+gfortran -c -g -O0 -Og -Wall  subr_testPsi.f90 -o subr_testPsi.o
+gfortran -c -g -O0 -Og -Wall  func_deltaPsi.f90 -o func_deltaPsi.o
+ 
+gfortran -c -g -O0 -Og -Wall  subr_contentCount.f90 -o subr_contentCount.o
+ 
+gfortran -c -g -O0 -Og -Wall  subr_contentTargetP.f90 -o subr_contentTargetP.o
+ 
+gfortran -c -g -O0 -Og -Wall  func_probability.f90 -o func_probability.o
+ 
+gfortran -c -g -O0 -Og -Wall  func_information.f90 -o func_information.o
+ 
+gfortran -c -g -O0 -Og -Wall  func_normal.f90 -o func_normal.o
+ 
+gfortran -c -g -O0 -Og -Wall  func_combination.f90 -o func_combination.o
+ 
+gfortran -c -g -O0 -Og -Wall  subr_EAP.f90 -o subr_EAP.o
+gfortran -o a main_MST_infor.o subr_maxvReal.o subr_maxvInt.o subr_minvInt.o subr_minvReal.o subr_sumReal.o subr_sumInt.o subr_aveReal.o subr_aveIntToReal.o subr_varReal.o subr_mseReal.o subr_resp.o subr_itemUsedYN.o subr_itemUsedSum.o subr_itemUsedRate.o subr_itemPoolUsedRate.o subr_testOverlap.o subr_testOmega.o subr_testPsi.o func_deltaPsi.o subr_contentCount.o subr_contentTargetP.o func_probability.o func_information.o func_normal.o func_combination.o subr_EAP.o 
+make.exe: Leaving directory 'd:/CAT_inGit/CAT_basic'
+ 
