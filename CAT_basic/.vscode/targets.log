@@ -7,7 +7,7 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # There is NO WARRANTY, to the extent permitted by law.
  
 
-# Make data base, printed on Thu Aug 04 09:29:20 2022
+# Make data base, printed on Sat Aug 06 17:15:11 2022
 
 # Variables
 
@@ -31,8 +31,7 @@ HOMEDRIVE = C:
 @F = $(notdir $@)
 # automatic
 ^D = $(patsubst %/,%,$(patsubst %\,%,$(dir $^)))
-# make 
-file
+# makefile
 CURDIR := d:/CAT_inGit/CAT_basic
 # default
 SHELL := sh.exe
@@ -83,7 +82,7 @@ ELECTRON_RUN_AS_NODE = 1
 # environment
 VS2017INSTALLDIR = C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_15712_JFSFRKYYCLIQIXKV
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_20896_OMGHSVGPEPWOMXYK
 # environment
 COMPUTERNAME = DESKTOP-73328GL
 # environment
@@ -101,10 +100,7 @@ USERNAME = Atwood
 # environment
 PUBLIC = C:\Users\Public
 # environment
-VSCODE_AMD_E 
-make.exe: *** No rule to make target 'all'.  Stop.
-
-NTRYPOINT = vs/workbench/api/node/extensionHostProcess
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
 VSCODE_CODE_CACHE_PATH = C:\Users\Atwood\AppData\Roaming\Code\CachedData\3b889b090b5ad5793f524b5d1d39fda662b96a2a
 # environment
@@ -208,7 +204,7 @@ PROCESSOR_LEVEL = 6
 # environment
 FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
 # environment
-VSCODE_PID = 15712
+VSCODE_PID = 20896
 # environment
 USERDOMAIN_ROAMINGPROFILE = DESKTOP-73328GL
 # variable set hash-table stats:
@@ -230,7 +226,7 @@ USERDOMAIN_ROAMINGPROFILE = DESKTOP-73328GL
 # C:\Program Files\Python39\ (key C:/Program Files/Python39/, mtime 1617113688): 18 files, no impossibilities.
 # C:\WINDOWS (key C:/WINDOWS, mtime 1624866472): 113 files, no impossibilities.
 # C:\Program Files\Python39\Scripts\ (key C:/Program Files/Python39/Scripts/, mtime 1617113694): 7 files, no impossibilities.
-# C:\Users\Atwood\AppData\Local\Microsoft\WindowsApps (key C:/Users/Atwood/AppData/Local/Microsoft/WindowsApps, mtime 1658560803): 17 files, no impossibilities.
+# C:\Users\Atwood\AppData\Local\Microsoft\WindowsApps (key C:/Users/Atwood/AppData/Local/Microsoft/WindowsApps, mtime 1659763884): 17 files, no impossibilities.
 # C:\Program Files\CMake\bin (key C:/Program Files/CMake/bin, mtime 1628499726): 7 files, no impossibilities.
 # C:\WINDOWS\System32\Wbem (key C:/WINDOWS/System32/Wbem, mtime 1657706235): 154 files, no impossibilities.
 # C:\Users\Atwood\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/Atwood/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1658458971): 4 files, no impossibilities.
@@ -490,6 +486,8 @@ subr_itemUsedSum.o:
 # strcache performance: lookups = 3863 / hit rate = 3%
 # hash-table stats:
 # Load=3709/8192=45%, Rehash=0, Collisions=1353/3863=35%
-# Finished Make data base on Thu Aug 04 09:29:20 2022
+# Finished Make data base on Sat Aug 06 17:15:11 2022
 
  
+make.exe: *** No rule to make target 'all'.  Stop.
+
