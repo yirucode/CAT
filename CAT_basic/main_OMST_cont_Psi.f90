@@ -5,7 +5,7 @@ program OMST_cont_Psi
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"!Uniform Normal
     ! === parameter ===
-    integer,parameter :: numTest = 100 !重複次數
+    integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 20 !作答題長
     integer,parameter :: numContentType = 3
