@@ -7,7 +7,7 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # There is NO WARRANTY, to the extent permitted by law.
  
 
-# Make data base, printed on Sat Aug 06 17:15:11 2022
+# Make data base, printed on Sun Aug 07 06:17:28 2022
 
 # Variables
 
@@ -31,14 +31,15 @@ HOMEDRIVE = C:
 @F = $(notdir $@)
 # automatic
 ^D = $(patsubst %/,%,$(patsubst %\,%,$(dir $^)))
-# makefile
+# make 
+file
 CURDIR := d:/CAT_inGit/CAT_basic
 # default
 SHELL := sh.exe
 # environment
 WINDIR = C:\WINDOWS
 # environment
-VSCODE_NLS_CONFIG = {"locale":"zh-tw","availableLanguages":{"*":"zh-tw"},"_languagePackId":"a0b772d00248b7f5c117cab9736199be.zh-tw","_translationsConfigFile":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw\\tcf.json","_cacheRoot":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw","_resolvedLanguagePackCoreLocation":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw\\3b889b090b5ad5793f524b5d1d39fda662b96a2a","_corruptedFile":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw\\corrupted.info","_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"zh-tw","availableLanguages":{"*":"zh-tw"},"_languagePackId":"a0b772d00248b7f5c117cab9736199be.zh-tw","_translationsConfigFile":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw\\tcf.json","_cacheRoot":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw","_resolvedLanguagePackCoreLocation":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw\\da76f93349a72022ca4670c1b84860304616aaa2","_corruptedFile":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw\\corrupted.info","_languagePackSupport":true}
 # environment
 INTEL_LICENSE_FILE = C:\Program Files (x86)\Common Files\Intel\Licenses
 # environment
@@ -82,7 +83,7 @@ ELECTRON_RUN_AS_NODE = 1
 # environment
 VS2017INSTALLDIR = C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_20896_OMGHSVGPEPWOMXYK
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_4548_CTPMKOAFYNVYWJIS
 # environment
 COMPUTERNAME = DESKTOP-73328GL
 # environment
@@ -100,9 +101,12 @@ USERNAME = Atwood
 # environment
 PUBLIC = C:\Users\Public
 # environment
-VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+VSCODE_AMD_EN 
+make.exe: *** No rule to make target 'all'.  Stop.
+
+TRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
-VSCODE_CODE_CACHE_PATH = C:\Users\Atwood\AppData\Roaming\Code\CachedData\3b889b090b5ad5793f524b5d1d39fda662b96a2a
+VSCODE_CODE_CACHE_PATH = C:\Users\Atwood\AppData\Roaming\Code\CachedData\da76f93349a72022ca4670c1b84860304616aaa2
 # environment
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
@@ -154,7 +158,7 @@ PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
 # environment
 OS = Windows_NT
 # environment
-VSCODE_IPC_HOOK = \\.\pipe\9d11548ed05a4797224be888d98a6bfc-1.69.2-main-sock
+VSCODE_IPC_HOOK = \\.\pipe\9d11548ed05a4797224be888d98a6bfc-1.70.0-main-sock
 # environment
 HOMEPATH = \Users\Atwood
 # environment
@@ -173,6 +177,8 @@ SYSTEMROOT = C:\WINDOWS
 +F = $(notdir $+)
 # environment
 APPDATA = C:\Users\Atwood\AppData\Roaming
+# environment
+__COMPAT_LAYER = DetectorsAppHealth
 # environment
 TEMP = C:\Users\Atwood\AppData\Local\Temp
 # environment
@@ -204,11 +210,11 @@ PROCESSOR_LEVEL = 6
 # environment
 FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
 # environment
-VSCODE_PID = 20896
+VSCODE_PID = 4548
 # environment
 USERDOMAIN_ROAMINGPROFILE = DESKTOP-73328GL
 # variable set hash-table stats:
-# Load=98/1024=10%, Rehash=0, Collisions=12/121=10%
+# Load=99/1024=10%, Rehash=0, Collisions=12/122=10%
 
 # Pattern-specific Variable Values
 
@@ -229,7 +235,7 @@ USERDOMAIN_ROAMINGPROFILE = DESKTOP-73328GL
 # C:\Users\Atwood\AppData\Local\Microsoft\WindowsApps (key C:/Users/Atwood/AppData/Local/Microsoft/WindowsApps, mtime 1659763884): 17 files, no impossibilities.
 # C:\Program Files\CMake\bin (key C:/Program Files/CMake/bin, mtime 1628499726): 7 files, no impossibilities.
 # C:\WINDOWS\System32\Wbem (key C:/WINDOWS/System32/Wbem, mtime 1657706235): 154 files, no impossibilities.
-# C:\Users\Atwood\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/Atwood/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1658458971): 4 files, no impossibilities.
+# C:\Users\Atwood\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/Atwood/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1659777359): 4 files, no impossibilities.
 # C:\WINDOWS\system32 (key C:/WINDOWS/system32, mtime 1659093984): 2918 files, no impossibilities.
 # C:\MinGW (key C:/MinGW, mtime 1617104233): 10 files, no impossibilities.
 # C:\Program Files\TortoiseGit\bin (key C:/Program Files/TortoiseGit/bin, mtime 1628465021): 97 files, no impossibilities.
@@ -486,8 +492,6 @@ subr_itemUsedSum.o:
 # strcache performance: lookups = 3863 / hit rate = 3%
 # hash-table stats:
 # Load=3709/8192=45%, Rehash=0, Collisions=1353/3863=35%
-# Finished Make data base on Sat Aug 06 17:15:11 2022
+# Finished Make data base on Sun Aug 07 06:17:28 2022
 
  
-make.exe: *** No rule to make target 'all'.  Stop.
-

@@ -3,17 +3,17 @@ program CAT
     ! === given data ====
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt" 
-    character(len = 50), parameter :: dataPath2 = "data/Normal_Population.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 40 !作答題長
+    integer,parameter :: length = 20 !作答題長
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
     !integer :: contentGoal_before
     integer :: contentAgain = 0
-    integer :: contentTarget(numContentType) = (/16,16,8/) !16,16,8
+    integer :: contentTarget(numContentType) = (/8,8,4/) !16,16,8
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
@@ -23,7 +23,7 @@ program CAT
     ! === true theta ===
     real :: thetaTrue(numTest) = 1. !真實能力值
     real :: thetaTrueMean !真實能力值之平均
-    real :: thetaBegin = 0.
+    real :: thetaBegin = 0. 
     ! === function ===
     real, external :: information, probability, normalPDF
     ! === unknown data ===
@@ -81,7 +81,7 @@ program CAT
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 2
-    real:: psiMax = 0.3
+    real:: psiMax = 0.1
     ! 因應alpha>1
     integer,dimension(3)::alphaSet
     !real, dimension(numTest):: psi
