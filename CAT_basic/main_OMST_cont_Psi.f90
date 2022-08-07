@@ -1,25 +1,30 @@
-program MST
+program OMST_cont_Psi
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_30.txt" !parameter_MST_15
-    character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"
-    ! === MST set ===
-    integer, parameter :: numStages = 2
-    integer, parameter :: maxLevel = 3
-    integer, parameter :: numModuleInLevel = 10 !5 !18
-    integer, parameter :: maxModule = maxLevel*numModuleInLevel
-    integer, parameter :: numItemInModule = 10 !20 !6
+    character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
+    character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"!Uniform Normal
     ! === parameter ===
-    integer,parameter :: numTest = 10000 !重複次數
-    integer,parameter :: numPool = 300 !題庫數 300 !324
-    integer,parameter :: length = numStages*numItemInModule !作答題長
+    integer,parameter :: numTest = 100 !重複次數
+    integer,parameter :: numPool = 300 !題庫數
+    integer,parameter :: length = 20 !作答題長
     integer,parameter :: numContentType = 3
+    ! === module set ===
+    integer :: contentScale(numContentType) = (/2,2,1/)
+    integer :: contentMultiplier = 2
+    ! === OMST set ===
+    integer :: usedStages
+    integer,parameter :: numStages = 2
+    integer :: realChoose
+    ! === content target ===
+    integer :: contentGoal
+    integer :: contentTarget(numContentType) != (/16,16,8/)
+    integer :: contentChange(numContentType) 
+    real :: randContent
+    real :: contentTP(numContentType)
     ! === item parameter ===
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數
     integer:: content(numPool)
-    integer:: level(numPool)
-    integer:: module(numPool) 
     ! === true theta ===
     real :: thetaTrue(numTest) = 1. !真實能力值
     real :: thetaTrueMean !真實能力值之平均
@@ -39,13 +44,9 @@ program MST
     integer :: usedPool(numPool, numTest) !紀錄試題是否被使用過
     integer :: usedSum(numPool, numTest) !試題被使用過的累加次數
     real :: randv(length, numTest)
-    ! === MST 的運算暫存 ===
-    real :: inforSum(maxModule)
-    ! integer :: usedModule(maxModule)
     ! === output data ===
     integer :: resp(length, numTest) !作答反應
     integer:: place_choose(length, numTest) !選題的試題位置
-    integer:: placeModule_choose(numStages, numTest) !被選擇的Module
     ! content 相關
     integer:: content_choose(length, numTest)
     integer, dimension(numContentType, numTest)::contentResult
@@ -63,6 +64,12 @@ program MST
     ! 測驗重疊率參數
     real:: testOverlapData
     real:: testOverlap
+    ! 估計能力參數
+    real::thetaHat(numStages, numTest)
+    real::thetaHatMean !估計能力值的平均數
+    real::thetaBias !估計能力值與真值的差之平均
+    real::thetaHatVar !估計能力值的變異數
+    real::thetaHatMSE !估計能力值的MSE
     ! Psi 控制參數 
     integer:: alpha = 1
     real:: psiMax = 0.1
@@ -70,7 +77,7 @@ program MST
     real, external :: combination, func_deltaPsi
     real, dimension(length, numTest):: deltaCriteria
     real, dimension(numPool, numTest)::eta !item contribution
-    real::eta_choose(length, numTest) !選中的eta
+    !real::eta_choose(length, numTest) !選中的eta
     ! 因應alpha>1
     integer,dimension(3)::alphaSet
     ! Omega
@@ -89,13 +96,6 @@ program MST
     real:: psiOneMax, psiTwoMax, psiThreeMax
     real:: psiOneMin, psiTwoMin, psiThreeMin
     real:: psiOneVar, psiTwoVar, psiThreeVar
-    ! 估計能力參數
-    ! real::thetaHat(length, numTest) 
-    real::thetaHat(numStages, numTest) ! 因MST而有修改
-    real::thetaHatMean !估計能力值的平均數
-    real::thetaBias !估計能力值與真值的差之平均
-    real::thetaHatVar !估計能力值的變異數
-    real::thetaHatMSE !估計能力值的MSE
     ! item pool 的相關資料紀錄 ===
     real :: poolUsedRate
     ! === 存取時間 ===
@@ -103,6 +103,7 @@ program MST
     real (kind=8) t2 !結束時間
     ! === output error ===
     integer :: ierror
+    ! === 輸出資料格式設定 === 
     ! === 輸出資料格式設定 === 
     character(len = 20), parameter :: input = 'ListCAT_thetaHat.txt'
     character(len = 20), parameter :: dataINT = '(100I10)' ! 隨著 length 改變而改變
@@ -113,12 +114,13 @@ program MST
     character(len = 20), parameter :: dataContentReal = '(10F10.4)'  ! 隨著 content type number 改變
     character(len = 20), parameter :: dataContentInt = '(10I10)'
     ! === run code ===
+    ! === run code ===
     call cpu_time (t1) !開始計時
     ! 讀取資料
     ! 輸入試題參數
     open(100, file= dataPath, status="old") 
     do i=1,numPool
-        read(100,*) a(i),b(i),c(i),content(i),level(i),module(i) !三參數
+        read(100,*) a(i),b(i),c(i),content(i) !三參數
     enddo
     close(100)
     ! 輸入受試者真實能力值
@@ -129,8 +131,12 @@ program MST
     enddo
     close(100)
     ! 開始模擬
-    do try = 1,numTest
-        
+    ! set module content constraint
+    contentTarget = contentScale*contentMultiplier
+    ! 開始施測
+    do try = 1, numTest
+        realChoose = 0
+
         ! Psi 控制設定
         if (try <= alpha) then 
             do i=1,numPool
@@ -140,91 +146,114 @@ program MST
             do i=1,numPool 
                 eta(i,try) = combination(try-(usedSum(i,try-1)+1),alpha) !mit=0 !選出符合條件者 予以施測
             enddo
-
         endif
 
-        do  choose = 1, numStages
+        do usedStages = 1, numStages
+            do choose = 1, length/numStages
+                
+                ! 隨機選擇要施測的內容領域
+                    if ( choose == 1 ) then
+                        contentChange = contentTarget ! 重設內容領域控制參數
+                    endif
+                    call subr_contentTargetP(contentChange, numContentType, contentTP)
+                    call random_number(randContent)
+                    !WRITE(*,*) randContent
+                    do i = 1, numContentType
+                        if (i.EQ.1) then
+                            if ((randContent > 0) .AND. (randContent <= contentTP(i))) then
+                                contentGoal = i
+                            endif
+                        else
+                            if ((randContent > contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
+                                contentGoal = i
+                            endif
+                        endif
+                    enddo
+                    contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除選中的內容題數
 
-            if (try <= alpha) then 
-                if (choose == 1) then 
-                    do i = 1, numPool
-                        infor(i) = information(thetaBegin, a(i), b(i), c(i))
-                    enddo
-                else
-                    do i = 1, numPool
-                        if ( usedPool(i, try) == 0 ) then
-                            infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
-                        else
-                            infor(i) = 0
-                        endif
-                    enddo
-                endif
-            else
-                ! 設定Psi控制
-                deltaCriteria(choose, try) = func_deltaPsi(try,alpha,psiMax,1)
-                if (choose == 1) then 
-                    do i = 1, numPool
-                        if (eta(i,try) >= deltaCriteria(choose, try)) then
-                            infor(i) = information(thetaBegin, a(i), b(i), c(i))
-                        else
-                            infor(i) = 0
-                        endif
-                    enddo
-                else
-                    do i = 1, numPool
-                        if (( usedPool(i, try) == 0 ) .AND. (eta(i,try) >= deltaCriteria(choose, try))) then
-                            infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
-                        else
-                            infor(i) = 0
-                        endif
-                    enddo
-                endif
-            endif
+                if (try <= alpha) then 
+                    ! 計算訊息量
+                    if ( usedStages == 1 ) then                
+                        do i = 1, numPool
+                            if ( ( usedPool(i, try) == 0 ) .AND. (content(i) == contentGoal) ) then
+                                infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                            else
+                                infor(i) = 0
+                            endif
+                        enddo
+                    else
+                        do i = 1, numPool
+                            if ( ( usedPool(i, try) == 0 ) .AND. ( content(i) == contentGoal ) ) then
+                                infor(i) = information(thetaHat(usedStages-1, try), a(i), b(i), c(i))
+                            else
+                                infor(i) = 0
+                            endif
+                        enddo
+                    endif
 
-            ! 計算 information in each module 的總和
-            do i = 1,maxModule
-                call subr_sumReal(infor(((i-1)*numItemInModule+1):(i*numItemInModule)),&
-                numItemInModule,inforSum(i))
+                else
+
+                    ! 設定Psi控制
+                    deltaCriteria(usedStages, try) = func_deltaPsi(try,alpha,psiMax,1)
+                    ! 計算訊息量
+                    if ( usedStages == 1 ) then                
+                        do i = 1, numPool
+                            if ( ( usedPool(i, try) == 0 ) .AND. (content(i) == contentGoal) .AND.&
+                            (eta(i,try) >= deltaCriteria(usedStages, try))) then
+                                infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                            else
+                                infor(i) = 0
+                            endif
+                        enddo
+                    else
+                        do i = 1, numPool
+                            if ( ( usedPool(i, try) == 0 ) .AND. ( content(i) == contentGoal ) .AND.&
+                            (eta(i,try) >= deltaCriteria(usedStages, try))) then
+                                infor(i) = information(thetaHat(usedStages-1, try), a(i), b(i), c(i))
+                            else
+                                infor(i) = 0
+                            endif
+                        enddo
+                    endif
+                endif
+
+                realChoose = realChoose + 1
+                !realChoose = (usedStages-1)*(length/numStages)+choose
+                call subr_maxvReal(infor, numPool, maxv, place_choose(realChoose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
+                usedPool(place_choose(realChoose, try), try) = 1 !紀錄使用試題
+                ! 紀錄使用的試題參數
+                a_choose(realChoose, try) = a(place_choose(realChoose, try))
+                b_choose(realChoose, try) = b(place_choose(realChoose, try))
+                c_choose(realChoose, try) = c(place_choose(realChoose, try))
+                content_choose(realChoose, try) = content(place_choose(realChoose, try))
+                ! 模擬作答反應
+                call subr_resp(thetaTrue(try), &
+                a_choose(realChoose, try),b_choose(realChoose, try),c_choose(realChoose, try),&
+                resp(realChoose, try),randv(realChoose, try))
             enddo
-            call subr_maxvReal(inforSum, maxModule, maxv, placeModule_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
-            do i = (placeModule_choose(choose, try)-1)*numItemInModule+1, placeModule_choose(choose, try)*numItemInModule
-                usedPool(i,try) = 1 !紀錄使用試題
+
+            ! 紀錄試題累計使用次數
+            do i=1, numPool
+                if ( try == 1 ) then
+                    usedSum(i,try) = usedPool(i,try)
+                else
+                    usedSum(i,try) = usedSum(i,try-1) + usedPool(i,try)
+                endif
             enddo
-            do j = (choose-1)*numItemInModule+1, choose*numItemInModule
-                    place_choose(j,try) = (placeModule_choose(choose, try)-1)*numItemInModule+(j-(choose-1)*numItemInModule)
-                    ! 紀錄使用的試題參數
-                    a_choose(j, try) = a(place_choose(j,try))
-                    b_choose(j, try) = b(place_choose(j,try))
-                    c_choose(j, try) = c(place_choose(j,try))
-                    content_choose(j, try) = content(place_choose(j,try))
-                    ! 紀錄與更新Psi控制指標
-                    eta_choose(j,try) = eta(place_choose(j, try),try)
-                    ! 模擬作答反應
-                    call subr_resp(thetaTrue(try), &
-                    a_choose(j, try),b_choose(j, try),c_choose(j, try),&
-                    resp(j, try),randv(j, try))
+            ! 計算每位受試者於不同內容領域中用了幾題
+            do j=1,numContentType
+                call subr_contentCount(content_choose(:,try),length,j,contentResult(j,try))
             enddo
             ! EAP能力估計
-            i = choose*numItemInModule
-            call subr_EAP(i, a_choose(1:i, try),b_choose(1:i, try), c_choose(1:i, try),&
-            resp(1:i, try), thetaHat(choose, try))
+            call subr_EAP(realChoose, &
+            a_choose(1:usedStages*(length/numStages), try),&
+            b_choose(1:usedStages*(length/numStages), try),&
+            c_choose(1:usedStages*(length/numStages), try),&
+            resp(1:usedStages*(length/numStages), try), thetaHat(usedStages, try))
         enddo
-        ! 紀錄試題累計使用次數
-        do i=1, numPool
-            if ( try == 1 ) then
-                usedSum(i,try) = usedPool(i,try)
-            else
-                usedSum(i,try) = usedSum(i,try-1) + usedPool(i,try)
-            endif
-        enddo
-        ! 計算每位受試者於不同內容領域中用了幾題
-        do j=1,numContentType
-            call subr_contentCount(content_choose(:,try),numStages*numItemInModule,j,contentResult(j,try))
-        enddo
-    enddo
+    end do
     call cpu_time (t2) !結束計時
-    ! thetaHat 計算
-    ! 因MST而有修改
+    ! thetaHat 計算 (根據OMST調整)
     call subr_aveReal(thetaTrue, numTest, thetaTrueMean)
     call subr_aveReal(thetaHat(numStages,:), numTest, thetaHatMean)
     thetaBias = thetaHatMean - thetaTrueMean
@@ -238,7 +267,7 @@ program MST
     ! item pool 計算
     call subr_itemPoolUsedRate(usedPool, numTest, numPool, poolUsedRate)
     ! test overlap
-    call subr_testOverlap(place_choose, numTest, length, testOverlapData)     ! 不知為何會受下面subr_maxvInt的影響，待查證
+    call subr_testOverlap(place_choose, numTest, length, testOverlapData) ! 不知為何會受下面subr_maxvInt的影響，待查證
     testOverlap = testOverlapData
     ! content mean 計算
     do i = 1, numContentType
@@ -294,7 +323,7 @@ program MST
     call subr_varReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeVar)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A10,A)') "method = ", " MST+Psi"
+    write(unit = 100, fmt = '(A10,A)') "method = ", " OMST+cont+Psi"
     write(unit = 100, fmt = '(A10,F10.5)') "time = ", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test n = ", numTest
     write(unit = 100, fmt = '(A10,I10)') "pool n = ", numPool
@@ -317,7 +346,6 @@ program MST
     write(unit = 100, fmt = '(A10, F10.5)') "overlap = ", testOverlap
     close(100)
     ! == theta hat ==
-    ! === 因MST而修改
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "thetaHat = "
     write(unit = 100, fmt = dataINT) (j, j=1,numStages)
@@ -339,14 +367,6 @@ program MST
     write(unit = 100, fmt = dataINT) (j, j=1,length)
     do i=1,numTest
         write(unit = 100, fmt = dataINT) (place_choose(j,i),j=1,length)
-    end do
-    close(100)
-    ! == Module choose ==
-    open(unit = 100 , file = 'ListCAT_module.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A)') "choose module = "
-    write(unit = 100, fmt = dataINT) (j, j=1,numStages)
-    do i=1,numTest
-        write(unit = 100, fmt = dataINT) (placeModule_choose(j,i),j=1,numStages)
     end do
     close(100)
     ! == content ==
@@ -372,6 +392,7 @@ program MST
         write(unit = 100, fmt = dataContentINT) (contentResult(j,i),j=1,numContentType)
     end do
     close(100)
+    ! == pool used ==
     open(unit = 100 , file = 'ListCAT_poolUsed.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "pool used = "
     write(unit = 100, fmt = dataPool) (j, j=1,numPool)
@@ -379,7 +400,6 @@ program MST
         write(unit = 100, fmt = dataPool) (usedPool(j,i),j=1,numPool)
     end do
     close(100)
-    ! == pool used ==
     open(unit = 100 , file = 'ListCAT_poolUsedSum.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "pool used sum = "
     write(unit = 100, fmt = dataPool) (j, j=1,numPool)
@@ -427,5 +447,5 @@ program MST
     end do
     close(100)
     stop
-end program MST
+end program OMST_cont_Psi
 
