@@ -13,7 +13,7 @@ program MST
     !parameter_MST_len20_1-2_P_4-3
     !parameter_MST_len10_1-2-3-4
     !parameter_MST_len10_1-2-3-4_P_4321
-    character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"  !Uniform Normal
+    character(len = 50), parameter :: dataPath2 = "data/Population_Uniform.txt"  !Uniform Normal
     ! === MST set ===
     integer,parameter :: numStages = 4 !2 4
     integer, parameter :: maxModule = 20 !有平行測驗時記得改 3 20 10

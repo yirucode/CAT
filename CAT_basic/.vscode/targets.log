@@ -7,7 +7,7 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # There is NO WARRANTY, to the extent permitted by law.
  
 
-# Make data base, printed on Sun Aug 07 06:17:28 2022
+# Make data base, printed on Sat Sep 03 21:18:30 2022
 
 # Variables
 
@@ -31,15 +31,15 @@ HOMEDRIVE = C:
 @F = $(notdir $@)
 # automatic
 ^D = $(patsubst %/,%,$(patsubst %\,%,$(dir $^)))
-# make 
-file
+# makefile
 CURDIR := d:/CAT_inGit/CAT_basic
 # default
 SHELL := sh.exe
 # environment
 WINDIR = C:\WINDOWS
 # environment
-VSCODE_NLS_CONFIG = {"locale":"zh-tw","availableLanguages":{"*":"zh-tw"},"_languagePackId":"a0b772d00248b7f5c117cab9736199be.zh-tw","_translationsConfigFile":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw\\tcf.json","_cacheRoot":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw","_resolvedLanguagePackCoreLocation":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw\\da76f93349a72022ca4670c1b84860304616aaa2","_corruptedFile":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\a0b772d00248b7f5c117cab9736199be.zh-tw\\corrupted.info","_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"zh-tw","availableLanguages":{"*":"zh-tw"},"_languagePackId":"781b7ebe22283cc49ae0f6b2a60a7843.zh-tw","_translationsConfigFile":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\781b7ebe22283cc49ae0f6b2a60a7843.zh-tw\\tcf.json","_cacheRoot":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\781b7ebe22283cc49ae0f6b2a60a7843.zh-tw","_resolvedLanguagePackCoreLocation":"C:\\ 
+Users\\Atwood\\AppData\\Roaming\\Code\\clp\\781b7ebe22283cc49ae0f6b2a60a7843.zh-tw\\da76f93349a72022ca4670c1b84860304616aaa2","_corruptedFile":"C:\\Users\\Atwood\\AppData\\Roaming\\Code\\clp\\781b7ebe22283cc49ae0f6b2a60a7843.zh-tw\\corrupted.info","_languagePackSupport":true}
 # environment
 INTEL_LICENSE_FILE = C:\Program Files (x86)\Common Files\Intel\Licenses
 # environment
@@ -83,7 +83,7 @@ ELECTRON_RUN_AS_NODE = 1
 # environment
 VS2017INSTALLDIR = C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_4548_CTPMKOAFYNVYWJIS
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_19016_ERJDTNIURHFMJACO
 # environment
 COMPUTERNAME = DESKTOP-73328GL
 # environment
@@ -101,10 +101,7 @@ USERNAME = Atwood
 # environment
 PUBLIC = C:\Users\Public
 # environment
-VSCODE_AMD_EN 
-make.exe: *** No rule to make target 'all'.  Stop.
-
-TRYPOINT = vs/workbench/api/node/extensionHostProcess
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
 VSCODE_CODE_CACHE_PATH = C:\Users\Atwood\AppData\Roaming\Code\CachedData\da76f93349a72022ca4670c1b84860304616aaa2
 # environment
@@ -121,7 +118,8 @@ VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 USERDOMAIN = DESKTOP-73328GL
 # makefile (from 'Make.CAT.mk', line 9)
 obj = main_MST_infor.o subr_maxvReal.o subr_maxvInt.o subr_minvInt.o subr_minvReal.o subr_sumReal.o subr_sumInt.o subr_aveReal.o subr_aveIntToReal.o subr_varReal.o subr_mseReal.o subr_resp.o subr_itemUsedYN.o subr_itemUsedSum.o subr_itemUsedRate.o subr_itemPoolUsedRate.o subr_testOverlap.o subr_testOmega.o subr_testPsi.o func_deltaPsi.o subr_contentCount.o subr_contentTargetP.o func_probability.o func_information.o func_normal.o func_combination.o subr_EAP.o 
-# environment
+# envi 
+ronment
 MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
@@ -178,8 +176,6 @@ SYSTEMROOT = C:\WINDOWS
 # environment
 APPDATA = C:\Users\Atwood\AppData\Roaming
 # environment
-__COMPAT_LAYER = DetectorsAppHealth
-# environment
 TEMP = C:\Users\Atwood\AppData\Local\Temp
 # environment
 COMSPEC = C:\WINDOWS\system32\cmd.exe
@@ -210,11 +206,12 @@ PROCESSOR_LEVEL = 6
 # environment
 FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
 # environment
-VSCODE_PID = 4548
+VSCODE_PID = 19016
 # environment
 USERDOMAIN_ROAMINGPROFILE = DESKTOP-73328GL
-# variable set hash-table stats:
-# Load=99/1024=10%, Rehash=0, Collisions=12/122=10%
+# variable set hash-table sta 
+ts:
+# Load=98/1024=10%, Rehash=0, Collisions=12/121=10%
 
 # Pattern-specific Variable Values
 
@@ -223,30 +220,32 @@ USERDOMAIN_ROAMINGPROFILE = DESKTOP-73328GL
 # Directories
 
 # C:\WINDOWS\System32\WindowsPowerShell\v1.0\ (key C:/WINDOWS/System32/WindowsPowerShell/v1.0/, mtime 1613723042): 32 files, no impossibilities.
-# . (key d:/CAT_inGit/CAT_basic, mtime 1658659862): 149 files, no impossibilities.
+# . (key d:/CAT_inGit/CAT_basic, mtime 1659868505): 150 files, no impossibilities.
 # C:\Program Files (x86)\dotnet\ (key C:/Program Files (x86)/dotnet/, mtime 1631632947): 8 files, no impossibilities.
 # C:\Program Files\Git\cmd (key C:/Program Files/Git/cmd, mtime 1628464926): 8 files, no impossibilities.
 # C:\WINDOWS\System32\OpenSSH\: could not be stat'd.
 # C:\MinGW\bin (key C:/MinGW/bin, mtime 1628498939): 129 files, no impossibilities.
 # C:\Users\Atwood\AppData\Roaming\Python\Python39\Scripts (key C:/Users/Atwood/AppData/Roaming/Python/Python39/Scripts, mtime 1617113555): 4 files, no impossibilities.
 # C:\Program Files\Python39\ (key C:/Program Files/Python39/, mtime 1617113688): 18 files, no impossibilities.
-# C:\WINDOWS (key C:/WINDOWS, mtime 1624866472): 113 files, no impossibilities.
+# C:\WIN 
+DOWS (key C:/WINDOWS, mtime 1624866472): 113 files, no impossibilities.
 # C:\Program Files\Python39\Scripts\ (key C:/Program Files/Python39/Scripts/, mtime 1617113694): 7 files, no impossibilities.
-# C:\Users\Atwood\AppData\Local\Microsoft\WindowsApps (key C:/Users/Atwood/AppData/Local/Microsoft/WindowsApps, mtime 1659763884): 17 files, no impossibilities.
+# C:\Users\Atwood\AppData\Local\Microsoft\WindowsApps (key C:/Users/Atwood/AppData/Local/Microsoft/WindowsApps, mtime 1661925561): 17 files, no impossibilities.
 # C:\Program Files\CMake\bin (key C:/Program Files/CMake/bin, mtime 1628499726): 7 files, no impossibilities.
 # C:\WINDOWS\System32\Wbem (key C:/WINDOWS/System32/Wbem, mtime 1657706235): 154 files, no impossibilities.
 # C:\Users\Atwood\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/Atwood/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1659777359): 4 files, no impossibilities.
-# C:\WINDOWS\system32 (key C:/WINDOWS/system32, mtime 1659093984): 2918 files, no impossibilities.
+# C:\WINDOWS\system32 (key C:/WINDOWS/system32, mtime 1661925058): 2918 files, no impossibilities.
 # C:\MinGW (key C:/MinGW, mtime 1617104233): 10 files, no impossibilities.
-# C:\Program Files\TortoiseGit\bin (key C:/Program Files/TortoiseGit/bin, mtime 1628465021): 97 files, no impossibilities.
+# C:\Program Files\TortoiseGit\bin (key C:/Program Files/TortoiseGit/bin, mtime 1628465021): 97 
+ files, no impossibilities.
 # C:\Program Files\IBM\SPSS\Statistics\25\JRE\bin (key C:/Program Files/IBM/SPSS/Statistics/25/JRE/bin, mtime 1588075173): 124 files, no impossibilities.
 
-# 3799 files, no impossibilities in 18 directories.
+# 3800 files, no impossibilities in 18 directories.
 
 # Implicit Rules
 
 %.o: %.f90
-#  recipe to execute (from 'Make.CAT.mk', line 49):
+#  recipe to execute (from 'Make.CAT.mk', line 50):
 	$(CC) $(CXXFLAGS) $^ -o $@
 
 # 1 implicit rules, 0 (0.0%) terminal.
@@ -269,7 +268,7 @@ a: main_MST_infor.o subr_maxvReal.o subr_maxvInt.o subr_minvInt.o subr_minvReal.
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Make.CAT.mk', line 45):
+#  recipe to execute (from 'Make.CAT.mk', line 46):
 	$(CC) -o $(exe) $(obj)
 
 # Not a target:
@@ -280,8 +279,9 @@ subr_sumInt.o:
 
 # Not a target:
 Make.CAT.mk:
-#  Implicit rule search has been done.
-#  Last modified 2022-07-24 15:49:03
+#  Implicit rule search has been done 
+.
+#  Last modified 2022-08-07 18:33:42
 #  File has been updated.
 #  Successfully updated.
 
@@ -347,7 +347,8 @@ subr_itemPoolUsedRate.o:
 #  File has not been updated.
 
 # Not a target:
-func_probability.o:
+func_pro 
+bability.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -416,7 +417,7 @@ run:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Make.CAT.mk', line 60):
+#  recipe to execute (from 'Make.CAT.mk', line 61):
 	make
 	./a.exe
 
@@ -425,7 +426,7 @@ clean:
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
-#  recipe to execute (from 'Make.CAT.mk', line 55):
+#  recipe to execute (from 'Make.CAT.mk', line 56):
 	del -file *.exe *.o *.txt
 
 # Not a target:
@@ -473,7 +474,8 @@ func_deltaPsi.o:
 # Not a target:
 subr_itemUsedSum.o:
 #  Implicit rule search has not been done.
-#  Modification time never checked.
+#  Modification time never ch 
+ecked.
 #  File has not been updated.
 
 # files hash-table stats:
@@ -484,14 +486,17 @@ subr_itemUsedSum.o:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 7 (6) / strings = 3709 / storage = 56301 B / avg = 15 B
+# strcache buffers: 7 (6) / strings = 3710 / storage = 56337 B / avg = 15 B
 # current buf: size = 8174 B / used = 7319 B / count = 518 / avg = 14 B
-# other used: total = 48127 B / count = 3191 / avg = 15 B
-# other free: total = 62 B / max = 14 B / min = 8 B / avg = 10 B
+# other used: total = 48163 B / count = 3192 / avg = 15 B
+# other free: total = 26 B / max = 8 B / min = 1 B / avg = 4 B
 
-# strcache performance: lookups = 3863 / hit rate = 3%
+# strcache performance: lookups =  
+3864 / hit rate = 3%
 # hash-table stats:
-# Load=3709/8192=45%, Rehash=0, Collisions=1353/3863=35%
-# Finished Make data base on Sun Aug 07 06:17:28 2022
+# Load=3710/8192=45%, Rehash=0, Collisions=1348/3864=35%
+# Finished Make data base on Sat Sep 03 21:18:30 2022
 
  
+make.exe: *** No rule to make target 'all'.  Stop.
+
