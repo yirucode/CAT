@@ -7,11 +7,11 @@ program CAT_contentControl
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 40 !作答題長
+    integer,parameter :: length = 20 !作答題長 !20 40
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
-    integer :: contentTarget(numContentType) = (/16,16,8/)
+    integer :: contentTarget(numContentType) = (/16,16,8/) !8,8,4  16,16,8  
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
@@ -81,6 +81,13 @@ program CAT_contentControl
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! item pool 的相關資料紀錄 ===
     real :: poolUsedRate
+    ! infor note
+    real, dimension(length, numTest):: choose_inforTrue
+    real, dimension(length, numTest):: choose_inforEstimate
+    real, dimension(numTest):: choose_inforTrueSum
+    real, dimension(numTest):: choose_inforEstimateSum
+    real :: testMean_inforTrue
+    real :: testMean_inforEstimate
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
@@ -234,27 +241,47 @@ program CAT_contentControl
     call subr_varReal(psiOne(2:numTest), numTest-1, psiOneVar)
     call subr_varReal(psiTwo(3:numTest), numTest-2, psiTwoVar)
     call subr_varReal(psiThree(4:numTest), numTest-3, psiThreeVar)
+    ! mean of infor 計算
+    do i = 1, numTest
+        do j = 1, length
+            choose_inforTrue(j,i) = information(thetaTrue(i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforEstimate(j,i) = information(thetaHat(length,i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforTrueSum(i) = choose_inforTrueSum(i) + choose_inforTrue(j,i)
+            choose_inforEstimateSum(i) = choose_inforEstimateSum(i) + choose_inforEstimate(j,i)
+        enddo
+    enddo
+    call subr_aveReal(choose_inforTrueSum, numTest, testMean_inforTrue)
+    call subr_aveReal(choose_inforEstimateSum, numTest, testMean_inforEstimate)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A10,A)') "method = ", " CAT with content balance"
-    write(unit = 100, fmt = '(A10,F10.5)') "time = ", t2-t1
-    write(unit = 100, fmt = '(A10,I10)') "test n = ", numTest
-    write(unit = 100, fmt = '(A10,I10)') "pool n = ", numPool
-    write(unit = 100, fmt = '(A10,I10)') "length = ", length
-    write(unit = 100, fmt = '(/,A)') "About thetaHat: "
-    write(unit = 100, fmt = '(A10, F10.5)') "Mean = ", thetaHatMean
-    write(unit = 100, fmt = '(A10, F10.5)') "Bias = ", thetaBias
-    write(unit = 100, fmt = '(A10, F10.5)') "Var = ", thetaHatVar
-    write(unit = 100, fmt = '(A10, F10.5)') "MSE = ", thetaHatMSE
-    write(unit = 100, fmt = '(A10, F10.5)') "RMSE = ", thetaHatMSE**0.5
-    write(unit = 100, fmt = '(/,A)') "About item used rate: "
-    write(unit = 100, fmt = '(A10, F10.5)') "max = ", usedRateMax
-    write(unit = 100, fmt = '(A10, F10.5)') "mean = ", usedRateMean
-    write(unit = 100, fmt = '(A10, F10.5)') "var = ", usedRateVar
-    write(unit = 100, fmt = '(/,A)') "About pool used: "
-    write(unit = 100, fmt = '(A10, F10.5)') "Rate = ", poolUsedRate
-    write(unit = 100, fmt = '(/,A)') "About test overlap: "
-    write(unit = 100, fmt = '(A10, F10.5)') "overlap = ", testOverlap
+    write(unit = 100, fmt = '(A)') "CAT_with_content_balance"
+    write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
+    write(unit = 100, fmt = '(A10,I10)') "test_n", numTest
+    write(unit = 100, fmt = '(A10,I10)') "pool_n", numPool
+    write(unit = 100, fmt = '(A10,I10)') "length", length
+    write(unit = 100, fmt = '(/,A)') "ThetaHat_of_Estimates: "
+    write(unit = 100, fmt = '(A10, F10.5)') "Mean", thetaHatMean
+    write(unit = 100, fmt = '(A10, F10.5)') "Bias", thetaBias
+    write(unit = 100, fmt = '(A10, F10.5)') "Var", thetaHatVar
+    write(unit = 100, fmt = '(A10, F10.5)') "MSE", thetaHatMSE
+    write(unit = 100, fmt = '(A10, F10.5)') "RMSE", thetaHatMSE**0.5
+    write(unit = 100, fmt = '(/,A)') "Item_Exposure_Ratee: "
+    write(unit = 100, fmt = '(A10, F10.5)') "max", usedRateMax
+    write(unit = 100, fmt = '(A10, F10.5)') "mean", usedRateMean
+    write(unit = 100, fmt = '(A10, F10.5)') "var", usedRateVar
+    write(unit = 100, fmt = '(/,A)') "Pool_Used: "
+    write(unit = 100, fmt = '(A10, F10.5)') "Rate", poolUsedRate
+    write(unit = 100, fmt = '(/,A)') "Test_Overlap: "
+    write(unit = 100, fmt = '(A10, F10.5)') "overlap", testOverlap
+    write(unit = 100, fmt = '(/,A)') "Mean_of_Infor: "
+    write(unit = 100, fmt = '(A10, F10.5)') "True", testMean_inforTrue
+    write(unit = 100, fmt = '(A10, F10.5)') "Estimate", testMean_inforEstimate
+    write(unit = 100, fmt = '(/,A)') "Psi_max"
+    write(unit = 100, fmt = '(A10, F10.5)') "Set", 1.0
+    write(unit = 100, fmt = '(A10, I10)') "alpha", 1
+    write(unit = 100, fmt = '(A10, F10.5)') "Max_1", psiOneMax
+    write(unit = 100, fmt = '(A10, F10.5)') "Max_2", psiTwoMax
+    write(unit = 100, fmt = '(A10, F10.5)') "Max_3", psiThreeMax
     close(100)
     ! == theta hat ==
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
@@ -320,21 +347,16 @@ program CAT_contentControl
     close(100)
     ! == Omega & Psi ==
     open(unit = 100 , file = 'ListCAT_testOmega&Psi.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(6A10)') "Omega 1", "Omega 2", "Omega 3", "Psi 1", "Psi 2", "Psi 3"
-    write(unit = 100, fmt = '(A)') "Mean = "
-    write(unit = 100, fmt = '(6F10.5)') omegaOneMean, omegaTwoMean, omegaThreeMean,&
+    write(unit = 100, fmt = '(7A10)') "Stat.", "Omega1", "Omega2", "Omega3", "Psi1", "Psi2", "Psi3"
+    write(unit = 100, fmt = '(A10,6F10.5)') "Mean", omegaOneMean, omegaTwoMean, omegaThreeMean,&
     psiOneMean, psiTwoMean, psiThreeMean
-    write(unit = 100, fmt = '(A)') "Max = "
-    write(unit = 100, fmt = '(6F10.5)') omegaOneMax, omegaTwoMax, omegaThreeMax,&
+    write(unit = 100, fmt = '(A10,6F10.5)') "Max", omegaOneMax, omegaTwoMax, omegaThreeMax,&
     psiOneMax, psiTwoMax, psiThreeMax
-    write(unit = 100, fmt = '(A)') "Min = "
-    write(unit = 100, fmt = '(6F10.5)') omegaOneMin, omegaTwoMin, omegaThreeMin,&
+    write(unit = 100, fmt = '(A10,6F10.5)') "Min", omegaOneMin, omegaTwoMin, omegaThreeMin,&
     psiOneMin, psiTwoMin, psiThreeMin
-    write(unit = 100, fmt = '(A)') "SD = "
-    write(unit = 100, fmt = '(6F10.5)') omegaOneVar**0.5, omegaTwoVar**0.5, omegaThreeVar**0.5,&
+    write(unit = 100, fmt = '(A10,6F10.5)') "SD", omegaOneVar**0.5, omegaTwoVar**0.5, omegaThreeVar**0.5,&
     psiOneVar**0.5, psiTwoVar**0.5, psiThreeVar**0.5
-    write(unit = 100, fmt = '(A)') "Last = "
-    write(unit = 100, fmt = '(6F10.5)') omegaOne(numTest), omegaTwo(numTest), omegaThree(numTest),&
+    write(unit = 100, fmt = '(A10,6F10.5)') "Last", omegaOne(numTest), omegaTwo(numTest), omegaThree(numTest),&
     psiOne(numTest), psiTwo(numTest), psiThree(numTest)
     write(unit = 100, fmt = '(/,A)') "data = "
     do i=1,numTest

@@ -1,31 +1,27 @@
- method =  MST infor
-   time =    4.68750
- test n =      10000
- pool n =        200
- length =         40
+CAT_with_content_balance
+      time  12.21875
+    test_n     10000
+    pool_n       300
+    length        20
 
-About thetaHat: 
-   Mean =    0.04942
-   Bias =    0.04518
-    Var =    2.36418
-    MSE =    0.13057
-   RMSE =    0.36135
+ThetaHat_of_Estimates: 
+      Mean   0.00641
+      Bias   0.00219
+       Var   0.91455
+       MSE   0.08325
+      RMSE   0.28853
 
-About item used rate: 
-    max =    0.38620
-   mean =    0.20000
-    var =    0.00436
+Item_Exposure_Ratee: 
+       max   0.78190
+      mean   0.06667
+       var   0.01974
 
-About pool used: 
-   Rate =    1.00000
+Pool_Used: 
+      Rate   0.47667
 
-About test overlap: 
-overlap =    0.22174
+Test_Overlap: 
+   overlap   0.36275
 
-About original item used rate: 
-    max =    0.38620
-   mean =    0.13333
-    var =    0.01180
-
-About original pool used: 
-   Rate =    0.66667
+Mean_of_Infor: 
+      True  12.96800
+  Estimate  13.62963

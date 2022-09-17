@@ -7,13 +7,13 @@ program CAT
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 20 !作答題長
+    integer,parameter :: length = 40 !作答題長 !40 !20
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
     !integer :: contentGoal_before
     integer :: contentAgain = 0
-    integer :: contentTarget(numContentType) = (/8,8,4/) !16,16,8
+    integer :: contentTarget(numContentType) = (/16,16,8/) !16,16,8 !8,8,4
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
@@ -80,7 +80,7 @@ program CAT
     real:: psiOneMin, psiTwoMin, psiThreeMin
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
-    integer:: alpha = 2
+    integer:: alpha = 1
     real:: psiMax = 0.1
     ! 因應alpha>1
     integer,dimension(3)::alphaSet
@@ -102,6 +102,10 @@ program CAT
     real::thetaHatMSE !估計能力值的MSE
     ! item pool 的相關資料紀錄 ===
     real :: poolUsedRate
+    ! infor note
+    real, dimension(length, numTest):: choose_infor
+    real, dimension(numTest):: choose_inforMean
+    real :: testMean_infor
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
@@ -361,29 +365,44 @@ program CAT
     call subr_varReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneVar)
     call subr_varReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoVar)
     call subr_varReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeVar)
+    ! mean of infor 計算
+    do i = 1, numTest
+        do j = 1, length
+            choose_infor(j,i) = information(thetaTrue(i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+        enddo
+        call subr_aveReal(choose_infor(:,i), length, choose_inforMean(i))
+    enddo
+    call subr_aveReal(choose_inforMean, numTest, testMean_infor)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A10,A)') "method = ", " CAT with Psi + con"
-    write(unit = 100, fmt = '(A10,F10.5)') "time = ", t2-t1
-    write(unit = 100, fmt = '(A10,I10)') "test n = ", numTest
-    write(unit = 100, fmt = '(A10,I10)') "pool n = ", numPool
-    write(unit = 100, fmt = '(A10,I10)') "length = ", length
-    write(unit = 100, fmt = '(A10,F10.5)') "psi max = ", psiMax ! 增加Psi的設定指標
-    write(unit = 100, fmt = '(A10,I10)') "alpha = ", alpha ! 增加Psi的設定指標
-    write(unit = 100, fmt = '(/,A)') "About thetaHat: "
-    write(unit = 100, fmt = '(A10, F10.5)') "Mean = ", thetaHatMean
-    write(unit = 100, fmt = '(A10, F10.5)') "Bias = ", thetaBias
-    write(unit = 100, fmt = '(A10, F10.5)') "Var = ", thetaHatVar
-    write(unit = 100, fmt = '(A10, F10.5)') "MSE = ", thetaHatMSE
-    write(unit = 100, fmt = '(A10, F10.5)') "RMSE = ", thetaHatMSE**0.5
-    write(unit = 100, fmt = '(/,A)') "About item used rate: "
-    write(unit = 100, fmt = '(A10, F10.5)') "max = ", usedRateMax
-    write(unit = 100, fmt = '(A10, F10.5)') "mean = ", usedRateMean
-    write(unit = 100, fmt = '(A10, F10.5)') "var = ", usedRateVar
-    write(unit = 100, fmt = '(/,A)') "About pool used: "
-    write(unit = 100, fmt = '(A10, F10.5)') "Rate = ", poolUsedRate
-    write(unit = 100, fmt = '(/,A)') "About test overlap: "
-    write(unit = 100, fmt = '(A10, F10.5)') "overlap = ", testOverlap
+    write(unit = 100, fmt = '(A)') "CAT_with_Psi&con"
+    write(unit = 100, fmt = '(A10,I10)') "stages", 1
+    write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
+    write(unit = 100, fmt = '(A10,I10)') "test_n", numTest
+    write(unit = 100, fmt = '(A10,I10)') "pool_n", numPool
+    write(unit = 100, fmt = '(A10,I10)') "length", length
+    write(unit = 100, fmt = '(/,A)') "ThetaHat_of_Estimates: "
+    write(unit = 100, fmt = '(A10, F10.5)') "Mean", thetaHatMean
+    write(unit = 100, fmt = '(A10, F10.5)') "Bias", thetaBias
+    write(unit = 100, fmt = '(A10, F10.5)') "Var", thetaHatVar
+    write(unit = 100, fmt = '(A10, F10.5)') "MSE", thetaHatMSE
+    write(unit = 100, fmt = '(A10, F10.5)') "RMSE", thetaHatMSE**0.5
+    write(unit = 100, fmt = '(/,A)') "Item_Exposure_Ratee: "
+    write(unit = 100, fmt = '(A10, F10.5)') "max", usedRateMax
+    write(unit = 100, fmt = '(A10, F10.5)') "mean", usedRateMean
+    write(unit = 100, fmt = '(A10, F10.5)') "var", usedRateVar
+    write(unit = 100, fmt = '(/,A)') "Pool_Used: "
+    write(unit = 100, fmt = '(A10, F10.5)') "Rate", poolUsedRate
+    write(unit = 100, fmt = '(/,A)') "Test_Overlap: "
+    write(unit = 100, fmt = '(A10, F10.5)') "overlap", testOverlap
+    write(unit = 100, fmt = '(/,A)') "Infor_of_Truetheta: "
+    write(unit = 100, fmt = '(A10, F10.5)') "Mean", testMean_infor
+    write(unit = 100, fmt = '(/,A)') "Psi_max"
+    write(unit = 100, fmt = '(A10, F10.5)') "Set", psiMax !Psi的設定指標
+    write(unit = 100, fmt = '(A10, I10)') "alpha", alpha !Psi的設定指標
+    write(unit = 100, fmt = '(A10, F10.5)') "Max_1", psiOneMax
+    write(unit = 100, fmt = '(A10, F10.5)') "Max_2", psiTwoMax
+    write(unit = 100, fmt = '(A10, F10.5)') "Max_3", psiThreeMax
     close(100)
     ! == theta hat ==
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
