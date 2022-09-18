@@ -11,10 +11,10 @@ program OMST_cont_Psi
     integer,parameter :: numContentType = 3
     ! === module set ===
     integer :: contentScale(numContentType) = (/2,2,1/)
-    integer :: contentMultiplier = 1
+    integer :: contentMultiplier = 2
     ! === OMST set ===
     integer :: usedStages
-    integer,parameter :: numStages = 4
+    integer,parameter :: numStages = 2
     integer :: realChoose
     ! === content target ===
     integer :: contentGoal
@@ -105,6 +105,8 @@ program OMST_cont_Psi
     real, dimension(numTest):: choose_inforEstimateSum
     real :: testMean_inforTrue
     real :: testMean_inforEstimate
+    !  判斷題庫是否有試題可選 
+    integer :: count_InforZero
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
@@ -200,8 +202,8 @@ program OMST_cont_Psi
 
                 else
 
-                    ! 設定Psi控制
-                    deltaCriteria(usedStages, try) = func_deltaPsi(try,alpha,psiMax,1)
+                    count_InforZero = 0
+                    deltaCriteria(usedStages, try) = func_deltaPsi(try,alpha,psiMax,1) ! 設定Psi控制
                     ! 計算訊息量
                     if ( usedStages == 1 ) then                
                         do i = 1, numPool
@@ -210,6 +212,7 @@ program OMST_cont_Psi
                                 infor(i) = information(thetaBegin, a(i), b(i), c(i))
                             else
                                 infor(i) = 0
+                                count_InforZero = count_InforZero + 1 
                             endif
                         enddo
                     else
@@ -219,8 +222,33 @@ program OMST_cont_Psi
                                 infor(i) = information(thetaHat(usedStages-1, try), a(i), b(i), c(i))
                             else
                                 infor(i) = 0
+                                count_InforZero = count_InforZero + 1 
                             endif
                         enddo
+                    endif
+
+                    if (count_InforZero == numPool) then 
+                        WRITE(*,*) "no item can be used"
+                        WRITE(*,*) "try = ", try
+                        WRITE(*,*) "choose = ", choose
+                        ! 寫下問題資料細節
+                        open(unit = 100 , file = 'ListCAT_debug.txt' , status = 'replace', action = 'write', iostat= ierror)
+                        write(unit = 100, fmt = *) "try = ", try
+                        write(unit = 100, fmt = *) "choose = ", choose
+                        write(unit = 100, fmt = *) "contentGoal = ", "Nan"
+                        write(unit = 100, fmt = *) "eta Criteria = ", deltaCriteria(choose, try)
+                        write(unit = 100, fmt = *) "item ID = "
+                        write(unit = 100, fmt = dataPool) (j, j=1,numPool)
+                        write(unit = 100, fmt = *) "item content = "
+                        write(unit = 100, fmt = dataPool) (content(j), j=1,numPool)
+                        write(unit = 100, fmt = *) "item used = "
+                        write(unit = 100, fmt = dataPool) (usedPool(j,try),j=1,numPool)
+                        write(unit = 100, fmt = *) "item used sum = "
+                        write(unit = 100, fmt = dataPool) (usedSum(j,try-1)+1,j=1,numPool)
+                        write(unit = 100, fmt = *) "eta = "
+                        write(unit = 100, fmt = dataPoolFS) (eta(j,try),j=1,numPool)
+                        close(100)
+                        stop ! 如果沒題目可選，則結束程式
                     endif
                 endif
 

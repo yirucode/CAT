@@ -5,7 +5,7 @@ program CA_MST
     character(len = 50), parameter :: dataPath = "data/parameter_MST_len10.txt" !len5 len10 len20 len10
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"  !Normal Uniform
     ! === MST set ===
-    integer,parameter :: numStages = 4 !4 2 2 4
+    integer,parameter :: numStages = 2 !4 2 2 4
     integer,parameter :: maxLevel = 3 !3
     integer, parameter :: numModuleInLevel = 10 !20 10 5 10
     integer, parameter :: maxModule = maxLevel*numModuleInLevel

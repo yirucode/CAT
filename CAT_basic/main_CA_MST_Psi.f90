@@ -2,14 +2,14 @@ program MST
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_30.txt" !15 30 60
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_60.txt" !15 30 60
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"
     ! === MST set ===
-    integer, parameter :: numStages = 2
+    integer, parameter :: numStages = 4
     integer, parameter :: maxLevel = 3
-    integer, parameter :: numModuleInLevel = 10 !5 10 20
+    integer, parameter :: numModuleInLevel = 20 !5 10 20
     integer, parameter :: maxModule = maxLevel*numModuleInLevel
-    integer, parameter :: numItemInModule = 10 !20 10 5
+    integer, parameter :: numItemInModule = 5 !20 10 5
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數 300 !324
@@ -64,7 +64,7 @@ program MST
     real:: testOverlapData
     real:: testOverlap
     ! Psi 控制參數 
-    integer:: alpha = 3
+    integer:: alpha = 2
     real:: psiMax = 0.1
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
