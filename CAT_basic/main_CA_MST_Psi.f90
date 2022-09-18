@@ -2,14 +2,14 @@ program MST
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_15.txt" !15 30 60
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_30.txt" !15 30 60
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"
     ! === MST set ===
     integer, parameter :: numStages = 2
     integer, parameter :: maxLevel = 3
-    integer, parameter :: numModuleInLevel = 5 !5 10 20
+    integer, parameter :: numModuleInLevel = 10 !5 10 20
     integer, parameter :: maxModule = maxLevel*numModuleInLevel
-    integer, parameter :: numItemInModule = 20 !20 10 5
+    integer, parameter :: numItemInModule = 10 !20 10 5
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數 300 !324
@@ -64,8 +64,8 @@ program MST
     real:: testOverlapData
     real:: testOverlap
     ! Psi 控制參數 
-    integer:: alpha = 1
-    real:: psiMax = 0.2
+    integer:: alpha = 3
+    real:: psiMax = 0.1
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
     real, dimension(length, numTest):: deltaCriteria
@@ -99,9 +99,14 @@ program MST
     ! item pool 的相關資料紀錄 ===
     real :: poolUsedRate
     ! infor note
-    real, dimension(length, numTest):: choose_infor
-    real, dimension(numTest):: choose_inforMean
-    real :: testMean_infor
+    real, dimension(length, numTest):: choose_inforTrue
+    real, dimension(length, numTest):: choose_inforEstimate
+    real, dimension(numTest):: choose_inforTrueSum
+    real, dimension(numTest):: choose_inforEstimateSum
+    real :: testMean_inforTrue
+    real :: testMean_inforEstimate
+    ! 判斷題庫是否有試題可選 
+    integer :: count_InforZero
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
@@ -144,11 +149,9 @@ program MST
             do i=1,numPool 
                 eta(i,try) = combination(try-(usedSum(i,try-1)+1),alpha) !mit=0 !選出符合條件者 予以施測
             enddo
-
         endif
-
+        
         do  choose = 1, numStages
-
             if (try <= alpha) then 
                 if (choose == 1) then 
                     do i = 1, numPool
@@ -160,18 +163,20 @@ program MST
                             infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
                         else
                             infor(i) = 0
+                            
                         endif
                     enddo
                 endif
             else
-                ! 設定Psi控制
-                deltaCriteria(choose, try) = func_deltaPsi(try,alpha,psiMax,1)
+                count_InforZero = 0
+                deltaCriteria(choose, try) = func_deltaPsi(try,alpha,psiMax,1) ! 設定Psi控制
                 if (choose == 1) then 
                     do i = 1, numPool
                         if (eta(i,try) >= deltaCriteria(choose, try)) then
                             infor(i) = information(thetaBegin, a(i), b(i), c(i))
                         else
                             infor(i) = 0
+                            count_InforZero = count_InforZero + 1 
                         endif
                     enddo
                 else
@@ -180,8 +185,33 @@ program MST
                             infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
                         else
                             infor(i) = 0
+                            count_InforZero = count_InforZero + 1 
                         endif
                     enddo
+                endif
+
+                if (count_InforZero == numPool) then 
+                    WRITE(*,*) "no item can be used"
+                    WRITE(*,*) "try = ", try
+                    WRITE(*,*) "choose = ", choose
+                    ! 寫下問題資料細節
+                    open(unit = 100 , file = 'ListCAT_debug.txt' , status = 'replace', action = 'write', iostat= ierror)
+                    write(unit = 100, fmt = *) "try = ", try
+                    write(unit = 100, fmt = *) "choose = ", choose
+                    write(unit = 100, fmt = *) "contentGoal = ", "Nan"
+                    write(unit = 100, fmt = *) "eta Criteria = ", deltaCriteria(choose, try)
+                    write(unit = 100, fmt = *) "item ID = "
+                    write(unit = 100, fmt = dataPool) (j, j=1,numPool)
+                    write(unit = 100, fmt = *) "item content = "
+                    write(unit = 100, fmt = dataPool) (content(j), j=1,numPool)
+                    write(unit = 100, fmt = *) "item used = "
+                    write(unit = 100, fmt = dataPool) (usedPool(j,try),j=1,numPool)
+                    write(unit = 100, fmt = *) "item used sum = "
+                    write(unit = 100, fmt = dataPool) (usedSum(j,try-1)+1,j=1,numPool)
+                    write(unit = 100, fmt = *) "eta = "
+                    write(unit = 100, fmt = dataPoolFS) (eta(j,try),j=1,numPool)
+                    close(100)
+                    stop ! 如果沒題目可選，則結束程式
                 endif
             endif
 
@@ -299,14 +329,17 @@ program MST
     ! mean of infor 計算
     do i = 1, numTest
         do j = 1, length
-            choose_infor(j,i) = information(thetaTrue(i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforTrue(j,i) = information(thetaTrue(i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforEstimate(j,i) = information(thetaHat(numStages,i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforTrueSum(i) = choose_inforTrueSum(i) + choose_inforTrue(j,i)
+            choose_inforEstimateSum(i) = choose_inforEstimateSum(i) + choose_inforEstimate(j,i)
         enddo
-        call subr_aveReal(choose_infor(:,i), length, choose_inforMean(i))
     enddo
-    call subr_aveReal(choose_inforMean, numTest, testMean_infor)
+    call subr_aveReal(choose_inforTrueSum, numTest, testMean_inforTrue)
+    call subr_aveReal(choose_inforEstimateSum, numTest, testMean_inforEstimate)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A)') "MST+Psi"
+    write(unit = 100, fmt = '(A)') "CA-MST_Psi"
     write(unit = 100, fmt = '(A10,I10)') "stages", numStages
     write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test_n", numTest
@@ -326,8 +359,9 @@ program MST
     write(unit = 100, fmt = '(A10, F10.5)') "Rate", poolUsedRate
     write(unit = 100, fmt = '(/,A)') "Test_Overlap: "
     write(unit = 100, fmt = '(A10, F10.5)') "overlap", testOverlap
-    write(unit = 100, fmt = '(/,A)') "Infor_of_Truetheta: "
-    write(unit = 100, fmt = '(A10, F10.5)') "Mean", testMean_infor
+    write(unit = 100, fmt = '(/,A)') "Mean_of_Infor: "
+    write(unit = 100, fmt = '(A10, F10.5)') "True", testMean_inforTrue
+    write(unit = 100, fmt = '(A10, F10.5)') "Estimate", testMean_inforEstimate
     write(unit = 100, fmt = '(/,A)') "Psi_max"
     write(unit = 100, fmt = '(A10, F10.5)') "Set", psiMax
     write(unit = 100, fmt = '(A10, I10)') "alpha", alpha

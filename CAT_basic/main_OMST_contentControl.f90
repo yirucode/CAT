@@ -7,14 +7,14 @@ program OMST_contentControl
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 40 !作答題長
+    integer,parameter :: length = 40 !作答題長 20 20 40 40
     integer,parameter :: numContentType = 3
     ! === module set ===
     integer :: contentScale(numContentType) = (/2,2,1/)
-    integer :: contentMultiplier = 2
+    integer :: contentMultiplier = 2 !2 1 4 2
     ! === OMST set ===
     integer :: usedStages
-    integer,parameter :: numStages = 4
+    integer,parameter :: numStages = 4 !2 4 2 4
     integer :: realChoose
     ! === content target ===
     integer :: contentGoal
@@ -87,9 +87,12 @@ program OMST_contentControl
     real:: psiOneMin, psiTwoMin, psiThreeMin
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! infor note
-    real, dimension(length, numTest):: choose_infor
-    real, dimension(numTest):: choose_inforMean
-    real :: testMean_infor
+    real, dimension(length, numTest):: choose_inforTrue
+    real, dimension(length, numTest):: choose_inforEstimate
+    real, dimension(numTest):: choose_inforTrueSum
+    real, dimension(numTest):: choose_inforEstimateSum
+    real :: testMean_inforTrue
+    real :: testMean_inforEstimate
     ! item pool 的相關資料紀錄 ===
     real :: poolUsedRate
     ! === 存取時間 ===
@@ -259,11 +262,14 @@ program OMST_contentControl
     ! mean of infor 計算
     do i = 1, numTest
         do j = 1, length
-            choose_infor(j,i) = information(thetaTrue(i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforTrue(j,i) = information(thetaTrue(i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforEstimate(j,i) = information(thetaHat(numStages,i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforTrueSum(i) = choose_inforTrueSum(i) + choose_inforTrue(j,i)
+            choose_inforEstimateSum(i) = choose_inforEstimateSum(i) + choose_inforEstimate(j,i)
         enddo
-        call subr_aveReal(choose_infor(:,i), length, choose_inforMean(i))
     enddo
-    call subr_aveReal(choose_inforMean, numTest, testMean_infor)
+    call subr_aveReal(choose_inforTrueSum, numTest, testMean_inforTrue)
+    call subr_aveReal(choose_inforEstimateSum, numTest, testMean_inforEstimate)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "OMST_with_content_balance"
@@ -286,8 +292,9 @@ program OMST_contentControl
     write(unit = 100, fmt = '(A10, F10.5)') "Rate", poolUsedRate
     write(unit = 100, fmt = '(/,A)') "Test_Overlap: "
     write(unit = 100, fmt = '(A10, F10.5)') "overlap", testOverlap
-    write(unit = 100, fmt = '(/,A)') "Infor_of_Truetheta: "
-    write(unit = 100, fmt = '(A10, F10.5)') "Mean", testMean_infor
+    write(unit = 100, fmt = '(/,A)') "Mean_of_Infor: "
+    write(unit = 100, fmt = '(A10, F10.5)') "True", testMean_inforTrue
+    write(unit = 100, fmt = '(A10, F10.5)') "Estimate", testMean_inforEstimate
     write(unit = 100, fmt = '(/,A)') "Psi_max"
     write(unit = 100, fmt = '(A10, F10.5)') "Set", 1.0
     write(unit = 100, fmt = '(A10, I10)') "alpha", 1

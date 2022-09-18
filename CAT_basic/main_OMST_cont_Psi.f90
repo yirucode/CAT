@@ -99,9 +99,12 @@ program OMST_cont_Psi
     ! item pool 的相關資料紀錄 ===
     real :: poolUsedRate
     ! infor note
-    real, dimension(length, numTest):: choose_infor
-    real, dimension(numTest):: choose_inforMean
-    real :: testMean_infor
+    real, dimension(length, numTest):: choose_inforTrue
+    real, dimension(length, numTest):: choose_inforEstimate
+    real, dimension(numTest):: choose_inforTrueSum
+    real, dimension(numTest):: choose_inforEstimateSum
+    real :: testMean_inforTrue
+    real :: testMean_inforEstimate
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
@@ -328,11 +331,14 @@ program OMST_cont_Psi
     ! mean of infor 計算
     do i = 1, numTest
         do j = 1, length
-            choose_infor(j,i) = information(thetaTrue(i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforTrue(j,i) = information(thetaTrue(i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforEstimate(j,i) = information(thetaHat(numStages,i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
+            choose_inforTrueSum(i) = choose_inforTrueSum(i) + choose_inforTrue(j,i)
+            choose_inforEstimateSum(i) = choose_inforEstimateSum(i) + choose_inforEstimate(j,i)
         enddo
-        call subr_aveReal(choose_infor(:,i), length, choose_inforMean(i))
     enddo
-    call subr_aveReal(choose_inforMean, numTest, testMean_infor)
+    call subr_aveReal(choose_inforTrueSum, numTest, testMean_inforTrue)
+    call subr_aveReal(choose_inforEstimateSum, numTest, testMean_inforEstimate)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "OMST+cont+Psi"
@@ -355,8 +361,9 @@ program OMST_cont_Psi
     write(unit = 100, fmt = '(A10, F10.5)') "Rate", poolUsedRate
     write(unit = 100, fmt = '(/,A)') "Test_Overlap: "
     write(unit = 100, fmt = '(A10, F10.5)') "overlap", testOverlap
-    write(unit = 100, fmt = '(/,A)') "Infor_of_Truetheta: "
-    write(unit = 100, fmt = '(A10, F10.5)') "Mean", testMean_infor
+    write(unit = 100, fmt = '(/,A)') "Mean_of_Infor: "
+    write(unit = 100, fmt = '(A10, F10.5)') "True", testMean_inforTrue
+    write(unit = 100, fmt = '(A10, F10.5)') "Estimate", testMean_inforEstimate
     write(unit = 100, fmt = '(/,A)') "Psi_max"
     write(unit = 100, fmt = '(A10, F10.5)') "Set", psiMax
     write(unit = 100, fmt = '(A10, I10)') "alpha", alpha

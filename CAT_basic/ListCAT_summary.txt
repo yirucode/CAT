@@ -1,27 +1,35 @@
-CAT_with_content_balance
-      time  12.21875
+CA-MST_Psi
+    stages         2
+      time   1.87500
     test_n     10000
     pool_n       300
     length        20
 
 ThetaHat_of_Estimates: 
-      Mean   0.00641
-      Bias   0.00219
-       Var   0.91455
-       MSE   0.08325
-      RMSE   0.28853
+      Mean   0.00180
+      Bias  -0.00243
+       Var   0.84862
+       MSE   0.15332
+      RMSE   0.39156
 
 Item_Exposure_Ratee: 
-       max   0.78190
+       max   0.11210
       mean   0.06667
-       var   0.01974
+       var   0.00263
 
 Pool_Used: 
-      Rate   0.47667
+      Rate   0.73333
 
 Test_Overlap: 
-   overlap   0.36275
+   overlap   0.10600
 
 Mean_of_Infor: 
-      True  12.96800
-  Estimate  13.62963
+      True   6.37735
+  Estimate   6.65979
+
+Psi_max
+       Set   0.30000
+     alpha         3
+     Max_1   0.11208
+     Max_2   0.21162
+     Max_3   0.30000
