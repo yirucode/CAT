@@ -1,35 +1,35 @@
-CA_MST
-    stages         2
-      time   1.90625
+CAT_with_Psi&con
+    stages         1
+      time  43.09375
     test_n     10000
     pool_n       300
-    length        20
+    length        40
 
 ThetaHat_of_Estimates: 
-      Mean   0.00587
-      Bias   0.00165
-       Var   0.86213
-       MSE   0.13334
-      RMSE   0.36515
+      Mean  -0.00032
+      Bias  -0.00455
+       Var   0.93701
+       MSE   0.07422
+      RMSE   0.27244
 
 Item_Exposure_Ratee: 
-       max   1.00000
-      mean   0.06667
-       var   0.03531
+       max   0.20000
+      mean   0.13333
+       var   0.00654
 
 Pool_Used: 
-      Rate   0.30000
+      Rate   0.94333
 
 Test_Overlap: 
-   overlap   0.59629
+   overlap   0.18232
 
 Mean_of_Infor: 
-      True   7.78359
-  Estimate   8.09539
+      True  16.72860
+  Estimate  17.12436
 
 Psi_max
-       Set   1.00000
+       Set   0.20000
      alpha         1
-     Max_1   0.83333
-     Max_2   0.96667
-     Max_3   1.00000
+     Max_1   0.20000
+     Max_2   0.37778
+     Max_3   0.53333

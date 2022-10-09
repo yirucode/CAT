@@ -95,6 +95,13 @@ program CA_MST
     real, dimension(numTest):: choose_inforEstimateSum
     real :: testMean_inforTrue
     real :: testMean_inforEstimate
+    ! infor note
+    real, dimension(length, numTest):: choose_inforTrue
+    real, dimension(length, numTest):: choose_inforEstimate
+    real, dimension(numTest):: choose_inforTrueSum
+    real, dimension(numTest):: choose_inforEstimateSum
+    real :: testMean_inforTrue
+    real :: testMean_inforEstimate
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
