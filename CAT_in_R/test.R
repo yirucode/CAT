@@ -2,7 +2,7 @@ install.packages("xxIRT")
 install.packages("dplyr")
 library(xxIRT)
 library(dplyr)
-pool <- read.table("parameter.txt", header=T)
+pool <- read.table("D:/CAT_inGit/CAT_in_R/data/parameter.txt", header=T)
 pool <- data.frame(pool,seq(1:300))
 names(pool) <- c("a","b","c","content","serial")
 
@@ -23,7 +23,7 @@ for (i in 1:no.M){
     assembly <- rbind(assembly,data_mod)
   }
 }
-write.table(assembly, file = "parameter_CAT&MST_30.txt",sep = " ", quote = FALSE, na = "NA")
+write.table(assembly, file = "~result\parameter_CAT&MST_30.txt",sep = " ", quote = FALSE, na = "NA")
 
 
 
