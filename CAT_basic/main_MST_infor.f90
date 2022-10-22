@@ -8,7 +8,7 @@ program MST
     !parameter_MST_len10_1-2
     !parameter_MST_len10_1-2_P_10-5
     !parameter_MST_len5_1-2-3-4
-    !parameter_MST_len5_1-2-3-4_P_4321
+    !parameter_MST_len5_1-2-3-4_P_6543.txt
     ! len = 40
     !parameter_MST_len20_1-2
     !parameter_MST_len20_1-2_P_4-3
@@ -17,11 +17,11 @@ program MST
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"  !Uniform Normal
     ! === MST set ===
     integer,parameter :: numStages = 4 !2 2 4 4 / 2 2 4 4 
-    integer, parameter :: maxModule = 20    ![len20] 3 20 10 20; [len40] 3 10 10 20
+    integer, parameter :: maxModule = 20    ![len20] 3 20 10 40; [len40] 3 10 10 20
     integer, parameter :: numItemInModule = 10 !10 10 5 5 / 20 20 10 10
     !integer :: MSTdesign(numStages) = (/1,2,3,4/)
     integer :: MSTnump(numStages) = (/4,3,2,1/) 
-    !(/1,1/) (/10,5/) (/1,1,1,1/) (/4,3,2,1/) 
+    !(/1,1/) (/10,5/) (/1,1,1,1/) (/4,3,2,1/) (/6,5,4,3/) 
     !(/1,1/) (/4,3/) (/4,3,2,1/) (/1,1,1,1/) (/3,1,1,1/) !每階段之每module平行測驗數
     integer :: MSTsum_items(numStages)
     ! === parameter ===
