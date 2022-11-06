@@ -167,4 +167,3 @@ x <- mst_constraint(x, "content", 4, 4, level=3)
 x <- mst_assemble(x)
 x$item
 plot(x,byroute=FALSE)
-dev.new(width=999, height=999)
