@@ -71,8 +71,8 @@ program OMST_cont_Psi
     real::thetaHatVar !估計能力值的變異數
     real::thetaHatMSE !估計能力值的MSE
     ! Psi 控制參數 
-    integer:: alpha = 2
-    real:: psiMax = 0.1
+    integer:: alpha = 1
+    real:: psiMax = 1
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
     real, dimension(length, numTest):: deltaCriteria
