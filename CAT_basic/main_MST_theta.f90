@@ -1,44 +1,49 @@
-program MST
+program MST_theta
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_len20_1-2_P_4-3.txt" 
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_len10_1-2-3-4.txt" 
     !parameter_MST_1-3-3-3_data_P.txt !data/parameter_MST_1-2-3-4_data_P.txt
-    ! len = 20
-    !parameter_MST_len10_1-2
-    !parameter_MST_len10_1-2_P_10-5
-    !parameter_MST_len5_1-2-3-4
-    !parameter_MST_len5_1-2-3-4_P_6543.txt
-    ! len = 40
-    !parameter_MST_len20_1-2
-    !parameter_MST_len20_1-2_P_4-3
-    !parameter_MST_len10_1-2-3-4
-    !parameter_MST_len10_1-2-3-4_P_4321
+    ! len = 20; parameter_MST_len10_1-2 ; maxModule = 3
+    ! len = 20; parameter_MST_len5_1-2-3-4 ; maxModule = 10
+    ! len = 40; parameter_MST_len20_1-2 ; maxModule = 3
+    ! len = 40; parameter_MST_len10_1-2-3-4 ; maxModule = 10
+    ! module P
+    ! len = 20; parameter_MST_len10_1-2_P_10-5 ; maxModule = 20
+    ! len = 20; parameter_MST_len5_1-2-3-4_P_6543.txt ; maxModule = 40
+    ! len = 40; parameter_MST_len20_1-2_P_4-3 ; maxModule = 10
+    ! len = 40; parameter_MST_len10_1-2-3-4_P_4321 ; maxModule = 20
+    ! old data
+    ! len = 20; parameter_MST_one_len10_1-2_P_10-5.txt ; maxModule = 20
+    ! len = 20; parameter_MST_one_len5_1-2-3-4_P_4321.txt ; maxModule = 20
+    ! len = 40; parameter_MST_one_len20_1-2_P_4-3.txt ; maxModule = 10
+    ! len = 40; parameter_MST_one_len10_1-2-3-4_P_4321.txt ; maxModule = 20
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"  !Uniform Normal
     ! === MST set ===
-    integer,parameter :: numStages = 2 !2 2 4 4 / 2 2 4 4 
+    integer,parameter :: numStages = 4 !2 2 4 4 / 2 2 4 4 
     integer, parameter :: maxModule = 10    ![len20] 3 20 10 40; [len40] 3 10 10 20
-    integer, parameter :: numItemInModule = 20 !10 10 5 5 / 20 20 10 10
-    integer :: MSTdesign(numStages) = (/1,2/)
-    integer :: MSTnump(numStages) = (/4,3/) 
+    integer, parameter :: numItemInModule = 10 !10 10 5 5 / 20 20 10 10
+    integer :: MSTdesign(numStages) = (/1,2,3,4/) !(/1,2/); (/1,2,3,4/)
+    integer :: MSTnump(numStages) = (/1,1,1,1/) 
     !(/1,1/) (/10,5/) (/1,1,1,1/) (/4,3,2,1/) (/6,5,4,3/) 
     !(/1,1/) (/4,3/) (/4,3,2,1/) (/1,1,1,1/) (/3,1,1,1/) !每階段之每module平行測驗數
-    integer :: MSTsum_items(numStages)
+    !integer :: MSTsum_items(numStages)
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = maxModule*numItemInModule !題庫數
     integer,parameter :: length = numStages*numItemInModule !作答題長
     integer,parameter :: numContentType = 3
+    ! === moduleP_ID ===
+    integer:: moduleP_ID(numPool)
     ! === 指定的 module theta value ===
     integer :: MSTdesignSum(numStages) ! (/1,3/) !(/1,3,6,10/)
-    integer, parameter :: numGoalTheta = 3 !3; 10
-    integer:: moduleP_ID(numPool)
-    real:: moduleP_thetaGoal(numPool)
-    real:: thetaGoalSet(numGoalTheta) = (/0,1,-1/)
-    !real:: thetaGoalSet(10) = (/0,0.5,-0.5,1,0,-1,1.5,0.5,-0.5,-1.5/)
+    integer, parameter :: numGoalTheta = 10 !3; 10
+    !real:: thetaGoalSet(numGoalTheta) = (/0, 1, -1/) !記得改
+    real:: thetaGoalSet(numGoalTheta) = (/0.0, 0.5, -0.5, 1.0, 0.0, -1.0, 1.5, 0.5, -0.5, -1.5/)
     real:: thetaCalculate(numGoalTheta)
+    real:: moduleP_thetaGoal(numPool)
     real:: choose_GoalSet(numStages, numTest)
-    integer, real:: place_GoalSet(numStages, numTest)
+    integer:: place_GoalSet(numStages, numTest)
     ! === 擴展試題 ===
     integer, parameter :: ori_numPool = 300
     integer :: ori_usedPool(ori_numPool, numTest) !紀錄試題是否被使用過
@@ -50,7 +55,7 @@ program MST
     real:: ori_poolUsedRate
     ! === MST set 2 ===
     real :: rand_module
-    integer :: randToInt
+    integer :: randToInt = 0
     !real :: rand_module(numStages, numTest)
     ! === item parameter ===
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數
@@ -68,7 +73,7 @@ program MST
     real, external :: information, probability, normalPDF
     ! === unknown data ===
     ! === 迴圈用 ===
-    integer :: i,j
+    integer :: i,j,k,m,n,v,w
     integer :: try
     integer :: choose
     real :: x
@@ -169,63 +174,72 @@ program MST
     ! 計算MSTdesignSum
     MSTdesignSum(1) = MSTdesign(1)
     do i=2,numStages
-        MSTdesignSum(numStages) = MSTdesign(i-1) + MSTdesign(i)
+        MSTdesignSum(i) = MSTdesignSum(i-1) + MSTdesign(i)
     enddo
 
     ! 設定試題之其他參數
-    do i=1,numStages  
-        if (i==1)then
-            MSTsum_items(i) = MSTnump(i)*i*numItemInModule
-            do j = 1, MSTsum_items(i)
-                stage(j) = i
+    ! do i=1,numStages  
+    !     if (i==1)then
+    !         MSTsum_items(i) = MSTnump(i)*i*numItemInModule
+    !         do j = 1, MSTsum_items(i)
+    !             stage(j) = i
+    !         enddo
+    !     else
+    !         MSTsum_items(i) = MSTsum_items(i-1) + MSTnump(i)*i*numItemInModule
+    !         do j = MSTsum_items(i-1)+1, MSTsum_items(i)
+    !             stage(j) = i
+    !         enddo
+    !     endif
+    ! enddo
+
+    ! j = 1
+    ! do i=1,numPool
+    !     if (j > numItemInModule) then 
+    !         j=1              
+    !     endif 
+    !     itemID(i) = j
+    !     j = j+1       
+    ! enddo
+
+    ! j = 1
+    ! do i=1,numPool
+    !     if ((i > 1).AND.(modules(i-1) /= modules(i))) then
+    !         j = j+1
+    !         if (j > MSTnump(stage(i))) then 
+    !             j=1              
+    !         endif
+    !     endif
+    !     pnum(i) = j
+    ! enddo
+
+
+    n=0
+    v=0
+    do i = 1, numStages
+        do j = 1, MSTdesign(i)         
+            v = v+1
+            do k = 1, MSTnump(i)
+                
+                if (j==1) then
+                    w = 1
+                else if ((k==1)) then
+                    w = w+1
+                endif
+
+                do m=1, numItemInModule
+                    n=n+1
+                    itemID(n) = m 
+                    pnum(n) = k
+                    stage(n) = i
+                    moduleP_thetaGoal(n) = thetaGoalSet(v)
+                    moduleP_ID(n) = v
+                    module_level(n) = w
+                enddo
             enddo
-        else
-            MSTsum_items(i) = MSTsum_items(i-1) + MSTnump(i)*i*numItemInModule
-            do j = MSTsum_items(i-1)+1, MSTsum_items(i)
-                stage(j) = i
-            enddo
-        endif
+        enddo
     enddo
+    !print*, n,v, moduleP_thetaGoal(n), moduleP_ID(n), module_level(n),itemID(n)
 
-    j = 1
-    do i=1,numPool
-        if (j > numItemInModule) then 
-            j=1              
-        endif 
-        itemID(i) = j
-        j = j+1       
-    enddo
-
-    j = 1
-    do i=1,numPool
-        if ((i > 1).AND.(modules(i-1) /= modules(i))) then
-            j = j+1
-            if (j > MSTnump(stage(i))) then 
-                j=1              
-            endif
-        endif
-        pnum(i) = j
-    enddo
-
-    j = 1
-    do i=1,numPool
-        if ((pnum(i) < pnum(i-1)).AND.(stage(i) == stage(i-1))) then 
-            j = j + 1
-        elseif(stage(i) /= stage(i-1))then
-            j = 1
-        endif
-        module_level(i) = j
-    enddo
-
-    j = 1
-    do i=1,numPool
-        if ((pnum(i) < pnum(i-1))) then 
-            j = j + 1
-        endif
-        moduleP_ID(i) = j
-        moduleP_thetaGoal(i) = thetaGoal(j)
-    enddo
-    print*, moduleP_ID, moduleP_thetaGoal
     ! 開始模擬
     !call random_number(rand_module)
     !randToInt = INT(1+FLOOR(MSTnump(choose)*rand_module))
@@ -237,45 +251,49 @@ program MST
                 do i=1,numGoalTheta
                     thetaCalculate(i) = 99
                 enddo
-                do i=1,numGoalTheta
-                    thetaCalculate(i) = ABS(thetaGoalSet(i)-thetaBegin)
-                enddo
+                i = MSTdesignSum(1)
+                thetaCalculate(i) = ABS(thetaGoalSet(i)-thetaBegin)
                 call subr_minvReal(thetaCalculate,numGoalTheta,minv,place_GoalSet(choose, try))
                 choose_GoalSet(choose, try) = thetaGoalSet(place_GoalSet(choose, try))
-                
+                ! information 計算
                 do i = 1, numPool
+                    ! 隨機抽取
                     if ((i==1).OR.(pnum(i) < pnum(i-1))) then 
                         call random_number(rand_module)
                         randToInt = INT(1+FLOOR(MSTnump(choose)*rand_module))
                     endif
-
-                    if ( (stage(i)==choose).AND.(usedPool(i, try) == 0)&.AND.(pnum(i)==randToInt).AND.&
-                    (moduleP_thetaGoal(i)==choose_GoalSet(choose, try)) ) then 
+                    ! 條件設定與計算
+                    if ( (stage(i)==choose).AND.(usedPool(i, try) == 0).AND.(pnum(i)==randToInt)&
+                    .AND.(moduleP_thetaGoal(i)==choose_GoalSet(choose, try)) ) then 
                         infor(i) = information(thetaBegin, a(i), b(i), c(i))
                     else
                         infor(i) = 0
                     endif
                 enddo
-
             else
-
+                do i=1,numGoalTheta
+                    thetaCalculate(i) = 99
+                enddo
+                do i = MSTdesignSum(choose-1)+1, MSTdesignSum(choose)
+                    thetaCalculate(i) = ABS(thetaGoalSet(i)-thetaHat(choose-1, try))
+                enddo
+                call subr_minvReal(thetaCalculate,numGoalTheta,minv,place_GoalSet(choose, try))
+                choose_GoalSet(choose, try) = thetaGoalSet(place_GoalSet(choose, try))
+                ! information 計算
                 do i = 1, numPool
                     if ((i==1).OR.(pnum(i) < pnum(i-1))) then 
                         call random_number(rand_module)
                         randToInt = INT(1+FLOOR(MSTnump(choose)*rand_module))
                     endif
-                    if ( (stage(i)==choose).AND.(usedPool(i, try) == 0).AND.(pnum(i)==randToInt) ) then
+                    if ( (stage(i)==choose).AND.(usedPool(i, try) == 0).AND.(pnum(i)==randToInt)&
+                    .AND.(moduleP_thetaGoal(i)==choose_GoalSet(choose, try)) ) then 
                         infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
                     else
                         infor(i) = 0
                     endif
                 enddo
-
             endif
-            
-            
-            
-            
+
             ! 計算 information in each module 的總和
             do i = 1,maxModule
                 call subr_sumReal(infor(((i-1)*numItemInModule+1):(i*numItemInModule)),&
@@ -405,7 +423,7 @@ program MST
     call subr_aveReal(choose_inforEstimateSum, numTest, testMean_inforEstimate)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A)') "MST"
+    write(unit = 100, fmt = '(A)') "MST theta"
     write(unit = 100, fmt = '(A10,I10)') "stages", numStages
     write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test_n", numTest
@@ -537,5 +555,5 @@ program MST
     end do
     close(100)
     stop
-end program MST
+end program MST_theta
 

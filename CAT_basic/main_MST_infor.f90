@@ -4,31 +4,37 @@ program MST
     ! === 輸入資料設定 ===
     character(len = 50), parameter :: dataPath = "data/parameter_MST_len20_1-2_P_4-3.txt" 
     !parameter_MST_1-3-3-3_data_P.txt !data/parameter_MST_1-2-3-4_data_P.txt
-    ! len = 20
-    !parameter_MST_len10_1-2
-    !parameter_MST_len10_1-2_P_10-5
-    !parameter_MST_len5_1-2-3-4
-    !parameter_MST_len5_1-2-3-4_P_6543.txt
-    ! len = 40
-    !parameter_MST_len20_1-2
-    !parameter_MST_len20_1-2_P_4-3
-    !parameter_MST_len10_1-2-3-4
-    !parameter_MST_len10_1-2-3-4_P_4321
+    ! len = 20; parameter_MST_len10_1-2 ; maxModule = 3
+    ! len = 20; parameter_MST_len5_1-2-3-4 ; maxModule = 10
+    ! len = 40; parameter_MST_len20_1-2 ; maxModule = 3
+    ! len = 40; parameter_MST_len10_1-2-3-4 ; maxModule = 10
+    ! module P
+    ! len = 20; parameter_MST_len10_1-2_P_10-5 ; maxModule = 20
+    ! len = 20; parameter_MST_len5_1-2-3-4_P_6543.txt ; maxModule = 40
+    ! len = 40; parameter_MST_len20_1-2_P_4-3 ; maxModule = 10
+    ! len = 40; parameter_MST_len10_1-2-3-4_P_4321 ; maxModule = 20
+    ! old data
+    ! len = 20; parameter_MST_one_len10_1-2_P_10-5.txt ; maxModule = 20
+    ! len = 20; parameter_MST_one_len5_1-2-3-4_P_4321.txt ; maxModule = 20
+    ! len = 40; parameter_MST_one_len20_1-2_P_4-3.txt ; maxModule = 10
+    ! len = 40; parameter_MST_one_len10_1-2-3-4_P_4321.txt ; maxModule = 20
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"  !Uniform Normal
     ! === MST set ===
     integer,parameter :: numStages = 2 !2 2 4 4 / 2 2 4 4 
     integer, parameter :: maxModule = 10    ![len20] 3 20 10 40; [len40] 3 10 10 20
     integer, parameter :: numItemInModule = 20 !10 10 5 5 / 20 20 10 10
-    !integer :: MSTdesign(numStages) = (/1,2,3,4/)
+    integer :: MSTdesign(numStages) = (/1,2/) !(/1,2,3,4/)
     integer :: MSTnump(numStages) = (/4,3/) 
     !(/1,1/) (/10,5/) (/1,1,1,1/) (/4,3,2,1/) (/6,5,4,3/) 
     !(/1,1/) (/4,3/) (/4,3,2,1/) (/1,1,1,1/) (/3,1,1,1/) !每階段之每module平行測驗數
-    integer :: MSTsum_items(numStages)
+    !integer :: MSTsum_items(numStages)
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = maxModule*numItemInModule !題庫數
     integer,parameter :: length = numStages*numItemInModule !作答題長
     integer,parameter :: numContentType = 3
+    ! === moduleP_ID ===
+    integer:: moduleP_ID(numPool)
     ! === 擴展試題 ===
     integer, parameter :: ori_numPool = 300
     integer :: ori_usedPool(ori_numPool, numTest) !紀錄試題是否被使用過
@@ -40,7 +46,7 @@ program MST
     real:: ori_poolUsedRate
     ! === MST set 2 ===
     real :: rand_module
-    integer :: randToInt
+    integer :: randToInt = 0
     !real :: rand_module(numStages, numTest)
     ! === item parameter ===
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數
@@ -58,7 +64,7 @@ program MST
     real, external :: information, probability, normalPDF
     ! === unknown data ===
     ! === 迴圈用 ===
-    integer :: i,j
+    integer :: i,j,k,m,n,v,w
     integer :: try
     integer :: choose
     real :: x
@@ -156,49 +162,77 @@ program MST
     close(100)
 
     ! 設定試題之其他參數
-    do i=1,numStages  
-        if (i==1)then
-            MSTsum_items(i) = MSTnump(i)*i*numItemInModule
-            do j = 1, MSTsum_items(i)
-                stage(j) = i
+    ! do i=1,numStages  
+    !     if (i==1)then
+    !         MSTsum_items(i) = MSTnump(i)*i*numItemInModule
+    !         do j = 1, MSTsum_items(i)
+    !             stage(j) = i
+    !         enddo
+    !     else
+    !         MSTsum_items(i) = MSTsum_items(i-1) + MSTnump(i)*i*numItemInModule
+    !         do j = MSTsum_items(i-1)+1, MSTsum_items(i)
+    !             stage(j) = i
+    !         enddo
+    !     endif
+    ! enddo
+
+    ! j = 1
+    ! do i=1,numPool
+    !     if (j > numItemInModule) then 
+    !         j=1              
+    !     endif 
+    !     itemID(i) = j
+    !     j = j+1       
+    ! enddo
+
+    ! j = 1
+    ! do i=1,numPool
+    !     if ((i > 1).AND.(modules(i-1) /= modules(i))) then
+    !         j = j+1
+    !         if (j > MSTnump(stage(i))) then 
+    !             j=1              
+    !         endif
+    !     endif
+    !     pnum(i) = j
+    ! enddo
+
+    ! !錯誤
+    ! j = 1
+    ! do i=1,numPool
+    !     if ((pnum(i) < pnum(i-1)).AND.(stage(i) == stage(i-1))) then 
+    !         j = j + 1
+    !     elseif(stage(i) /= stage(i-1))then
+    !         j = 1
+    !     endif
+    !     module_level(i) = j
+    ! enddo
+
+    ! 設定試題之其他參數
+    n=0
+    v=0
+    do i = 1, numStages
+        do j = 1, MSTdesign(i)         
+            v = v+1
+            do k = 1, MSTnump(i)
+                
+                if (j==1) then
+                    w = 1
+                else if ((k==1)) then
+                    w = w+1
+                endif
+
+                do m=1, numItemInModule
+                    n=n+1
+                    itemID(n) = m 
+                    pnum(n) = k
+                    stage(n) = i
+                    module_level(n) = w
+                    moduleP_ID(n) = v
+                enddo
             enddo
-        else
-            MSTsum_items(i) = MSTsum_items(i-1) + MSTnump(i)*i*numItemInModule
-            do j = MSTsum_items(i-1)+1, MSTsum_items(i)
-                stage(j) = i
-            enddo
-        endif
+        enddo
     enddo
-
-    j = 1
-    do i=1,numPool
-        if (j > numItemInModule) then 
-            j=1              
-        endif 
-        itemID(i) = j
-        j = j+1       
-    enddo
-
-    j = 1
-    do i=1,numPool
-        if ((i > 1).AND.(modules(i-1) /= modules(i))) then
-            j = j+1
-            if (j > MSTnump(stage(i))) then 
-                j=1              
-            endif
-        endif
-        pnum(i) = j
-    enddo
-
-    j = 1
-    do i=1,numPool
-        if ((pnum(i) < pnum(i-1)).AND.(stage(i) == stage(i-1))) then 
-            j = j + 1
-        elseif(stage(i) /= stage(i-1))then
-            j = 1
-        endif
-        module_level(i) = j
-    enddo
+    !print*, n,v, moduleP_thetaGoal(n), moduleP_ID(n), module_level(n),itemID(n)
 
     ! 開始模擬
     !call random_number(rand_module)

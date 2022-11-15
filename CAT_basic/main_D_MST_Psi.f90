@@ -1,18 +1,18 @@
-program CA_MST
+program D_MST_Psi
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_len10.txt" !len5 len10 len20 len10
-    character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"  !Normal Uniform
+    character(len = 50), parameter :: dataPath = "data/parameter_DMST_60.txt" !15 30 60
+    character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"
     ! === MST set ===
-    integer,parameter :: numStages = 2 !4 2 2 4
-    integer,parameter :: maxLevel = 3 !3
-    integer, parameter :: numModuleInLevel = 10 !20 10 5 10
+    integer, parameter :: numStages = 4
+    integer, parameter :: maxLevel = 3
+    integer, parameter :: numModuleInLevel = 20 !5 10 20
     integer, parameter :: maxModule = maxLevel*numModuleInLevel
-    integer, parameter :: numItemInModule = 10 !5 10 20 10
+    integer, parameter :: numItemInModule = 5 !20 10 5
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
-    integer,parameter :: numPool = 300 !題庫數
+    integer,parameter :: numPool = 300 !題庫數 300 !324
     integer,parameter :: length = numStages*numItemInModule !作答題長
     integer,parameter :: numContentType = 3
     ! === item parameter ===
@@ -63,6 +63,16 @@ program CA_MST
     ! 測驗重疊率參數
     real:: testOverlapData
     real:: testOverlap
+    ! Psi 控制參數 
+    integer:: alpha = 2
+    real:: psiMax = 0.1
+    ! Psi 控制過程中的各類指標
+    real, external :: combination, func_deltaPsi
+    real, dimension(length, numTest):: deltaCriteria
+    real, dimension(numPool, numTest)::eta !item contribution
+    real::eta_choose(length, numTest) !選中的eta
+    ! 因應alpha>1
+    integer,dimension(3)::alphaSet
     ! Omega
     real, dimension(numTest)::omegaOne
     real, dimension(numTest)::omegaTwo
@@ -95,13 +105,8 @@ program CA_MST
     real, dimension(numTest):: choose_inforEstimateSum
     real :: testMean_inforTrue
     real :: testMean_inforEstimate
-    ! infor note
-    real, dimension(length, numTest):: choose_inforTrue
-    real, dimension(length, numTest):: choose_inforEstimate
-    real, dimension(numTest):: choose_inforTrueSum
-    real, dimension(numTest):: choose_inforEstimateSum
-    real :: testMean_inforTrue
-    real :: testMean_inforEstimate
+    ! 判斷題庫是否有試題可選 
+    integer :: count_InforZero
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
@@ -111,7 +116,9 @@ program CA_MST
     character(len = 20), parameter :: input = 'ListCAT_thetaHat.txt'
     character(len = 20), parameter :: dataINT = '(100I10)' ! 隨著 length 改變而改變
     character(len = 20), parameter :: dataF = '(100F10.4)' ! 隨著 length 改變而改變
+    character(len = 20), parameter :: dataFS = '(100F10.2)' ! 隨著 length 改變而改變
     character(len = 20), parameter :: dataPool = '(500I10)' ! 隨著 pool item number 改變而改變
+    character(len = 20), parameter :: dataPoolFS = '(500F10.2)' ! 隨著 pool item number 改變而改變
     character(len = 20), parameter :: dataContentReal = '(10F10.4)'  ! 隨著 content type number 改變
     character(len = 20), parameter :: dataContentInt = '(10I10)'
     ! === run code ===
@@ -132,21 +139,82 @@ program CA_MST
     close(100)
     ! 開始模擬
     do try = 1,numTest
+        
+        ! Psi 控制設定
+        if (try <= alpha) then 
+            do i=1,numPool
+                eta(i, try) = 0 !combination(try-1,alpha) !mit=0 !選出符合條件者 予以施測
+            enddo
+        else
+            do i=1,numPool 
+                eta(i,try) = combination(try-(usedSum(i,try-1)+1),alpha) !mit=0 !選出符合條件者 予以施測
+            enddo
+        endif
+        
         do  choose = 1, numStages
-
-            if (choose == 1) then 
-                do i = 1, numPool
-                    infor(i) = information(thetaBegin, a(i), b(i), c(i))
-                enddo
+            if (try <= alpha) then 
+                if (choose == 1) then 
+                    do i = 1, numPool
+                        infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                    enddo
+                else
+                    do i = 1, numPool
+                        if ( usedPool(i, try) == 0 ) then
+                            infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
+                        else
+                            infor(i) = 0
+                            
+                        endif
+                    enddo
+                endif
             else
-                do i = 1, numPool
-                    if ( usedPool(i, try) == 0 ) then
-                        infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
-                    else
-                        infor(i) = 0
-                    endif
-                enddo
+                count_InforZero = 0
+                deltaCriteria(choose, try) = func_deltaPsi(try,alpha,psiMax,1) ! 設定Psi控制
+                if (choose == 1) then 
+                    do i = 1, numPool
+                        if (eta(i,try) >= deltaCriteria(choose, try)) then
+                            infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                        else
+                            infor(i) = 0
+                            count_InforZero = count_InforZero + 1 
+                        endif
+                    enddo
+                else
+                    do i = 1, numPool
+                        if (( usedPool(i, try) == 0 ) .AND. (eta(i,try) >= deltaCriteria(choose, try))) then
+                            infor(i) = information(thetaHat(choose-1, try), a(i), b(i), c(i))
+                        else
+                            infor(i) = 0
+                            count_InforZero = count_InforZero + 1 
+                        endif
+                    enddo
+                endif
+
+                if (count_InforZero == numPool) then 
+                    WRITE(*,*) "no item can be used"
+                    WRITE(*,*) "try = ", try
+                    WRITE(*,*) "choose = ", choose
+                    ! 寫下問題資料細節
+                    open(unit = 100 , file = 'ListCAT_debug.txt' , status = 'replace', action = 'write', iostat= ierror)
+                    write(unit = 100, fmt = *) "try = ", try
+                    write(unit = 100, fmt = *) "choose = ", choose
+                    write(unit = 100, fmt = *) "contentGoal = ", "Nan"
+                    write(unit = 100, fmt = *) "eta Criteria = ", deltaCriteria(choose, try)
+                    write(unit = 100, fmt = *) "item ID = "
+                    write(unit = 100, fmt = dataPool) (j, j=1,numPool)
+                    write(unit = 100, fmt = *) "item content = "
+                    write(unit = 100, fmt = dataPool) (content(j), j=1,numPool)
+                    write(unit = 100, fmt = *) "item used = "
+                    write(unit = 100, fmt = dataPool) (usedPool(j,try),j=1,numPool)
+                    write(unit = 100, fmt = *) "item used sum = "
+                    write(unit = 100, fmt = dataPool) (usedSum(j,try-1)+1,j=1,numPool)
+                    write(unit = 100, fmt = *) "eta = "
+                    write(unit = 100, fmt = dataPoolFS) (eta(j,try),j=1,numPool)
+                    close(100)
+                    stop ! 如果沒題目可選，則結束程式
+                endif
             endif
+
             ! 計算 information in each module 的總和
             do i = 1,maxModule
                 call subr_sumReal(infor(((i-1)*numItemInModule+1):(i*numItemInModule)),&
@@ -163,6 +231,8 @@ program CA_MST
                     b_choose(j, try) = b(place_choose(j,try))
                     c_choose(j, try) = c(place_choose(j,try))
                     content_choose(j, try) = content(place_choose(j,try))
+                    ! 紀錄與更新Psi控制指標
+                    eta_choose(j,try) = eta(place_choose(j, try),try)
                     ! 模擬作答反應
                     call subr_resp(thetaTrue(try), &
                     a_choose(j, try),b_choose(j, try),c_choose(j, try),&
@@ -219,30 +289,43 @@ program CA_MST
         call subr_testPsi(numTest,numPool,2,usedSum,length,try,psiTwo)
         call subr_testPsi(numTest,numPool,3,usedSum,length,try,psiThree)
     enddo
-    call subr_aveReal(omegaOne, numTest, omegaOneMean)
-    call subr_aveReal(omegaTwo, numTest, omegaTwoMean)
-    call subr_aveReal(omegaThree, numTest, omegaThreeMean)
-    call subr_maxvReal(omegaOne(2:numTest), numTest-1, omegaOneMax, place)
-    call subr_maxvReal(omegaTwo(3:numTest), numTest-2, omegaTwoMax, place)
-    call subr_maxvReal(omegaThree(4:numTest), numTest-3, omegaThreeMax, place)
-    call subr_minvReal(omegaOne(2:numTest), numTest-1, omegaOnemin, place)
-    call subr_minvReal(omegaTwo(3:numTest), numTest-2, omegaTwomin, place)
-    call subr_minvReal(omegaThree(4:numTest), numTest-3, omegaThreemin, place)
-    call subr_varReal(omegaOne(2:numTest), numTest-1, omegaOneVar)
-    call subr_varReal(omegaTwo(3:numTest), numTest-2, omegaTwoVar)
-    call subr_varReal(omegaThree(4:numTest), numTest-3, omegaThreeVar)
-    call subr_aveReal(psiOne, numTest, psiOneMean)
-    call subr_aveReal(psiTwo, numTest, psiTwoMean)
-    call subr_aveReal(psiThree, numTest, psiThreeMean)
-    call subr_maxvReal(psiOne(2:numTest), numTest-1, psiOneMax, place)
-    call subr_maxvReal(psiTwo(3:numTest), numTest-2, psiTwoMax, place)
-    call subr_maxvReal(psiThree(4:numTest), numTest-3, psiThreeMax, place)
-    call subr_minvReal(psiOne(2:numTest), numTest-1, psiOnemin, place)
-    call subr_minvReal(psiTwo(3:numTest), numTest-2, psiTwomin, place)
-    call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreemin, place)
-    call subr_varReal(psiOne(2:numTest), numTest-1, psiOneVar)
-    call subr_varReal(psiTwo(3:numTest), numTest-2, psiTwoVar)
-    call subr_varReal(psiThree(4:numTest), numTest-3, psiThreeVar)
+    if (alpha==1) then
+        do i = 1,3
+            alphaSet(i)=i
+        enddo
+    else
+        do i = 1,3
+            if (i > alpha) then 
+                alphaSet(i)=i
+            else
+                alphaSet(i)=alpha
+            endif
+        enddo
+    endif
+    call subr_aveReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMean)
+    call subr_aveReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMean)
+    call subr_aveReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMean)
+    call subr_maxvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMax, place)
+    call subr_maxvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMax, place)
+    call subr_maxvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMax, place)
+    call subr_minvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOnemin, place)
+    call subr_minvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwomin, place)
+    call subr_minvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreemin, place)
+    call subr_varReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneVar)
+    call subr_varReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoVar)
+    call subr_varReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeVar)
+    call subr_aveReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMean)
+    call subr_aveReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMean)
+    call subr_aveReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMean)
+    call subr_maxvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMax, place)
+    call subr_maxvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMax, place)
+    call subr_maxvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMax, place)
+    call subr_minvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOnemin, place)
+    call subr_minvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwomin, place)
+    call subr_minvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreemin, place)
+    call subr_varReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneVar)
+    call subr_varReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoVar)
+    call subr_varReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeVar)
     ! mean of infor 計算
     do i = 1, numTest
         do j = 1, length
@@ -256,7 +339,7 @@ program CA_MST
     call subr_aveReal(choose_inforEstimateSum, numTest, testMean_inforEstimate)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A)') "CA_MST"
+    write(unit = 100, fmt = '(A)') "D-MST_Psi"
     write(unit = 100, fmt = '(A10,I10)') "stages", numStages
     write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
     write(unit = 100, fmt = '(A10,I10)') "test_n", numTest
@@ -280,8 +363,8 @@ program CA_MST
     write(unit = 100, fmt = '(A10, F10.5)') "True", testMean_inforTrue
     write(unit = 100, fmt = '(A10, F10.5)') "Estimate", testMean_inforEstimate
     write(unit = 100, fmt = '(/,A)') "Psi_max"
-    write(unit = 100, fmt = '(A10, F10.5)') "Set", 1.0
-    write(unit = 100, fmt = '(A10, I10)') "alpha", 1
+    write(unit = 100, fmt = '(A10, F10.5)') "Set", psiMax
+    write(unit = 100, fmt = '(A10, I10)') "alpha", alpha
     write(unit = 100, fmt = '(A10, F10.5)') "Max_1", psiOneMax
     write(unit = 100, fmt = '(A10, F10.5)') "Max_2", psiTwoMax
     write(unit = 100, fmt = '(A10, F10.5)') "Max_3", psiThreeMax
@@ -359,7 +442,7 @@ program CA_MST
     close(100)
     ! == Omega & Psi ==
     open(unit = 100 , file = 'ListCAT_testOmega&Psi.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(7A10)') "Stat.", "Omega 1", "Omega 2", "Omega 3", "Psi 1", "Psi 2", "Psi 3"
+    write(unit = 100, fmt = '(7A10)') "Stat.", "Omega1", "Omega2", "Omega3", "Psi1", "Psi2", "Psi3"
     write(unit = 100, fmt = '(A10,6F10.5)') "Mean", omegaOneMean, omegaTwoMean, omegaThreeMean,&
     psiOneMean, psiTwoMean, psiThreeMean
     write(unit = 100, fmt = '(A10,6F10.5)') "Max", omegaOneMax, omegaTwoMax, omegaThreeMax,&
@@ -376,6 +459,21 @@ program CA_MST
         psiOne(i), psiTwo(i), psiThree(i)
     end do
     close(100)
+    ! == Psi Control Data ==
+    open(unit = 100 , file = 'ListCAT_testPsiEta.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(A)') "eta = "
+    write(unit = 100, fmt = dataPool) (j, j=1,numPool)
+    do i=1,numTest
+        write(unit = 100, fmt = dataPoolFS) (eta(j,i),j=1,numPool)
+    end do
+    close(100) 
+    open(unit = 100 , file = 'ListCAT_testPsideltaCriteria.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 100, fmt = '(A)') "delta change = "
+    write(unit = 100, fmt = dataINT) (j, j=1,length)
+    do i=1,numTest
+        write(unit = 100, fmt = dataFS) (deltaCriteria(j,i),j=1,length)
+    end do
+    close(100)
     stop
-end program CA_MST
+end program D_MST_Psi
 

@@ -7,7 +7,7 @@ MST_data <- read_excel("D:/CAT_inGit/CAT_in_R/data/MST_data.xlsx", sheet = "MST_
 View(MST_data)
 #設定排序
 #MST_data$PsiSet <- factor(MST_data$PsiSet, ordered = TRUE, levels = c("1", "0.77", "0.3","0.2","0.1"))
-MST_data$method <- factor(MST_data$method, levels = c("one", "range"))
+MST_data$method <- factor(MST_data$method, levels = c("one+infor","one+theta", "range+infor", "range+theta"))
 #繪圖
 library(ggplot2)
 
@@ -15,7 +15,7 @@ p <- ggplot(data=MST_data, aes(x=stages, y=Bias,
         label=sprintf("%0.3f", round(Bias, digits = 4)),
         group=method,color=method)) + #shape
         geom_line()+  # 根據group繪製線條
-        geom_hline(yintercept = 0, linetype = 3, color = "RED") +
+        geom_hline(yintercept = 0, linetype = 3) + #color = "RED" 無法使用，因為已被用
         #guides(colour = guide_legend("Year",
         #        label.position = "bottom", ncol = 3))+
         geom_point()+  # 繪製散布圖的點
@@ -48,11 +48,11 @@ p <- ggplot(data=MST_data, aes(x=stages, y=RMSE,
         #        label.position = "bottom", ncol = 3))+
         geom_point()+  # 繪製散布圖的點
         geom_text(
-                check_overlap = TRUE, 
+                #check_overlap = TRUE, 
                 vjust = -1)+
         #geom_label()+
         scale_x_discrete(limits=c("2","4"))+
-        scale_y_continuous( limits = c(0.2,0.5)
+        scale_y_continuous( limits = c(0.27,0.42)
                 # breaks = 0.001 * c(1, 2, 4, 8, 16),
                 # minor_breaks = NULL
                 )+
@@ -135,11 +135,11 @@ p <- ggplot(data=MST_data, aes(x=stages, y=InforTurth,
         #        label.position = "bottom", ncol = 3))+
         geom_point()+  # 繪製散布圖的點
         geom_text(
-                check_overlap = TRUE, 
+                #check_overlap = TRUE, 
                 vjust = -1)+ #hjust
         #geom_label()+
         scale_x_discrete(limits=c("2","4"))+
-        scale_y_continuous( limits = c(5,25)
+        scale_y_continuous( limits = c(5,15) #(5,25)
                 # breaks = 0.001 * c(1, 2, 4, 8, 16),
                 # minor_breaks = NULL
                 )+
@@ -170,7 +170,7 @@ p <- ggplot(data=MST_data, aes(x=stages, y=InforEstimate,
                 vjust = -1)+ #hjust
         #geom_label()+
         scale_x_discrete(limits=c("2","4"))+
-        scale_y_continuous( limits = c(5,25)
+        scale_y_continuous( limits = c(5,15) #5,25
                 # breaks = 0.001 * c(1, 2, 4, 8, 16),
                 # minor_breaks = NULL
                 )+
@@ -188,7 +188,7 @@ dev.off()
 
 
 # ============================
-# CA-MST plot
+# CA-MST plot #未完成
 
 ls()
 rm(list = ls()) #清除變數；OR: remove(list = ls())
