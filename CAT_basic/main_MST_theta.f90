@@ -275,7 +275,9 @@ program MST_theta
                     thetaCalculate(i) = 99
                 enddo
                 do i = MSTdesignSum(choose-1)+1, MSTdesignSum(choose)
-                    thetaCalculate(i) = ABS(thetaGoalSet(i)-thetaHat(choose-1, try))
+                    if (  ABS(choose_GoalSet(choose-1, try)-thetaGoalSet(i)) < 1.0  ) then
+                        thetaCalculate(i) = ABS(thetaGoalSet(i)-thetaHat(choose-1, try))
+                    endif
                 enddo
                 call subr_minvReal(thetaCalculate,numGoalTheta,minv,place_GoalSet(choose, try))
                 choose_GoalSet(choose, try) = thetaGoalSet(place_GoalSet(choose, try))

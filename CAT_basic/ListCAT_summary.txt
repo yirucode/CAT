@@ -1,43 +1,43 @@
 MST theta
     stages         4
-      time   4.53125
+      time   4.65625
     test_n     10000
     pool_n       100
     length        40
 
 ThetaHat_of_Estimates: 
-      Mean   0.00402
-      Bias  -0.00020
-       Var   0.91794
-       MSE   0.08252
-      RMSE   0.28726
+      Mean   0.00242
+      Bias  -0.00181
+       Var   0.92221
+       MSE   0.07938
+      RMSE   0.28175
 
 Item_Exposure_Ratee: 
        max   1.00000
       mean   0.13333
-       var   0.05322
+       var   0.05328
 
 Pool_Used: 
       Rate   0.33333
 
 Test_Overlap: 
-   overlap   0.53246
+   overlap   0.53285
 
 Mean_of_Infor: 
-      True  12.72260
-  Estimate  13.05995
+      True  12.74371
+  Estimate  13.05908
 
 Psi_max
        Set   1.00000
      alpha         1
-     Max_1   0.60417
-     Max_2   0.79924
-     Max_3   0.90227
+     Max_1   0.60922
+     Max_2   0.79467
+     Max_3   0.92500
 
 Original_item_usedrate: 
        max   1.00000
       mean   0.40000
-       var   0.05300
+       var   0.05316
 
 Original_Pool_Used: 
       Rate   1.00000
