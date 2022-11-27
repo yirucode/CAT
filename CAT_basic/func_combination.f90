@@ -13,7 +13,11 @@ real::Denominator !分母
 ! === run code ===
 if(n<k)then
     combination=0
-else
+else if(n==k) then !為了加速，免去下面程式運算
+    combination = 1
+else if((n>k).AND.(k==0)) then
+    combination = 1
+else if((n>k).AND.(k>0)) then
     Numerator = 1
     Denominator = 1
     do i=1,k
@@ -21,6 +25,9 @@ else
         Denominator=Denominator*i
     enddo
     combination = Numerator/Denominator
+else
+    print*, "error"
+    stop
 endif
 return
 end function combination
