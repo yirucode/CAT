@@ -5,14 +5,14 @@ program CAT
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt" 
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"
     ! === parameter ===
-    integer,parameter :: numTest = 10000 !重複次數
+    integer,parameter :: numTest = 1000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 40 !作答題長 !20 40
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
     !integer :: contentGoal_before
-    integer :: contentAgain = 0
+    !integer :: contentAgain = 0 !已無作用
     integer :: contentTarget(numContentType) = (/16,16,8/) ! !8,8,4  16,16,8
     integer :: contentChange(numContentType) 
     real :: randContent
@@ -81,9 +81,10 @@ program CAT
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 1
-    real:: psiMax = 0.1
+    real:: psiMax = 0.3
     ! 因應alpha>1
-    integer,dimension(3)::alphaSet
+    !integer,dimension(3)::alphaSet 
+    integer::max_alphaSet = 3
     !real, dimension(numTest):: psi
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
@@ -209,12 +210,14 @@ program CAT
                 ! 設定Psi控制
                 deltaCriteria(choose, try) = func_deltaPsi(try,alpha,psiMax,1)
                 ! 計算訊息量
-                if ( (choose == 1) ) then                
+                if ( (choose == 1) ) then   
+                    count_InforZero = 0             
                     do i = 1, numPool
                         if ( (content(i) == contentGoal) .AND. (eta(i,try) >= deltaCriteria(choose, try)) ) then
                             infor(i) = information(thetaBegin, a(i), b(i), c(i))
                         else
                             infor(i) = 0
+                            count_InforZero = count_InforZero + 1 
                         endif
                     enddo
                 else
@@ -227,56 +230,52 @@ program CAT
                             infor(i) = 0
                             count_InforZero = count_InforZero + 1 
                         endif
-                        if (count_InforZero == numPool) then 
-                            WRITE(*,*) "no item can be used"
-                            WRITE(*,*) "try = ", try
-                            WRITE(*,*) "choose = ", choose
-                            ! 寫下問題資料細節
-                            open(unit = 100 , file = 'ListCAT_debug.txt' , status = 'replace', action = 'write', iostat= ierror)
-                            write(unit = 100, fmt = *) "try = ", try
-                            write(unit = 100, fmt = *) "choose = ", choose
-                            write(unit = 100, fmt = *) "contentGoal = ", contentGoal
-                            write(unit = 100, fmt = *) "eta Criteria = ", deltaCriteria(choose, try)
-                            write(unit = 100, fmt = *) "item ID = "
-                            write(unit = 100, fmt = dataPool) (j, j=1,numPool)
-                            write(unit = 100, fmt = *) "item content = "
-                            write(unit = 100, fmt = dataPool) (content(j), j=1,numPool)
-                            write(unit = 100, fmt = *) "item used = "
-                            write(unit = 100, fmt = dataPool) (usedPool(j,try),j=1,numPool)
-                            write(unit = 100, fmt = *) "item used sum = "
-                            write(unit = 100, fmt = dataPool) (usedSum(j,try-1)+1,j=1,numPool)
-                            write(unit = 100, fmt = *) "eta = "
-                            write(unit = 100, fmt = dataPoolFS) (eta(j,try),j=1,numPool)
-                            close(100)
-                            contentAgain = 1
-                            stop ! 如果沒題目可選，則結束程式
-                        else
-                            contentAgain = 0
-                        endif
                     enddo
                 endif
+
+                if (count_InforZero == numPool) then 
+                    WRITE(*,*) "no item can be used"
+                    WRITE(*,*) "try = ", try
+                    WRITE(*,*) "choose = ", choose
+                    ! 寫下問題資料細節
+                    open(unit = 100 , file = 'ListCAT_debug.txt' , status = 'replace', action = 'write', iostat= ierror)
+                    write(unit = 100, fmt = *) "try = ", try
+                    write(unit = 100, fmt = *) "choose = ", choose
+                    write(unit = 100, fmt = *) "contentGoal = ", contentGoal
+                    write(unit = 100, fmt = *) "eta Criteria = ", deltaCriteria(choose, try)
+                    write(unit = 100, fmt = *) "item ID = "
+                    write(unit = 100, fmt = dataPool) (j, j=1,numPool)
+                    write(unit = 100, fmt = *) "item content = "
+                    write(unit = 100, fmt = dataPool) (content(j), j=1,numPool)
+                    write(unit = 100, fmt = *) "item used = "
+                    write(unit = 100, fmt = dataPool) (usedPool(j,try),j=1,numPool)
+                    write(unit = 100, fmt = *) "item used sum = "
+                    write(unit = 100, fmt = dataPool) (usedSum(j,try-1)+1,j=1,numPool)
+                    write(unit = 100, fmt = *) "eta = "
+                    write(unit = 100, fmt = dataPoolFS) (eta(j,try),j=1,numPool)
+                    close(100)
+                    stop ! 如果沒題目可選，則結束程式
+                endif
             endif
-            if (contentAgain /= 1) then
-                call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
-                usedPool(place_choose(choose, try), try) = 1 !紀錄使用試題
-                ! 紀錄使用的試題參數
-                a_choose(choose, try) = a(place_choose(choose, try))
-                b_choose(choose, try) = b(place_choose(choose, try))
-                c_choose(choose, try) = c(place_choose(choose, try))
-                content_choose(choose, try) = content(place_choose(choose, try))
-                ! 紀錄與更新Psi控制指標
-                eta_choose(choose,try) = eta(place_choose(choose, try),try)
-                ! 模擬作答反應
-                call subr_resp(thetaTrue(try), &
-                a_choose(choose, try),b_choose(choose, try),c_choose(choose, try),&
-                resp(choose, try),randv(choose, try))
-                ! EAP能力估計
-                call subr_EAP(choose, &
-                a_choose(1:choose, try),b_choose(1:choose, try),c_choose(1:choose, try),&
-                resp(1:choose, try), thetaHat(choose, try))
-            else
-                content_choose(choose, try) = 0
-            endif
+
+            call subr_maxvReal(infor, numPool, maxv, place_choose(choose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
+            usedPool(place_choose(choose, try), try) = 1 !紀錄使用試題
+            ! 紀錄使用的試題參數
+            a_choose(choose, try) = a(place_choose(choose, try))
+            b_choose(choose, try) = b(place_choose(choose, try))
+            c_choose(choose, try) = c(place_choose(choose, try))
+            content_choose(choose, try) = content(place_choose(choose, try))
+            ! 紀錄與更新Psi控制指標
+            eta_choose(choose,try) = eta(place_choose(choose, try),try)
+            ! 模擬作答反應
+            call subr_resp(thetaTrue(try), &
+            a_choose(choose, try),b_choose(choose, try),c_choose(choose, try),&
+            resp(choose, try),randv(choose, try))
+            ! EAP能力估計
+            call subr_EAP(choose, &
+            a_choose(1:choose, try),b_choose(1:choose, try),c_choose(1:choose, try),&
+            resp(1:choose, try), thetaHat(choose, try))
+
 
             ! ! 確認用
             ! do j=1,numContentType
@@ -331,44 +330,71 @@ program CAT
         call subr_testPsi(numTest,numPool,2,usedSum,length,try,psiTwo)
         call subr_testPsi(numTest,numPool,3,usedSum,length,try,psiThree)
     enddo
-    if (alpha==1) then
-        do i = 1,3
-            alphaSet(i)=i
-        enddo
-    else
-        do i = 1,3
-            if (i > alpha) then 
-                alphaSet(i)=i
-            else
-                alphaSet(i)=alpha
-            endif
-        enddo
-    endif
-    call subr_aveReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMean)
-    call subr_aveReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMean)
-    call subr_aveReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMean)
-    call subr_maxvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMax, place)
-    call subr_maxvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMax, place)
-    call subr_maxvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMax, place)
-    call subr_minvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOnemin, place)
-    call subr_minvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwomin, place)
-    call subr_minvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreemin, place)
-    call subr_varReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneVar)
-    call subr_varReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoVar)
-    call subr_varReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeVar)
-    call subr_aveReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMean)
-    call subr_aveReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMean)
-    call subr_aveReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMean)
-    call subr_maxvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMax, place)
-    call subr_maxvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMax, place)
-    call subr_maxvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMax, place)
-    call subr_minvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOnemin, place)
-    call subr_minvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwomin, place)
-    call subr_minvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreemin, place)
-    call subr_varReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneVar)
-    call subr_varReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoVar)
-    call subr_varReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeVar)
-    ! mean of infor 計算
+
+    ! if (alpha==1) then
+    !     do i = 1,3
+    !         alphaSet(i)=i
+    !     enddo
+    ! else
+    !     do i = 1,3
+    !         if (i > alpha) then 
+    !             alphaSet(i)=i
+    !         else
+    !             alphaSet(i)=alpha
+    !         endif
+    !     enddo
+    ! endif
+    ! call subr_aveReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMean)
+    ! call subr_aveReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMean)
+    ! call subr_aveReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMean)
+    ! call subr_maxvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMax, place)
+    ! call subr_maxvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMax, place)
+    ! call subr_maxvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMax, place)
+    ! call subr_minvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOnemin, place)
+    ! call subr_minvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwomin, place)
+    ! call subr_minvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreemin, place)
+    ! call subr_varReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneVar)
+    ! call subr_varReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoVar)
+    ! call subr_varReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeVar)
+    ! call subr_aveReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMean)
+    ! call subr_aveReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMean)
+    ! call subr_aveReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMean)
+    ! call subr_maxvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMax, place)
+    ! call subr_maxvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMax, place)
+    ! call subr_maxvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMax, place)
+    ! call subr_minvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOnemin, place)
+    ! call subr_minvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwomin, place)
+    ! call subr_minvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreemin, place)
+    ! call subr_varReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneVar)
+    ! call subr_varReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoVar)
+    ! call subr_varReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeVar)
+    
+    call subr_aveReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOneMean)
+    call subr_aveReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwoMean)
+    call subr_aveReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreeMean)
+    call subr_maxvReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOneMax, place)
+    call subr_maxvReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwoMax, place)
+    call subr_maxvReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreeMax, place)
+    call subr_minvReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOnemin, place)
+    call subr_minvReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwomin, place)
+    call subr_minvReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreemin, place)
+    call subr_varReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOneVar)
+    call subr_varReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwoVar)
+    call subr_varReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreeVar)
+    call subr_aveReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOneMean)
+    call subr_aveReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwoMean)
+    call subr_aveReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreeMean)
+    call subr_maxvReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOneMax, place)
+    call subr_maxvReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwoMax, place)
+    call subr_maxvReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreeMax, place)
+    call subr_minvReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOnemin, place)
+    call subr_minvReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwomin, place)
+    call subr_minvReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreemin, place)
+    call subr_varReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOneVar)
+    call subr_varReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwoVar)
+    call subr_varReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreeVar)
+    
+    ! ! mean of infor 計算
     do i = 1, numTest
         do j = 1, length
             choose_inforTrue(j,i) = information(thetaTrue(i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
