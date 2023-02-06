@@ -40,6 +40,7 @@ subr_EAP.o
 # main_MST_1234design
 # main_MST_infor
 # main_MST_theta
+# main_OMST_cont_Psi_full.f90
 
 # obj = subr_testOmega.o
 
