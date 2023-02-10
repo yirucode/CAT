@@ -7,13 +7,13 @@ program CAT
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 40 !作答題長 !20 40
+    integer,parameter :: length = 20 !作答題長 !20 40
     integer,parameter :: numContentType = 3
     ! === content target ===
     integer :: contentGoal
     !integer :: contentGoal_before
     !integer :: contentAgain = 0
-    integer :: contentTarget(numContentType) = (/16,16,8/) ! !8,8,4  16,16,8
+    integer :: contentTarget(numContentType) = (/8,8,4/) ! !8,8,4  16,16,8
     integer :: contentChange(numContentType) 
     real :: randContent
     real :: contentTP(numContentType)
@@ -81,7 +81,7 @@ program CAT
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 3
-    real:: psiMax = 0.1
+    real:: psiMax = 0.3
     
     ! Psi 鬆綁參數
     real:: max_eta

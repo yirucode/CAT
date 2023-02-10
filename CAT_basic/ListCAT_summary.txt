@@ -1,0 +1,35 @@
+CAT_with_Psi&con
+    stages         1
+      time  11.45312
+    test_n     10000
+    pool_n       300
+    length        20
+
+ThetaHat_of_Estimates: 
+      Mean   0.00915
+      Bias   0.00492
+       Var   0.87763
+       MSE   0.12687
+      RMSE   0.35619
+
+Item_Exposure_Ratee: 
+       max   0.11210
+      mean   0.06667
+       var   0.00255
+
+Pool_Used: 
+      Rate   0.81667
+
+Test_Overlap: 
+   overlap   0.10485
+
+Mean_of_Infor: 
+      True   8.75594
+  Estimate   9.20647
+
+Psi_max
+       Set   0.30000
+     alpha         3
+     Max_1   0.11208
+     Max_2   0.21162
+     Max_3   0.30000
