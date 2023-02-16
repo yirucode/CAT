@@ -81,7 +81,7 @@ program CAT
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! Psi 控制參數 
     integer:: alpha = 3
-    real:: psiMax = 0.3
+    real:: psiMax = 0.1
     
     ! Psi 鬆綁參數
     real:: max_eta

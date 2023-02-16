@@ -2,14 +2,14 @@ program D_MST_Psi
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_DMST_60.txt" !15 30 60
+    character(len = 50), parameter :: dataPath = "data/parameter_DMST_30.txt" !15(20/module) 30(10/module) 60(5/module)
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"
     ! === MST set ===
-    integer, parameter :: numStages = 4
+    integer, parameter :: numStages = 2
     integer, parameter :: maxLevel = 3
-    integer, parameter :: numModuleInLevel = 20 !5 10 20
+    integer, parameter :: numItemInModule = 10 !20 10 5 (每個module內的題數)
+    integer, parameter :: numModuleInLevel = 10 !5 10 20 (每個level內的module數)
     integer, parameter :: maxModule = maxLevel*numModuleInLevel
-    integer, parameter :: numItemInModule = 5 !20 10 5
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數 300 !324
@@ -64,8 +64,8 @@ program D_MST_Psi
     real:: testOverlapData
     real:: testOverlap
     ! Psi 控制參數 
-    integer:: alpha = 2
-    real:: psiMax = 0.1
+    integer:: alpha = 1
+    real:: psiMax = 0.3
 
     ! Psi 鬆綁參數
     real:: max_eta

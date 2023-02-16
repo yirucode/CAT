@@ -7,14 +7,14 @@ program OMST_cont_Psi_full
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 20 !作答題長
+    integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
     ! === module set ===
     integer :: contentScale(numContentType) = (/2,2,1/)
     integer :: contentMultiplier = 2
     ! === OMST set ===
     integer :: usedStages
-    integer,parameter :: numStages = 2
+    integer,parameter :: numStages = 4
     integer :: realChoose
     ! === content target ===
     integer :: contentGoal
@@ -71,7 +71,7 @@ program OMST_cont_Psi_full
     real::thetaHatVar !估計能力值的變異數
     real::thetaHatMSE !估計能力值的MSE
     ! Psi 控制參數 
-    integer:: alpha = 3
+    integer:: alpha = 2
     real:: psiMax = 0.1
 
     ! Psi 鬆綁參數
