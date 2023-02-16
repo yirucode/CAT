@@ -2,7 +2,7 @@ program MST_theta
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
-    character(len = 50), parameter :: dataPath = "data/parameter_MST_len5_1-2-3-4_P_6543.txt" 
+    character(len = 50), parameter :: dataPath = "data/parameter_MST_len20_1-2_P_4-3.txt" 
     !parameter_MST_1-3-3-3_data_P.txt !data/parameter_MST_1-2-3-4_data_P.txt
     ! len = 20; parameter_MST_len10_1-2 ; maxModule = 3
     ! len = 20; parameter_MST_len5_1-2-3-4 ; maxModule = 10
@@ -20,11 +20,11 @@ program MST_theta
     ! len = 40; parameter_MST_one_len10_1-2-3-4_P_4321.txt ; maxModule = 20
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"  !Uniform Normal
     ! === MST set ===
-    integer,parameter :: numStages = 4 !2 2 4 4 / 2 2 4 4 
-    integer, parameter :: maxModule = 40    ![len20] 3 20 10 40; [len40] 3 10 10 20
-    integer, parameter :: numItemInModule = 5 !10 10 5 5 / 20 20 10 10
-    integer :: MSTdesign(numStages) = (/1,2,3,4/) !(/1,2/); (/1,2,3,4/)
-    integer :: MSTnump(numStages) = (/6,5,4,3/) 
+    integer,parameter :: numStages = 2 !2 2 4 4 / 2 2 4 4 
+    integer, parameter :: maxModule = 10    ![len20] 3 20 10 40; [len40] 3 10 10 20
+    integer, parameter :: numItemInModule = 20 !10 10 5 5 / 20 20 10 10
+    integer :: MSTdesign(numStages) = (/1,2/) !(/1,2/); (/1,2,3,4/)
+    integer :: MSTnump(numStages) = (/4,3/) 
     !(/1,1/) (/10,5/) (/1,1,1,1/) (/4,3,2,1/) (/6,5,4,3/) 
     !(/1,1/) (/4,3/) (/4,3,2,1/) (/1,1,1,1/) (/3,1,1,1/) !每階段之每module平行測驗數
     !integer :: MSTsum_items(numStages)
@@ -37,10 +37,11 @@ program MST_theta
     integer:: moduleP_ID(numPool)
     ! === 指定的 module theta value ===
     integer :: MSTdesignSum(numStages) ! (/1,3/) !(/1,3,6,10/)
-    ! integer, parameter :: numGoalTheta = 3 !3; 10 !記得改
-    ! real:: thetaGoalSet(numGoalTheta) = (/0, 1, -1/) !記得改
-    integer, parameter :: numGoalTheta = 10 !3; 10 !記得改
-    real:: thetaGoalSet(numGoalTheta) = (/0.0, 0.5, -0.5, 1.0, 0.0, -1.0, 1.5, 0.5, -0.5, -1.5/) !記得改
+    !! ######## 記得改 ########
+    integer, parameter :: numGoalTheta = 3 !記得改
+    real:: thetaGoalSet(numGoalTheta) = (/0, 1, -1/) !記得改
+    ! integer, parameter :: numGoalTheta = 10 !記得改
+    ! real:: thetaGoalSet(numGoalTheta) = (/0.0, 0.5, -0.5, 1.0, 0.0, -1.0, 1.5, 0.5, -0.5, -1.5/) !記得改
     real :: cut_value
     real:: thetaCalculate(numGoalTheta)
     real:: moduleP_thetaGoal(numPool)
@@ -127,6 +128,8 @@ program MST_theta
     real:: psiOneMax, psiTwoMax, psiThreeMax
     real:: psiOneMin, psiTwoMin, psiThreeMin
     real:: psiOneVar, psiTwoVar, psiThreeVar
+    ! Psi&Omega指標
+    integer::max_alphaSet = 3
     ! 估計能力參數
     ! real::thetaHat(length, numTest) 
     real::thetaHat(numStages, numTest) ! 因MST而有修改
@@ -393,30 +396,57 @@ program MST_theta
         call subr_testPsi(numTest,numPool,2,usedSum,length,try,psiTwo)
         call subr_testPsi(numTest,numPool,3,usedSum,length,try,psiThree)
     enddo
-    call subr_aveReal(omegaOne, numTest, omegaOneMean)
-    call subr_aveReal(omegaTwo, numTest, omegaTwoMean)
-    call subr_aveReal(omegaThree, numTest, omegaThreeMean)
-    call subr_maxvReal(omegaOne(2:numTest), numTest-1, omegaOneMax, place)
-    call subr_maxvReal(omegaTwo(3:numTest), numTest-2, omegaTwoMax, place)
-    call subr_maxvReal(omegaThree(4:numTest), numTest-3, omegaThreeMax, place)
-    call subr_minvReal(omegaOne(2:numTest), numTest-1, omegaOnemin, place)
-    call subr_minvReal(omegaTwo(3:numTest), numTest-2, omegaTwomin, place)
-    call subr_minvReal(omegaThree(4:numTest), numTest-3, omegaThreemin, place)
-    call subr_varReal(omegaOne(2:numTest), numTest-1, omegaOneVar)
-    call subr_varReal(omegaTwo(3:numTest), numTest-2, omegaTwoVar)
-    call subr_varReal(omegaThree(4:numTest), numTest-3, omegaThreeVar)
-    call subr_aveReal(psiOne, numTest, psiOneMean)
-    call subr_aveReal(psiTwo, numTest, psiTwoMean)
-    call subr_aveReal(psiThree, numTest, psiThreeMean)
-    call subr_maxvReal(psiOne(2:numTest), numTest-1, psiOneMax, place)
-    call subr_maxvReal(psiTwo(3:numTest), numTest-2, psiTwoMax, place)
-    call subr_maxvReal(psiThree(4:numTest), numTest-3, psiThreeMax, place)
-    call subr_minvReal(psiOne(2:numTest), numTest-1, psiOnemin, place)
-    call subr_minvReal(psiTwo(3:numTest), numTest-2, psiTwomin, place)
-    call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreemin, place)
-    call subr_varReal(psiOne(2:numTest), numTest-1, psiOneVar)
-    call subr_varReal(psiTwo(3:numTest), numTest-2, psiTwoVar)
-    call subr_varReal(psiThree(4:numTest), numTest-3, psiThreeVar)
+
+    ! call subr_aveReal(omegaOne, numTest, omegaOneMean)
+    ! call subr_aveReal(omegaTwo, numTest, omegaTwoMean)
+    ! call subr_aveReal(omegaThree, numTest, omegaThreeMean)
+    ! call subr_maxvReal(omegaOne(2:numTest), numTest-1, omegaOneMax, place)
+    ! call subr_maxvReal(omegaTwo(3:numTest), numTest-2, omegaTwoMax, place)
+    ! call subr_maxvReal(omegaThree(4:numTest), numTest-3, omegaThreeMax, place)
+    ! call subr_minvReal(omegaOne(2:numTest), numTest-1, omegaOnemin, place)
+    ! call subr_minvReal(omegaTwo(3:numTest), numTest-2, omegaTwomin, place)
+    ! call subr_minvReal(omegaThree(4:numTest), numTest-3, omegaThreemin, place)
+    ! call subr_varReal(omegaOne(2:numTest), numTest-1, omegaOneVar)
+    ! call subr_varReal(omegaTwo(3:numTest), numTest-2, omegaTwoVar)
+    ! call subr_varReal(omegaThree(4:numTest), numTest-3, omegaThreeVar)
+    ! call subr_aveReal(psiOne, numTest, psiOneMean)
+    ! call subr_aveReal(psiTwo, numTest, psiTwoMean)
+    ! call subr_aveReal(psiThree, numTest, psiThreeMean)
+    ! call subr_maxvReal(psiOne(2:numTest), numTest-1, psiOneMax, place)
+    ! call subr_maxvReal(psiTwo(3:numTest), numTest-2, psiTwoMax, place)
+    ! call subr_maxvReal(psiThree(4:numTest), numTest-3, psiThreeMax, place)
+    ! call subr_minvReal(psiOne(2:numTest), numTest-1, psiOnemin, place)
+    ! call subr_minvReal(psiTwo(3:numTest), numTest-2, psiTwomin, place)
+    ! call subr_minvReal(psiThree(4:numTest), numTest-3, psiThreemin, place)
+    ! call subr_varReal(psiOne(2:numTest), numTest-1, psiOneVar)
+    ! call subr_varReal(psiTwo(3:numTest), numTest-2, psiTwoVar)
+    ! call subr_varReal(psiThree(4:numTest), numTest-3, psiThreeVar)
+
+    call subr_aveReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOneMean)
+    call subr_aveReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwoMean)
+    call subr_aveReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreeMean)
+    call subr_maxvReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOneMax, place)
+    call subr_maxvReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwoMax, place)
+    call subr_maxvReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreeMax, place)
+    call subr_minvReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOnemin, place)
+    call subr_minvReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwomin, place)
+    call subr_minvReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreemin, place)
+    call subr_varReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOneVar)
+    call subr_varReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwoVar)
+    call subr_varReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreeVar)
+    call subr_aveReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOneMean)
+    call subr_aveReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwoMean)
+    call subr_aveReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreeMean)
+    call subr_maxvReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOneMax, place)
+    call subr_maxvReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwoMax, place)
+    call subr_maxvReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreeMax, place)
+    call subr_minvReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOnemin, place)
+    call subr_minvReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwomin, place)
+    call subr_minvReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreemin, place)
+    call subr_varReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOneVar)
+    call subr_varReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwoVar)
+    call subr_varReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreeVar)
+
     ! mean of infor 計算
     do i = 1, numTest
         do j = 1, length
