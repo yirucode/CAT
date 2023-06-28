@@ -6,7 +6,8 @@ library(readxl)
 MST_data <- read_excel("D:/CAT_inGit/CAT_in_R/data/MST_data.xlsx", sheet = "len_all")
 View(MST_data)
 #設定排序
-MST_data$method <- factor(MST_data$method, levels = c("MST有平行", "CAT+cont", "OMST+cont", "D-MST"))
+#MST_data$method <- factor(MST_data$method, levels = c("MST有平行", "CAT+cont", "OMST+cont", "D-MST"))
+MST_data$method <- factor(MST_data$method, levels = c("MST", "CAT", "OMST", "D-MST"))
 #繪圖
 library(ggplot2)
 
