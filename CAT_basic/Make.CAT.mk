@@ -6,12 +6,13 @@
 CC = gfortran
 CXXFLAGS =-c -g -O0 -Og -Wall 
 exe = a
-obj = main_MST_theta.o \
+obj = main_OMST_cont_SH.o \
 subr_maxvReal.o subr_maxvInt.o \
 subr_minvInt.o subr_minvReal.o\
 subr_sumReal.o subr_sumInt.o\
 subr_aveReal.o subr_aveIntToReal.o \
 subr_varReal.o subr_mseReal.o\
+subr_aveReal_kind8.o subr_varReal_kind8.o\
 subr_resp.o \
 subr_itemUsedYN.o subr_itemUsedSum.o \
 subr_itemUsedRate.o subr_itemPoolUsedRate.o\
@@ -20,9 +21,13 @@ subr_testOmega.o subr_testPsi.o\
 func_deltaPsi.o\
 subr_contentCount.o subr_contentTargetP.o \
 func_probability.o func_information.o\
-func_normal.o \
+func_normalPDF.o \
 func_combination.o \
-subr_EAP.o 
+subr_EAP.o \
+subr_setPK.o \
+module_ran_mod.o \
+
+
 
 # 待驗證的代碼
 # main_CAT.o
@@ -43,7 +48,8 @@ subr_EAP.o
 # main_MST_1234design
 # main_MST_infor
 # main_MST_theta
-
+# main_OMST_cont_SHO
+# main_OMST_cont_SH
 
 
 # obj = subr_testOmega.o
