@@ -6,7 +6,7 @@ program main_OMST_cont_SH
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"!Uniform Normal
     ! === parameter ===
-    integer,parameter :: numTest = 500 !重複次數
+    integer,parameter :: numTest = 500 !重複次數 10000
     integer,parameter :: numPool = 300 !題庫數
     integer,parameter :: length = 20 !作答題長
     integer,parameter :: numContentType = 3
@@ -30,9 +30,9 @@ program main_OMST_cont_SH
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數
     integer:: content(numPool)
     ! === true theta ===
-    real(kind=8) :: thetaTrue(numTest) = 1. !真實能力值
-    real(kind=8) :: thetaTrueMean = 0. !真實能力值之平均
-    real(kind=8) :: thetaBegin = 0.
+    real :: thetaTrue(numTest) = 1. !真實能力值
+    real :: thetaTrueMean = 0. !真實能力值之平均
+    real :: thetaBegin = 0.
     ! === function ===
     real, external :: information, probability, normalPDF
     ! === unknown data ===
@@ -42,7 +42,8 @@ program main_OMST_cont_SH
     integer :: choose
     real :: x
     ! === 運算暫存用 ===
-    real :: maxv !最大值 
+    real :: maxv !最大值
+    integer :: sumv_Int 
     integer :: place
     real :: infor(numPool) !題庫各試題的訊息量
     real :: randv(length, numTest)
@@ -61,6 +62,7 @@ program main_OMST_cont_SH
     ! 試題使用率；使用 = Administer
     integer :: usedPool(numPool, numTest) !紀錄試題是否被使用過
     integer :: usedSum(numPool, numTest) !試題被使用過的累加次數
+    integer :: usedTotalSum(numTest)
     real:: usedRate(numPool) !PA
     real:: usedRateMax !maxPA
     real:: usedRateMean !PAmean
@@ -70,11 +72,16 @@ program main_OMST_cont_SH
     real:: testOverlapData
     real:: testOverlap
     ! 估計能力參數 
-    real(kind=8)::thetaHat(numStages, numTest)
-    real(kind=8)::thetaHatMean !估計能力值的平均數
-    real(kind=8)::thetaBias !估計能力值與真值的差之平均
-    real(kind=8)::thetaHatVar !估計能力值的變異數
-    real(kind=8)::thetaHatMSE !估計能力值的MSE
+    ! real(kind=8)::thetaHat(numStages, numTest)
+    ! real(kind=8)::thetaHatMean !估計能力值的平均數
+    ! real(kind=8)::thetaBias !估計能力值與真值的差之平均
+    ! real(kind=8)::thetaHatVar !估計能力值的變異數
+    ! real(kind=8)::thetaHatMSE !估計能力值的MSE
+    real::thetaHat(numStages, numTest)
+    real::thetaHatMean !估計能力值的平均數
+    real::thetaBias !估計能力值與真值的差之平均
+    real::thetaHatVar !估計能力值的變異數
+    real::thetaHatMSE !估計能力值的MSE
     ! Omega
     real, dimension(numTest)::omegaOne
     real, dimension(numTest)::omegaTwo
@@ -92,12 +99,18 @@ program main_OMST_cont_SH
     real:: psiOneMin, psiTwoMin, psiThreeMin
     real:: psiOneVar, psiTwoVar, psiThreeVar
     ! infor note
+    ! double precision, dimension(length, numTest):: choose_inforTrue
+    ! double precision, dimension(length, numTest):: choose_inforEstimate
+    ! double precision, dimension(numTest):: choose_inforTrueSum
+    ! double precision, dimension(numTest):: choose_inforEstimateSum
+    ! double precision:: testMean_inforTrue
+    ! double precision:: testMean_inforEstimate
     real, dimension(length, numTest):: choose_inforTrue
     real, dimension(length, numTest):: choose_inforEstimate
     real, dimension(numTest):: choose_inforTrueSum
     real, dimension(numTest):: choose_inforEstimateSum
-    real :: testMean_inforTrue
-    real :: testMean_inforEstimate
+    real:: testMean_inforTrue
+    real:: testMean_inforEstimate
     ! === 存取時間 ===
     real (kind=8) t1 !開始時間
     real (kind=8) t2 !結束時間
@@ -109,6 +122,7 @@ program main_OMST_cont_SH
     character(len = 20), parameter :: dataF = '(100F10.4)' ! 隨著 length 改變而改變
     character(len = 20), parameter :: dataFS = '(100F10.2)' ! 隨著 length 改變而改變
     character(len = 20), parameter :: dataPool = '(500I10)' ! 隨著 pool item number 改變而改變
+    character(len = 20), parameter :: dataPool_T = '(A10,500I10)' ! 隨著 pool item number 改變而改變
     character(len = 20), parameter :: dataPoolFS = '(500F10.2)' ! 隨著 pool item number 改變而改變
     character(len = 20), parameter :: dataContentReal = '(10F10.4)'  ! 隨著 content type number 改變
     character(len = 20), parameter :: dataContentInt = '(10I10)'
@@ -116,13 +130,18 @@ program main_OMST_cont_SH
     ! === SH control === 
     ! 曝光率控管參數設定
     real, parameter::rMAX = 0.2
-    real::stop_rMAX = rMAX + rMAX*0.1 !0.22
+    real::stop_rMAX = rMAX + rMAX*0.5 !0.22
     real::stop_minMaxPA = 1 !紀錄迭代最小的maxPA
     integer::stop_NUM = 0
     real:: PK(numPool) = (/(1.0,i=1,numPool)/) !所有曝光率參數 初始值=1
     integer::numPK1 = numPool !PK=1的數目，初始值等於題庫數
+    ! SH 鬆綁參數    
+    real:: PK_choose(numPool)
+    real:: PK_max
+    real:: PK_rand
+    integer::stop_NUM_out = 0
     ! SH運算暫存用 
-    real:: rand_SH !亂數；用於SH法
+    real(kind = 8):: rand_SH !亂數；用於SH法
     integer:: itemID !題號；SH新增
     integer:: numIterate = 0!迭代次數；SH新增
     ! 試題被選擇率
@@ -133,11 +152,12 @@ program main_OMST_cont_SH
     real:: selectRateMean !PSmean
     real:: selectRateVar !PSvar
     ! 題庫試題選中與使用次數之檢驗數值
-    ! integer::sumS 
-    ! integer::sumA 
+    integer::sumS 
+    integer::sumA 
+    integer::sumS_Change
+    integer::sumS_cont_Change
+    integer::sum_num_SH
     ! integer::sumPOOL 
-    ! SH 鬆綁參數    
-
     ! 判斷題庫是否有試題可選 
     integer :: count_InforZero
 
@@ -150,7 +170,7 @@ program main_OMST_cont_SH
         read(100,*) a(i),b(i),c(i),content(i) !三參數
     enddo
     close(100)
-    
+
     ! ! 輸入受試者真實能力值
     ! open(100, file= dataPath2, status="old") 
     ! read(100,*)  ! 跳過第一列
@@ -161,143 +181,142 @@ program main_OMST_cont_SH
 
     ! 產生模擬的受試者真實能力值
     do i=1,numTest
-        ! thetaTrue( i ) = normal( REAL(thetaTrueMean,KIND = 8), 1.0D0 ) !自行生成
-        thetaTrue( i ) = normal( REAL(thetaTrueMean, KIND = 8), 1.0D0 ) !自行生成
+        thetaTrue( i ) = REAL(normal( REAL(thetaTrueMean,KIND=8), 1.0D0 ),KIND=4) !自行生成
+        ! thetaTrue( i ) = REAL(normal( REAL(2,KIND=8), 1.0D0 ),KIND=4) !自行生成
     enddo
-
+    
+    ! ! 檢驗模擬資料
+    ! call subr_aveReal(thetaTrue, numTest, thetaHatMean)
+    ! call subr_varReal(thetaTrue, numTest, thetaHatVar)
+    ! WRITE(*,*) "mean = ",thetaHatMean, " var = ", thetaHatVar
+    ! open(100, file= 'theta_Normal.txt', status="replace") 
+    ! WRITE(100,"(A20,A20)") "ID", "theta"
+    ! do i=1,numTest
+    !     WRITE(100,"(I20,F20.15)") i, thetaTrue(i)
+    ! enddo
+    ! close(100)
     !==================
     !運算過程中，寫下SH曝光率迭代資料
     !==================
-    ! open(unit = 102 , file = 'summery_SH_maxPA.txt' , status = 'replace', action = 'write', iostat= ierror)
-    ! write(unit = 102, fmt = '(A)') "type = "
-    ! close(102)
-    ! write(unit = 101, fmt ='(8A10)') "freq","item","PAmax","numPK1","OverLap","PAmean","PAvar","PoolUR" 
-    !寫下SH曝光率迭代資料 PK_test
-    open(unit = 103 , file = 'summery_SH_PK_test.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 103, fmt ="(2A10,300I10)") "Iterate","data",(i,i=1,numPool)
-    ! close(103)
-    ! open(unit = 102, file = 'summery_SH_maxPA.txt' , status = 'unknown')
-    ! open(unit = 103, file = 'summery_SH_PK_test.txt' , status = 'unknown')
-    ! 開始模擬
-    ! set module content constraint
-    contentTarget = contentScale*contentMultiplier
+    open(unit = 101 , file = 'ListCAT_summery_SH_maxPA.txt' , status = 'replace', action = 'write', iostat= ierror)
+    open(unit = 102 , file = 'ListCAT_summery_SH_PK_test.txt' , status = 'replace', action = 'write', iostat= ierror)
+    write(unit = 101, fmt ='(8A10)') "freq","item","PAmax","numPK1","PAmean","PAvar","PoolUR","OverLap"
+    write(unit = 102, fmt ="(2A10,300I10)") "Iterate","data",(i,i=1,numPool)
+    
+    contentTarget = contentScale*contentMultiplier ! 模組內各領域試題題數
+    contentPoolLimit = contentPoolNum - contentTarget*numStages ! 題庫各領域試題可用於迭代之上限量
+    ! do i = 1, numPool
+    !     PK(i) = 0.2
+    ! enddo
+        
     !開始SH的迭代
     do while( .true. )
-
-        !重設試題使用狀況
+    ! do x = 1,10
         do try = 1, numTest
-            do itemID = 1, numPool
-                usedPool(itemID, try) = 0
-                usedSum(itemID, try) = 0
-                selectPool(itemID, try) = 0
-                selectSum(itemID, try) = 0
-            enddo
-            do realChoose = 1, length
-                a_choose(realChoose, try) = 0
-                b_choose(realChoose, try) = 0
-                c_choose(realChoose, try) = 0
-                content_choose(realChoose, try) = 0
-                resp(realChoose, try) = 0
-            enddo
-        enddo
-
-        
-        ! 開始施測
-        do try = 1, numTest
-            realChoose = 0
+            ! 每次迭代須重設的值
+            if (try == 1) then
+                do j = 1,numTest
+                    do i = 1,numPool
+                        usedPool(i, j) = 0 
+                        usedSum(i, j) = 0 
+                    enddo
+                enddo
+            endif
+            
             do usedStages = 1, numStages
                 do choose = 1, length/numStages
-
-                    ! 內容領域相關設定
-                    if ( choose == 1 ) then
+                    ! 不同受試者須重設的值
+                    if (( choose == 1 ).AND.(usedStages == 1)) then
+                        !重設試題使用狀況
+                        realChoose = 0
+                        usedTotalSum(try) = 0
                         do i = 1, numContentType
                             contentPoolChange(i) = 0
                         enddo
-                        contentChange = contentTarget ! 重設內容領域控制參數
-                        contentPoolLimit = contentPoolNum - contentChange ! 題庫各領域剩餘可選的數量
-                    endif
-                    call subr_contentTargetP(contentChange, numContentType, contentTP)
-
-                    !SH曝光率控制
-                    do while (.true.)
-                        ! 隨機選擇要施測的內容領域
-                        call random_number(randContent)
-                        !WRITE(*,*) randContent
-                        do i = 1, numContentType
-                            if (i.EQ.1) then
-                                if ((randContent > 0) .AND. (randContent <= contentTP(i))) then
-                                    contentGoal = i
-                                endif
-                            else
-                                if ((randContent > contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
-                                    contentGoal = i
-                                endif
-                            endif
+                        do i=1,numPool
+                            selectPool(i, try) = 0 
+                            selectSum(i, try) = 0 
                         enddo
-                        contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除選中的內容題數
-                        contentPoolChange(contentGoal) = contentPoolChange(contentGoal) +1
-                        contentPoolLimit(contentGoal) = contentPoolLimit(contentGoal) -1
+                        do i=1,length
+                            place_choose(i, try) = 0  
+                            resp(i, try) = 9
+                        enddo
+                    endif
+                    realChoose = realChoose +1 ! 題長中的第幾題
+                    ! 內容領域相關設定
+                    if ( choose == 1 ) then ! 不同module須重設的值
+                        contentChange = contentTarget ! 重設內容領域控制參數
+                    endif
+                    ! 選擇要施測的內容領域
+                    call subr_contentTargetP(contentChange, numContentType, contentTP) ! 計算各內容機率範圍
+                    call random_number(randContent) !隨機選擇要施測的內容領域
+                    do i = 1, numContentType
+                        if (i.EQ.1) then
+                            if ((randContent > 0) .AND. (randContent <= contentTP(i))) then
+                                contentGoal = i
+                            endif
+                        else
+                            if ((randContent > contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
+                                contentGoal = i
+                            endif
+                        endif
+                    enddo
+                    contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除"選中&施測"的內容題數
+
+                    sum_num_SH = 0
+                    ! 納入SH控管
+                    do while (.true.)
+                        contentPoolChange(contentGoal) = contentPoolChange(contentGoal) +1 ! 加總"被選中"的內容題數
+                        sum_num_SH = sum_num_SH + 1
+                        ! write(*,*) '==================='
+                        ! write(*,*) 'sum number of SH  = ', sum_num_SH
+                        ! write(*,*) 'contentGoal       = ', contentGoal
+                        ! write(*,*) 'contentPoolChange = ',contentPoolChange
                         
                         ! 計算訊息量
-                        call random_number(rand_SH) !產生用於SH的隨機變數
                         if ( usedStages == 1 ) then       
                             do i = 1, numPool
-                                if (content(i) <= numContentType) then
-                                    if ( ( usedPool(i, try) == 0 ) .AND. &
-                                    (content(i) == contentGoal) .AND. &
-                                    (selectPool(i, try) == 0)) then
-                                        infor(i) = information(thetaBegin, a(i), b(i), c(i))
-                                    else
-                                        infor(i) = 0
-                                    endif
+                                if ( ( selectPool(i, try) == 0) .AND. (content(i) == contentGoal) ) then
+                                    infor(i) = information(thetaBegin, a(i), b(i), c(i))
                                 else
-                                    print*, "content error!"
-                                    stop
+                                    infor(i) = 0
                                 endif
                             enddo
                         else
                             do i = 1, numPool
-                                if (content(i) <= numContentType) then
-                                    if ( ( usedPool(i, try) == 0 ) .AND. &
-                                    ( content(i) == contentGoal ) .AND. &
-                                    (selectPool(i, try) == 0)) then
-                                        infor(i) = information(thetaHat(usedStages-1, try), a(i), b(i), c(i))
-                                    else
-                                        infor(i) = 0
-                                    endif
+                                if ( ( selectPool(i, try) == 0) .AND. (content(i) == contentGoal)) then
+                                    infor(i) = information(thetaHat(usedStages-1, try), a(i), b(i), c(i))
                                 else
-                                    print*, "content error!"
-                                    stop
+                                    infor(i) = 0
                                 endif
                             enddo
                         endif
-                        realChoose = realChoose + 1
-                        ! realChoose = (usedStages-1)*(length/numStages) + choose
                         call subr_maxvReal(infor, numPool, maxv, place_choose(realChoose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
-                        ! 紀錄被選擇次數
-                        selectPool(place_choose(realChoose, try), try) = 1
-                        if (try == 1) then
-                            selectSum(place_choose(realChoose, try), try) = 1
-                        else
-                            selectSum(place_choose(realChoose, try), try) = selectSum(place_choose(realChoose, try), try-1) + 1
-                        endif
-                        ! 需在content題數有限的狀況選出試題
-                        if (contentPoolChange(contentGoal) < (contentPoolLimit(contentGoal)-contentChange(contentGoal))) then
-                            !等式成立，則跳離此迴圈
-                            if (rand_SH <= PK(place_choose(realChoose, try))) then
-                                exit
-                            else
-                                contentChange(contentGoal) = contentChange(contentGoal)+1 ! 恢復選中的內容題數
-                                contentPoolChange(contentGoal) = contentPoolChange(contentGoal) -1
-                                contentPoolLimit(contentGoal) = contentPoolLimit(contentGoal) +1
-                                realChoose = realChoose -1
-                            endif 
-                        else
+                        ! 成功選題後，紀錄選出的試題
+                        selectPool(place_choose(realChoose, try), try) = 1 !紀錄選出的試題
+                        ! ! 計算被選次數
+                        ! sumS = 0
+                        ! do i = 1, numPool
+                        !     sumS = sumS + selectPool(i, try)
+                        ! enddo
+                        ! write(*,*) 'sumS              = ', sumS
+                        !產生用於SH的隨機變數
+                        call random_number(rand_SH)
+                        ! ! 驗證隨機變數的效果 
+                        ! write(*,*) "======== "
+                        ! write(*,*) "rand   = ", REAL(rand_SH,kind = 4)
+                        ! write(*,*) "PK     = ", PK(place_choose(realChoose, try))
+                        ! write(*,*) "place  = ", place_choose(realChoose, try)
+                        if (REAL(rand_SH,kind = 4) <= PK(place_choose(realChoose, try))) then
+                            exit
+                        elseif (contentPoolChange(contentGoal)>contentPoolLimit(contentGoal)) then
+                            ! write(*,*) "content error!"
                             exit
                         endif
-                    enddo 
+                    enddo !SH篩選迴圈End
+                    
                     ! 成功選題後，紀錄選出的試題
-                    usedPool(place_choose(realChoose, try), try) = 1 !紀錄使用試題
+                    usedPool(place_choose(realChoose, try), try) = 1 !紀錄選出並使用的試題
                     ! 紀錄使用的試題參數
                     a_choose(realChoose, try) = a(place_choose(realChoose, try))
                     b_choose(realChoose, try) = b(place_choose(realChoose, try))
@@ -307,92 +326,305 @@ program main_OMST_cont_SH
                     call subr_resp(thetaTrue(try), &
                     a_choose(realChoose, try),b_choose(realChoose, try),c_choose(realChoose, try),&
                     resp(realChoose, try),randv(realChoose, try))
-                    ! 紀錄試題累計使用次數與使用率
-                    do i=1, numPool
-                        if ( try == 1 ) then
-                            usedSum(i,try) = usedPool(i,try)
-                            usedRate(i) = usedSum(i,try)/try
-                        else
-                            usedSum(i,try) = usedSum(i,try-1) + usedPool(i,try)
-                            usedRate(i) = usedSum(i,try)/try
-                        endif
-                    enddo
+
+                    ! ! 驗算內容選擇狀況
+                    ! write(*,*) "==================="
+                    ! write(*,*) "try               =", try
+                    ! write(*,*) "realChoose        =", realChoose
+                    ! write(*,*) "contentTP         =", (contentTP(i),i=1,numContentType)
+                    ! write(*,*) "randContent       =", randContent
+                    ! write(*,*) "contentGoal       =", contentGoal
+                    ! write(*,*) "contentChange     =", (contentChange(i),i=1,numContentType)
+                    ! write(*,*) "contentPoolLimit  =", (contentPoolLimit(i),i=1,numContentType)
+                    ! write(*,*) "contentPoolChange =", (contentPoolChange(i),i=1,numContentType)
+                    ! sumS = 0
+                    ! do i = 1, numPool
+                    !     sumS = sumS + usedPool(i, try)
+                    ! enddo
+                    ! write(*,*) '======================================= '
+                    ! write(*,*) 'try               = ', try
+                    ! write(*,*) 'sumS_Pool         = ', sumS
+
+                    ! 驗算題庫選擇狀況
+                    ! write(*,*) "==================="
+                    ! write(*,*) "selectPool        =", (selectPool(i, try),i=1,numPool)
+                    ! write(*,*) "usedPool          =", (usedPool(i, try),i=1,numPool)
+                    ! write(*,*) "selectPool        =", selectPool(place_choose(realChoose, try), try)
+                    ! write(*,*) "usedPool          =", usedPool(place_choose(realChoose, try), try)
                 enddo
+                
                 ! EAP能力估計
                 call subr_EAP(realChoose, &
                 a_choose(1:usedStages*(length/numStages), try),&
                 b_choose(1:usedStages*(length/numStages), try),&
                 c_choose(1:usedStages*(length/numStages), try),&
                 resp(1:usedStages*(length/numStages), try), thetaHat(usedStages, try))
+                ! write(*,*) "==================="
+                ! write(*,*) "thetaTrue   =", thetaTrue(try)
+                ! write(*,*) "thetaHat    =", thetaHat(usedStages,try)
             enddo
             ! 計算每位受試者於不同內容領域中用了幾題
-            do j=1,numContentType
-                call subr_contentCount(content_choose(:,try),length,j,contentResult(j,try))
+            do i=1,numContentType
+                call subr_contentCount(content_choose(:,try),length,i,contentResult(i,try))
             enddo
+            ! write(*,*) "==================="
+            ! write(*,*) "thetaHat    =", (thetaHat(i,try),i=1,numStages)
+            ! write(*,*) "contentResult =", (contentResult(i,try),i=1,numContentType)
         enddo
-
+        
         ! === 施測所有受試者後 ===!
         ! 記錄迭代次數
         numIterate = numIterate + 1 
+        ! 算出被施測(A)&被選擇(S)的累加次數
+        do try = 1, numTest
+            do i = 1, numPool
+                if ( try == 1 ) then
+                    selectSum(i,try) = selectPool(i,try) ! 被選擇(S)的累加次數
+                    usedSum(i,try) = usedPool(i,try) ! 被施測(A)的累加次數
+                else
+                    selectSum(i,try) = selectSum(i,try-1) + selectPool(i,try) ! 被選擇(S)的累加次數
+                    usedSum(i,try) = usedSum(i,try-1) + usedPool(i,try) ! 被施測(A)的累加次數
+                endif
+                usedTotalSum(try) = usedTotalSum(try) + usedPool(i,try)
+            enddo
+        enddo
+
+        ! 算出試題使用率(PA)與被選擇率(PS)
+        do i=1, numPool
+            usedRate(i) = REAL(usedSum(i,numTest))/numTest !PA
+            selectRate(i) = REAL(selectSum(i,numTest))/numTest !PS
+        enddo
+        ! write(*,*) "usedRate          =", (usedRate(i),i=1,numPool)
+        ! write(*,*) "selectRate        =", (selectRate(i),i=1,numPool)
         ! 算出最大PA
         call subr_maxvReal(usedRate, numPool, usedRateMax, place) !取PA的最大值與相對位置
-        write(*,*) "numIterate= ",numIterate, "; maxPA= ",usedRateMax
-        ! if (numIterate > 50) then
-        !     write(*,*) "numIterate too"
-        ! endif
-        ! 紀錄迭代最小的maxPA
-        ! if ( usedRateMax < stop_minMaxPA ) then
-        !     stop_minMaxPA = usedRateMax
-        !     write(*,*) "min(maxPA)= ",usedRateMax
-        ! end if
-
-        ! item selsected rate 
-        selectRate = REAL(selectSum(:, numTest))/numTest
-        ! do i = 1, numPool
-        !     selectRate(i) = REAL(selectSum(i, numTest))/numTest
-        ! enddo
-        ! item used rate 計算
-        call subr_itemUsedRate(usedPool, numTest, numPool, usedRate)
-        call subr_maxvReal(usedRate, numPool, usedRateMax, place)
+        write(*,"(A10,I10,A10,I10,A10,I10,A10,F10.5)") "numIterate= ",numIterate, " numPK1 = ", numPK1,&
+        " place = ", place," maxPA= ",usedRateMax
         call subr_aveReal(usedRate, numPool, usedRateMean)
         call subr_varReal(usedRate, numPool, usedRateVar)
-        ! 迭代題庫使用率
         call subr_itemPoolUsedRate(usedPool, numTest, numPool, poolUsedRate) !SH迭代題庫使用率
-        ! test overlap
         call subr_testOverlap(place_choose, numTest, length, testOverlapData) ! 不知為何會受下面subr_maxvInt的影響，待查證
         testOverlap = testOverlapData
-        !寫下SH曝光率迭代資料
-        ! write(unit = 102, fmt = "(2I10,F10.5,I10,4F10.5)") numIterate,place,usedRateMax,numPK1,testOverlap,&
-        ! usedRateMean,usedRateVar,poolUsedRate
+        ! 寫下資料
+        write(unit = 101, fmt ="(2I10,F10.5,I10,4F10.5)") numIterate , place ,usedRateMax,&
+        numPK1,usedRateMean,usedRateVar,poolUsedRate, testOverlap 
         
-        ! print*, numIterate,place,usedRateMax,numPK1,testOverlap,usedRateMean,usedRateVar,poolUsedRate
-        
-        !此式成立，則跳離此迴圈
-        !if (maxPA < stop_rMAX) exit
-        !要出現5次此情形，才會跳出迴圈
+        ! 迭代停止規則
+        if ( usedRateMax < stop_minMaxPA ) then ! 紀錄迭代最小的maxPA
+            stop_minMaxPA = usedRateMax
+            ! write(*,*) "min(maxPA)= ",usedRateMax
+        end if
         if (usedRateMax < stop_rMAX) then
             stop_NUM = stop_NUM +1
         end if
-        if (stop_NUM >= 5) then
-            ! if (usedRateMax <= stop_minMaxPA) exit
-            exit
+        if (stop_NUM >= 5) then !要出現5次此情形，才會跳出迴圈
+            if (usedRateMax <= stop_minMaxPA) exit !此式成立，則跳離此迴圈
         end if 
+        ! ! 停止迭代之寬鬆規則
+        ! if ( numIterate >= 20 ) then 
+        !     if ( usedRateMax <= (stop_minMaxPA + stop_minMaxPA*0.1)) then
+        !         stop_NUM_out = stop_NUM_out + 1
+        !         if (stop_NUM_out >= 5) then
+        !             exit        
+        !         endif
+        !     endif
+        !     write(*,*) "=================================================================================="
+        !     write(*,"(A10,I10,A10,F10.5,A10,I10)") "numIterate= ",numIterate,& 
+        !     " Rule = ", (stop_minMaxPA + stop_minMaxPA*0.1),&
+        !     " Out_num = ", stop_NUM_out
+        ! end if
+
         !SH曝光率控制 PK值調整
         call setPK(selectRate,numPool,rMAX,length,PK,numPK1)
-        
-        !寫下SH曝光率迭代資料 PK_test(依題庫試題數調整)
-        ! write(102,"(I10,A10,400F10.5)") numIterate,"PS",(PS(i),i=1,col)
-        write(unit = 103, fmt = "(I10,A10,400F10.5)") numIterate,"PK",(PK(i),i=1,numPool)
+        write(unit = 102, fmt ="(I10,A10,400I10)") numIterate,"numS",(selectSum(i,numTest),i=1,numPool)
+        write(unit = 102, fmt ="(I10,A10,400I10)") numIterate,"numA",(usedSum(i,numTest),i=1,numPool)
+        write(unit = 102, fmt ="(I10,A10,400F10.5)") numIterate,"PS",(selectRate(i),i=1,numPool)
+        write(unit = 102, fmt ="(I10,A10,400F10.5)") numIterate,"PA",(usedRate(i),i=1,numPool)
+        write(unit = 102, fmt ="(I10,A10,400F10.5)") numIterate,"PK",(PK(i),i=1,numPool)
+    enddo !結束迭代
 
+    write(unit = 102, fmt ="(I10,A10,400I10)") numIterate,"numS",(selectSum(i,numTest),i=1,numPool)
+    write(unit = 102, fmt ="(I10,A10,400I10)") numIterate,"numA",(usedSum(i,numTest),i=1,numPool)
+    write(unit = 102, fmt ="(I10,A10,400F10.5)") numIterate,"PS",(selectRate(i),i=1,numPool)
+    write(unit = 102, fmt ="(I10,A10,400F10.5)") numIterate,"PA",(usedRate(i),i=1,numPool)
+    write(unit = 102, fmt ="(I10,A10,400F10.5)") numIterate,"PK",(PK(i),i=1,numPool)
+    ! close(101)
+    ! close(102)
+
+
+
+    ! =======================================================
+    ! =======================================================
+    ! ========== 根據迭代所得的PK值再施測一次 =================
+    ! 輸入受試者真實能力值
+    open(100, file= dataPath2, status="old") 
+    read(100,*)  ! 跳過第一列
+    do i=1,numTest
+        read(100,*) x, thetaTrue(i) !從資料讀取三參數
     enddo
+    close(100)
 
+    ! 重新施測須重設的值
+    do try = 1,numTest
+        do i = 1,numPool
+            usedPool(i, try) = 0 
+            usedSum(i, try) = 0
+            selectPool(i, try) = 0 
+            selectSum(i, try) = 0 
+        enddo
+        do i=1,length
+            place_choose(i, try) = 0  
+            resp(i, try) = 9
+            a_choose(i, try) = 0
+            b_choose(i, try) = 0
+            c_choose(i, try) = 0
+            content_choose(i, try) = 0
+        enddo
+        usedTotalSum(try) = 0
+    enddo
+    
+    do try = 1, numTest
+        do usedStages = 1, numStages
+            do choose = 1, length/numStages
+                ! 不同受試者須重設的值
+                if (( choose == 1 ).AND.(usedStages == 1)) then
+                    !重設試題使用狀況
+                    realChoose = 0
+                    do i = 1, numContentType
+                        contentPoolChange(i) = 0
+                    enddo
+                endif
+                realChoose = realChoose +1 ! 題長中的第幾題
+                ! 內容領域相關設定
+                if ( choose == 1 ) then ! 不同module須重設的值
+                    contentChange = contentTarget ! 重設內容領域控制參數
+                endif
+                ! 選擇要施測的內容領域
+                call subr_contentTargetP(contentChange, numContentType, contentTP) ! 計算各內容機率範圍
+                call random_number(randContent) !隨機選擇要施測的內容領域
+                do i = 1, numContentType
+                    if (i.EQ.1) then
+                        if ((randContent > 0) .AND. (randContent <= contentTP(i))) then
+                            contentGoal = i
+                        endif
+                    else
+                        if ((randContent > contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
+                            contentGoal = i
+                        endif
+                    endif
+                enddo
+                contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除"選中&施測"的內容題數
+                
+                ! 納入SH控管
+                do while (.true.)
+                    contentPoolChange(contentGoal) = contentPoolChange(contentGoal) +1 ! 加總"被選中"的內容題數
+                    ! 計算訊息量
+                    if ( usedStages == 1 ) then       
+                        do i = 1, numPool
+                            if ( ( selectPool(i, try) == 0) .AND. (content(i) == contentGoal) ) then
+                                infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                            else
+                                infor(i) = 0
+                            endif
+                        enddo
+                    else
+                        do i = 1, numPool
+                            if ( ( selectPool(i, try) == 0) .AND. (content(i) == contentGoal)) then
+                                infor(i) = information(thetaHat(usedStages-1, try), a(i), b(i), c(i))
+                            else
+                                infor(i) = 0
+                            endif
+                        enddo
+                    endif
+                    call subr_maxvReal(infor, numPool, maxv, place_choose(realChoose, try)) ! 求出最大訊息量與其題庫ID(紀錄使用的試題題號)
+                    ! 成功選題後，紀錄選出的試題
+                    selectPool(place_choose(realChoose, try), try) = 1 !紀錄選出的試題
+                    !產生用於SH的隨機變數
+                    call random_number(rand_SH)
+                    if (REAL(rand_SH,kind = 4) <= PK(place_choose(realChoose, try))) then
+                        exit
+                    elseif (contentPoolChange(contentGoal)>contentPoolLimit(contentGoal)) then
+                        ! write(*,*) "content error!"
+                        exit ! 避免出現無試題選出的狀況
+                    endif
+                enddo !SH篩選迴圈End
+                
+                ! 成功選題後，紀錄選出的試題
+                usedPool(place_choose(realChoose, try), try) = 1 !紀錄選出並使用的試題
+                ! 紀錄使用的試題參數
+                a_choose(realChoose, try) = a(place_choose(realChoose, try))
+                b_choose(realChoose, try) = b(place_choose(realChoose, try))
+                c_choose(realChoose, try) = c(place_choose(realChoose, try))
+                content_choose(realChoose, try) = content(place_choose(realChoose, try))
+                ! 模擬作答，並記錄作答反應
+                call subr_resp(thetaTrue(try), &
+                a_choose(realChoose, try),b_choose(realChoose, try),c_choose(realChoose, try),&
+                resp(realChoose, try),randv(realChoose, try))
+            enddo
+            
+            ! EAP能力估計
+            call subr_EAP(realChoose, &
+            a_choose(1:usedStages*(length/numStages), try),&
+            b_choose(1:usedStages*(length/numStages), try),&
+            c_choose(1:usedStages*(length/numStages), try),&
+            resp(1:usedStages*(length/numStages), try), thetaHat(usedStages, try))
+        enddo
+        ! 計算每位受試者於不同內容領域中用了幾題
+        do i=1,numContentType
+            call subr_contentCount(content_choose(:,try),length,i,contentResult(i,try))
+        enddo
+    enddo
+        
+    ! === 施測所有受試者後 ===!
+    ! 算出被施測(A)&被選擇(S)的累加次數
+    do try = 1, numTest
+        do i = 1, numPool
+            if ( try == 1 ) then
+                selectSum(i,try) = selectPool(i,try) ! 被選擇(S)的累加次數
+                usedSum(i,try) = usedPool(i,try) ! 被施測(A)的累加次數
+                usedTotalSum(try) = usedPool(i,try)
+            else
+                selectSum(i,try) = selectSum(i,try-1) + selectPool(i,try) ! 被選擇(S)的累加次數
+                usedSum(i,try) = usedSum(i,try-1) + usedPool(i,try) ! 被施測(A)的累加次數
+                usedTotalSum(try) = usedTotalSum(try) + usedPool(i,try)
+            endif
+        enddo
+    enddo
+    ! 算出試題使用率(PA)與被選擇率(PS)
+    do i=1, numPool
+        usedRate(i) = REAL(usedSum(i,numTest))/numTest !PA
+        selectRate(i) = REAL(selectSum(i,numTest))/numTest !PS
+    enddo
+    ! write(*,*) "usedRate          =", (usedRate(i),i=1,numPool)
+    ! write(*,*) "selectRate        =", (selectRate(i),i=1,numPool)
+    ! 算出最大PA
+    call subr_maxvReal(usedRate, numPool, usedRateMax, place) !取PA的最大值與相對位置
+    ! write(*,*) "Final place = ", place," Final maxPA= ",usedRateMax
+    call subr_aveReal(usedRate, numPool, usedRateMean)
+    call subr_varReal(usedRate, numPool, usedRateVar)
+    call subr_itemPoolUsedRate(usedPool, numTest, numPool, poolUsedRate) !SH迭代題庫使用率
+    call subr_testOverlap(place_choose, numTest, length, testOverlapData) ! 不知為何會受下面subr_maxvInt的影響，待查證
+    testOverlap = testOverlapData ! test overlap
+
+    ! 寫下資料
+    write(unit = 101, fmt ="(A10,A50)") " ","========================="
+    write(unit = 101, fmt ="(2I10,F10.5,I10,4F10.5)") numIterate , place ,usedRateMax,&
+    numPK1,usedRateMean,usedRateVar,poolUsedRate,testOverlap 
+
+    write(unit = 102, fmt ="(A10,A50)") " ","========================="
+    write(unit = 102, fmt ="(I10,A10,400I10)") numIterate,"numS",(selectSum(i,numTest),i=1,numPool)
+    write(unit = 102, fmt ="(I10,A10,400I10)") numIterate,"numA",(usedSum(i,numTest),i=1,numPool)
+    write(unit = 102, fmt ="(I10,A10,400F10.5)") numIterate,"PS",(selectRate(i),i=1,numPool)
+    write(unit = 102, fmt ="(I10,A10,400F10.5)") numIterate,"PA",(usedRate(i),i=1,numPool)
+    write(unit = 102, fmt ="(I10,A10,400F10.5)") numIterate,"PK",(PK(i),i=1,numPool)
+    close(101)
     close(102)
-    close(103)
-
-    ! 再施測一次
-
 
     call cpu_time (t2) !結束計時
+    
+    ! ====================================================
+    ! ============= 計算並輸出所需資料 ====================
+
     ! thetaHat 計算 (根據OMST調整)
     call subr_aveReal(thetaTrue, numTest, thetaTrueMean)
     call subr_aveReal(thetaHat(numStages,:), numTest, thetaHatMean)
@@ -461,35 +693,35 @@ program main_OMST_cont_SH
     call subr_aveReal(choose_inforEstimateSum, numTest, testMean_inforEstimate)
     ! === 輸出資料 ===
     open(unit = 100 , file = 'ListCAT_summary.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 100, fmt = '(A)') "OMST_with_content_balance"
-    write(unit = 100, fmt = '(A10,I10)') "stages", numStages
-    write(unit = 100, fmt = '(A10,F10.5)') "time", t2-t1
-    write(unit = 100, fmt = '(A10,I10)') "test_n", numTest
-    write(unit = 100, fmt = '(A10,I10)') "pool_n", numPool
-    write(unit = 100, fmt = '(A10,I10)') "length", length
+    write(unit = 100, fmt = '(A)') "OMST_with_cont&SH"
+    write(unit = 100, fmt = '(A12,I10)') "stages", numStages
+    write(unit = 100, fmt = '(A12,F10.5)') "time", t2-t1
+    write(unit = 100, fmt = '(A12,I10)') "test_n", numTest
+    write(unit = 100, fmt = '(A12,I10)') "pool_n", numPool
+    write(unit = 100, fmt = '(A12,I10)') "length", length
     write(unit = 100, fmt = '(/,A)') "ThetaHat_of_Estimates: "
-    write(unit = 100, fmt = '(A10, F10.5)') "Mean", thetaHatMean
-    write(unit = 100, fmt = '(A10, F10.5)') "Bias", thetaBias
-    write(unit = 100, fmt = '(A10, F10.5)') "Var", thetaHatVar
-    write(unit = 100, fmt = '(A10, F10.5)') "MSE", thetaHatMSE
-    write(unit = 100, fmt = '(A10, F10.5)') "RMSE", thetaHatMSE**0.5
+    write(unit = 100, fmt = '(A12, F10.5)') "Mean", thetaHatMean
+    write(unit = 100, fmt = '(A12, F10.5)') "Bias", thetaBias
+    write(unit = 100, fmt = '(A12, F10.5)') "Var", thetaHatVar
+    write(unit = 100, fmt = '(A12, F10.5)') "MSE", thetaHatMSE
+    write(unit = 100, fmt = '(A12, F10.5)') "RMSE", thetaHatMSE**0.5
     write(unit = 100, fmt = '(/,A)') "Item_Exposure_Ratee: "
-    write(unit = 100, fmt = '(A10, F10.5)') "max", usedRateMax
-    write(unit = 100, fmt = '(A10, F10.5)') "mean", usedRateMean
-    write(unit = 100, fmt = '(A10, F10.5)') "var", usedRateVar
+    write(unit = 100, fmt = '(A12, F10.5)') "max", usedRateMax
+    write(unit = 100, fmt = '(A12, F10.5)') "mean", usedRateMean
+    write(unit = 100, fmt = '(A12, F10.5)') "var", usedRateVar
     write(unit = 100, fmt = '(/,A)') "Pool_Used: "
-    write(unit = 100, fmt = '(A10, F10.5)') "Rate", poolUsedRate
+    write(unit = 100, fmt = '(A12, F10.5)') "Rate", poolUsedRate
     write(unit = 100, fmt = '(/,A)') "Test_Overlap: "
-    write(unit = 100, fmt = '(A10, F10.5)') "overlap", testOverlap
+    write(unit = 100, fmt = '(A12, F10.5)') "overlap", testOverlap
     write(unit = 100, fmt = '(/,A)') "Mean_of_Infor: "
-    write(unit = 100, fmt = '(A10, F10.5)') "True", testMean_inforTrue
-    write(unit = 100, fmt = '(A10, F10.5)') "Estimate", testMean_inforEstimate
+    write(unit = 100, fmt = '(A12, F10.5)') "True", testMean_inforTrue
+    write(unit = 100, fmt = '(A12, F10.5)') "Estimate", testMean_inforEstimate
     write(unit = 100, fmt = '(/,A)') "Psi_max"
-    write(unit = 100, fmt = '(A10, F10.5)') "Set", 1.0
-    write(unit = 100, fmt = '(A10, I10)') "alpha", 1
-    write(unit = 100, fmt = '(A10, F10.5)') "Max_1", psiOneMax
-    write(unit = 100, fmt = '(A10, F10.5)') "Max_2", psiTwoMax
-    write(unit = 100, fmt = '(A10, F10.5)') "Max_3", psiThreeMax
+    write(unit = 100, fmt = '(A12, F10.5)') "Set", 1.0
+    write(unit = 100, fmt = '(A12, I10)') "alpha", 1
+    write(unit = 100, fmt = '(A12, F10.5)') "Max_1", psiOneMax
+    write(unit = 100, fmt = '(A12, F10.5)') "Max_2", psiTwoMax
+    write(unit = 100, fmt = '(A12, F10.5)') "Max_3", psiThreeMax
     close(100)
     ! == theta hat ==
     open(unit = 100 , file = 'ListCAT_theta.txt' , status = 'replace', action = 'write', iostat= ierror)
@@ -548,9 +780,9 @@ program main_OMST_cont_SH
     close(100)
     open(unit = 100 , file = 'ListCAT_poolUsedSum.txt' , status = 'replace', action = 'write', iostat= ierror)
     write(unit = 100, fmt = '(A)') "pool used sum = "
-    write(unit = 100, fmt = dataPool) (j, j=1,numPool)
+    write(unit = 100, fmt = dataPool_T) "SUM",(j, j=1,numPool)
     do i=1,numTest
-        write(unit = 100, fmt = dataPool) (usedSum(j,i),j=1,numPool)
+        write(unit = 100, fmt = dataPool) usedTotalSum(i),(usedSum(j,i),j=1,numPool)
     end do
     close(100)
     ! == Omega & Psi ==
@@ -573,5 +805,5 @@ program main_OMST_cont_SH
     end do
     close(100)
     stop
-
-end program main_OMST_cont_SH
+    
+end program
