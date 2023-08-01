@@ -19,9 +19,9 @@ program CAT_contentControl
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數
     integer:: content(numPool)
     ! === true theta ===
-    real :: thetaTrue(numTest) = 1. !真實能力值
+    real :: thetaTrue(numTest) = 1.0 !真實能力值
     real :: thetaTrueMean !真實能力值之平均
-    real :: thetaBegin = 0.
+    real :: thetaBegin = 0.0
     ! === function ===
     real, external :: information, probability, normalPDF
     ! === unknown data ===

@@ -9,7 +9,7 @@ Subroutine subr_aveReal(x, nvals, ave)
     ! === output data ===
     real, intent(out) :: ave
     ! === run code ===
-    sum_x = 0.
+    sum_x = 0.0
     do i=1, nvals
         sum_x = sum_x + x(i)
     enddo

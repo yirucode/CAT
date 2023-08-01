@@ -9,7 +9,7 @@ Subroutine subr_aveReal_kind8(x, nvals, ave)
     ! === output data ===
     real(kind=8), intent(out) :: ave
     ! === run code ===
-    sum_x = 0.
+    sum_x = 0.0D0
     do i=1, nvals
         sum_x = sum_x + x(i)
     enddo

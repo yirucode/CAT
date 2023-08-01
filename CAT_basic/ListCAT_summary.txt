@@ -1,0 +1,35 @@
+OMST_with_cont&SH
+      stages         4
+        time   8.95312
+      test_n       500
+      pool_n       300
+      length        40
+
+ThetaHat_of_Estimates: 
+        Mean   0.02286
+        Bias   0.01646
+         Var   0.98184
+         MSE   0.06480
+        RMSE   0.25456
+
+Item_Exposure_Ratee: 
+         max   0.24200
+        mean   0.13333
+         var   0.00760
+
+Pool_Used: 
+        Rate   0.85333
+
+Test_Overlap: 
+     overlap   0.18868
+
+Mean_of_Infor: 
+        True  15.07653
+    Estimate  15.46665
+
+Psi_max
+         Set   1.00000
+       alpha         1
+       Max_1   0.22500
+       Max_2   0.40000
+       Max_3   0.53604

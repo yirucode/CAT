@@ -6,22 +6,24 @@ program main_OMST_cont_SH
     character(len = 50), parameter :: dataPath = "data/parameter_300.txt"
     character(len = 50), parameter :: dataPath2 = "data/Population_Normal.txt"!Uniform Normal
     ! === parameter ===
-    integer,parameter :: numTest = 500 !重複次數 10000
+    integer,parameter :: numTest = 1000 !重複次數 10000
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 20 !作答題長
+    integer,parameter :: length = 40 !作答題長 
     integer,parameter :: numContentType = 3
     ! === module set ===
     integer :: contentScale(numContentType) = (/2,2,1/)
     integer :: contentMultiplier = 2
     ! === OMST set ===
     integer :: usedStages
-    integer,parameter :: numStages = 2
+    integer,parameter :: numStages = 4
     integer :: realChoose
     ! === content target ===
     integer :: contentGoal = 0
     integer :: contentTarget(numContentType) != (/16,16,8/)
+    integer :: contentTargetSum(numContentType) != (/16,16,8/)
     integer :: contentChange(numContentType) 
     integer :: contentPoolNum(numContentType) = (/120,120,60/) ! SH控管新增
+    integer :: contentPoolNumSum(numContentType) ! SH控管新增
     integer :: contentPoolLimit(numContentType)   ! 初始值等於contentPoolNum；SH控管新增
     integer :: contentPoolChange(numContentType)  ! SH控管新增
     real :: randContent
@@ -30,9 +32,9 @@ program main_OMST_cont_SH
     real::a(numPool), b(numPool), c(numPool) !題庫試題參數
     integer:: content(numPool)
     ! === true theta ===
-    real :: thetaTrue(numTest) = 1. !真實能力值
-    real :: thetaTrueMean = 0. !真實能力值之平均
-    real :: thetaBegin = 0.
+    real :: thetaTrue(numTest) = 1.0 !真實能力值
+    real :: thetaTrueMean = 0.0 !真實能力值之平均
+    real :: thetaBegin = 0.0
     ! === function ===
     real, external :: information, probability, normalPDF
     ! === unknown data ===
@@ -40,6 +42,7 @@ program main_OMST_cont_SH
     integer :: i,j
     integer :: try
     integer :: choose
+    integer :: xi
     real :: x
     ! === 運算暫存用 ===
     real :: maxv !最大值
@@ -128,13 +131,14 @@ program main_OMST_cont_SH
     character(len = 20), parameter :: dataContentInt = '(10I10)'
     ! ================== 
     ! === SH control === 
-    ! 曝光率控管參數設定
-    real, parameter::rMAX = 0.2
-    real::stop_rMAX = rMAX + rMAX*0.5 !0.22
+    ! 曝光率控管參數設定 (2)
+    real, parameter::rMAX = 0.1
+    real::stop_rMAX = rMAX + rMAX*((1.0/numTest)*numPool) !0.22
     real::stop_minMaxPA = 1 !紀錄迭代最小的maxPA
     integer::stop_NUM = 0
     real:: PK(numPool) = (/(1.0,i=1,numPool)/) !所有曝光率參數 初始值=1
-    integer::numPK1 = numPool !PK=1的數目，初始值等於題庫數
+    integer::numPK1(numContentType)
+    integer::numSumPK1 = numPool !PK=1的數目，初始值等於題庫數
     ! SH 鬆綁參數    
     real:: PK_choose(numPool)
     real:: PK_max
@@ -200,18 +204,28 @@ program main_OMST_cont_SH
     !==================
     open(unit = 101 , file = 'ListCAT_summery_SH_maxPA.txt' , status = 'replace', action = 'write', iostat= ierror)
     open(unit = 102 , file = 'ListCAT_summery_SH_PK_test.txt' , status = 'replace', action = 'write', iostat= ierror)
-    write(unit = 101, fmt ='(8A10)') "freq","item","PAmax","numPK1","PAmean","PAvar","PoolUR","OverLap"
+    write(unit = 101, fmt ='(8A10)') "freq","item","PAmax","numSumPK1","PAmean","PAvar","PoolUR","OverLap"
     write(unit = 102, fmt ="(2A10,300I10)") "Iterate","data",(i,i=1,numPool)
     
     contentTarget = contentScale*contentMultiplier ! 模組內各領域試題題數
+    do i = 1, numContentType
+        if(i==1)then 
+            contentTargetSum(i) = contentTarget(i)
+            contentPoolNumSum(i) = contentPoolNum(i)
+        else
+            contentTargetSum(i) = contentTargetSum(i-1) + contentTarget(i)
+            contentPoolNumSum(i) = contentPoolNumSum(i-1) + contentPoolNum(i)
+        endif
+    enddo
     contentPoolLimit = contentPoolNum - contentTarget*numStages ! 題庫各領域試題可用於迭代之上限量
+    numPK1 = contentPoolNum  !題庫各領域試題之PK為1的數量初始值
     ! do i = 1, numPool
     !     PK(i) = 0.2
     ! enddo
         
     !開始SH的迭代
-    do while( .true. )
-    ! do x = 1,10
+    ! do while( .true. )
+    do xi = 1,15
         do try = 1, numTest
             ! 每次迭代須重設的值
             if (try == 1) then
@@ -266,7 +280,7 @@ program main_OMST_cont_SH
                     sum_num_SH = 0
                     ! 納入SH控管
                     do while (.true.)
-                        contentPoolChange(contentGoal) = contentPoolChange(contentGoal) +1 ! 加總"被選中"的內容題數
+                        ! contentPoolChange(contentGoal) = contentPoolChange(contentGoal) +1 ! 加總"被選中"的內容題數
                         sum_num_SH = sum_num_SH + 1
                         ! write(*,*) '==================='
                         ! write(*,*) 'sum number of SH  = ', sum_num_SH
@@ -309,9 +323,9 @@ program main_OMST_cont_SH
                         ! write(*,*) "place  = ", place_choose(realChoose, try)
                         if (REAL(rand_SH,kind = 4) <= PK(place_choose(realChoose, try))) then
                             exit
-                        elseif (contentPoolChange(contentGoal)>contentPoolLimit(contentGoal)) then
+                        ! elseif (contentPoolChange(contentGoal)>contentPoolLimit(contentGoal)) then
                             ! write(*,*) "content error!"
-                            exit
+                            ! exit
                         endif
                     enddo !SH篩選迴圈End
                     
@@ -398,7 +412,7 @@ program main_OMST_cont_SH
         ! write(*,*) "selectRate        =", (selectRate(i),i=1,numPool)
         ! 算出最大PA
         call subr_maxvReal(usedRate, numPool, usedRateMax, place) !取PA的最大值與相對位置
-        write(*,"(A10,I10,A10,I10,A10,I10,A10,F10.5)") "numIterate= ",numIterate, " numPK1 = ", numPK1,&
+        write(*,"(A10,I10,A10,I10,A10,I10,A10,F10.5)") "numIterate= ",numIterate, " numSumPK1 = ", numSumPK1,&
         " place = ", place," maxPA= ",usedRateMax
         call subr_aveReal(usedRate, numPool, usedRateMean)
         call subr_varReal(usedRate, numPool, usedRateVar)
@@ -407,35 +421,60 @@ program main_OMST_cont_SH
         testOverlap = testOverlapData
         ! 寫下資料
         write(unit = 101, fmt ="(2I10,F10.5,I10,4F10.5)") numIterate , place ,usedRateMax,&
-        numPK1,usedRateMean,usedRateVar,poolUsedRate, testOverlap 
+        numSumPK1,usedRateMean,usedRateVar,poolUsedRate, testOverlap 
         
         ! 迭代停止規則
-        if ( usedRateMax < stop_minMaxPA ) then ! 紀錄迭代最小的maxPA
-            stop_minMaxPA = usedRateMax
-            ! write(*,*) "min(maxPA)= ",usedRateMax
-        end if
-        if (usedRateMax < stop_rMAX) then
-            stop_NUM = stop_NUM +1
-        end if
-        if (stop_NUM >= 5) then !要出現5次此情形，才會跳出迴圈
-            if (usedRateMax <= stop_minMaxPA) exit !此式成立，則跳離此迴圈
-        end if 
-        ! ! 停止迭代之寬鬆規則
-        ! if ( numIterate >= 20 ) then 
-        !     if ( usedRateMax <= (stop_minMaxPA + stop_minMaxPA*0.1)) then
-        !         stop_NUM_out = stop_NUM_out + 1
-        !         if (stop_NUM_out >= 5) then
-        !             exit        
-        !         endif
-        !     endif
-        !     write(*,*) "=================================================================================="
-        !     write(*,"(A10,I10,A10,F10.5,A10,I10)") "numIterate= ",numIterate,& 
-        !     " Rule = ", (stop_minMaxPA + stop_minMaxPA*0.1),&
-        !     " Out_num = ", stop_NUM_out
-        ! end if
+        if ( numSumPK1 >= length/numStages) then
+            if ( usedRateMax < stop_minMaxPA ) then ! 紀錄迭代最小的maxPA
+                stop_minMaxPA = usedRateMax
+                ! write(*,*) "min(maxPA)= ",usedRateMax
+            end if
+            if (usedRateMax < stop_rMAX) then
+                stop_NUM = stop_NUM +1
+            end if
+            if (stop_NUM >= 5) then !要出現5次此情形，才會跳出迴圈
+                if (usedRateMax <= stop_minMaxPA) exit !此式成立，則跳離此迴圈
+            end if 
+        else
+            print*, "error!"
+            ! ! 停止迭代之寬鬆規則
+            ! if (usedRateMax < 0.55) then
+            !     stop_NUM = stop_NUM +1
+            ! end if
+            ! if (stop_NUM >= 5) then !要出現5次此情形，才會跳出迴圈
+            !     exit !此式成立，則跳離此迴圈
+            ! end if 
+        endif
 
         !SH曝光率控制 PK值調整
-        call setPK(selectRate,numPool,rMAX,length,PK,numPK1)
+        do i=1, numContentType
+            if (i == 1) then
+                call setPK(selectRate(1:contentPoolNumSum(i)),contentPoolNum(i),&
+                rMAX,contentTarget(i),PK(1:contentPoolNumSum(i)),numPK1(i))
+            else
+                call setPK(selectRate(contentPoolNumSum(i-1)+1:contentPoolNumSum(i)),contentPoolNum(i),&
+                rMAX,contentTarget(i),PK(contentPoolNumSum(i-1)+1:contentPoolNumSum(i)),numPK1(i))
+            endif
+        enddo
+        do i = 1, numContentType
+            numPK1(i) = 0
+            if (i == 1) then
+                do j = 1,contentPoolNumSum(i)
+                    if (PK(j) == 1) then
+                        numPK1(i) = numPK1(i) + 1
+                    endif
+                enddo
+                numSumPK1 = numPK1(i)
+            else
+                do j = contentPoolNumSum(i-1)+1,contentPoolNumSum(i)
+                    if (PK(j) == 1) then
+                        numPK1(i) = numPK1(i) + 1
+                    endif
+                enddo
+                numSumPK1 = numSumPK1 + numPK1(i)
+            endif
+        enddo
+        
         write(unit = 102, fmt ="(I10,A10,400I10)") numIterate,"numS",(selectSum(i,numTest),i=1,numPool)
         write(unit = 102, fmt ="(I10,A10,400I10)") numIterate,"numA",(usedSum(i,numTest),i=1,numPool)
         write(unit = 102, fmt ="(I10,A10,400F10.5)") numIterate,"PS",(selectRate(i),i=1,numPool)
@@ -609,7 +648,7 @@ program main_OMST_cont_SH
     ! 寫下資料
     write(unit = 101, fmt ="(A10,A50)") " ","========================="
     write(unit = 101, fmt ="(2I10,F10.5,I10,4F10.5)") numIterate , place ,usedRateMax,&
-    numPK1,usedRateMean,usedRateVar,poolUsedRate,testOverlap 
+    numSumPK1,usedRateMean,usedRateVar,poolUsedRate,testOverlap 
 
     write(unit = 102, fmt ="(A10,A50)") " ","========================="
     write(unit = 102, fmt ="(I10,A10,400I10)") numIterate,"numS",(selectSum(i,numTest),i=1,numPool)
@@ -685,8 +724,15 @@ program main_OMST_cont_SH
         do j = 1, length
             choose_inforTrue(j,i) = information(thetaTrue(i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
             choose_inforEstimate(j,i) = information(thetaHat(numStages,i), a_choose(j, i), b_choose(j, i), c_choose(j, i))
-            choose_inforTrueSum(i) = choose_inforTrueSum(i) + choose_inforTrue(j,i)
-            choose_inforEstimateSum(i) = choose_inforEstimateSum(i) + choose_inforEstimate(j,i)
+            if(j==1)then
+                choose_inforTrueSum(i) = 0.0
+                choose_inforTrueSum(i) = choose_inforTrue(j,i)
+                choose_inforEstimateSum(i) = 0.0
+                choose_inforEstimateSum(i) = choose_inforEstimate(j,i)
+            else
+                choose_inforTrueSum(i) = choose_inforTrueSum(i) + choose_inforTrue(j,i)
+                choose_inforEstimateSum(i) = choose_inforEstimateSum(i) + choose_inforEstimate(j,i)
+            endif
         enddo
     enddo
     call subr_aveReal(choose_inforTrueSum, numTest, testMean_inforTrue)

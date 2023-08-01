@@ -2,7 +2,6 @@
 !PK值調整
 !------------------
 subroutine setPK(PS,col,rMAX,length,PK,numPK1)
-
 implicit none
 integer:: i,col,length
 real::rMAX
@@ -33,14 +32,14 @@ enddo
 
 !------------------
 !如果PK=1不夠時，進行調整
-if (numPK1<length) then
+if (numPK1 < length) then
 
     do i=1,col
         rank(i)=PK(i)
     enddo
     
     !將PK進行排列 找出前幾項PK較大的值 並記錄位置
-    do rankN1 = 1,length !col-1
+    do rankN1 = 1, col-1 !length
         do rankN2=1+rankN1,col
             rankC1=rank(rankN1)
             rankC2=rank(rankN2)
@@ -56,9 +55,9 @@ if (numPK1<length) then
         enddo
     enddo
     
-    do i=1,length !col
+    do i=1, length !col
         if(rank(i)<1) then
-            PK(place_rank(i))=1    !調整PK值
+            PK(place_rank(i)) = 1    !調整PK值
         end if
     enddo
     
