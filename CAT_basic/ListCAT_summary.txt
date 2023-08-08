@@ -1,51 +1,51 @@
             OMST_with_cont&SH 
          stages              4
-           time     2193.85938
+           time     1848.54688
          test_n          10000
          pool_n            300
          length             40
 
        ThetaHat_of_Estimates: 
-           Mean        0.00430
-           Bias        0.00007
-            Var        0.85717
-            MSE        0.13686
-           RMSE        0.36994
+           Mean        0.00494
+           Bias        0.00071
+            Var        0.93147
+            MSE        0.07379
+           RMSE        0.27164
 
           Item_Exposure_Rate: 
-            max        0.76810
+            max        0.21070
            mean        0.13333
-            var        0.01300
+            var        0.00728
 
                    Pool_Used: 
-           Rate        1.00000
+           Rate        0.89000
 
                 Test_Overlap: 
-        overlap        0.23072
+        overlap        0.18783
 
                Mean_of_Infor: 
-           True        8.69333
-       Estimate        8.65642
+           True       14.98695
+       Estimate       15.32200
 
                        Psi_max
             Set        1.00000
           alpha              1
-          Max_1        0.33631
-          Max_2        0.55000
-          Max_3        0.61811
+          Max_1        0.22184
+          Max_2        0.39384
+          Max_3        0.53023
 
                  r_max_of_SH: 
-       rMax_Set        0.10000
-  stop_minMaxPA        0.76890
-     sum_numPK1             40
-         numPK1   16   16    8
+       rMax_Set        0.20000
+  stop_minMaxPA        0.20930
+     sum_numPK1            127
+         numPK1   52   49   26
 
    Item_Exposure_Rate_of_PK1: 
-            max        0.76810
-           mean        0.35188
-            var        0.04229
+            max        0.19410
+           mean        0.04289
+            var        0.00298
 
    Item_Exposure_Rate_of_PK0: 
-            max        0.10730
-           mean        0.09971
-            var        0.00001
+            max        0.21070
+           mean        0.19973
+            var        0.00002

@@ -143,7 +143,7 @@ program main_OMST_cont_SH
     ! ================== 
     ! === SH control === 
     ! 曝光率控管參數設定 (2)
-    real, parameter::rMAX = 0.1
+    real, parameter::rMAX = 0.2
     real, parameter:: stop_x = 0.01 ! 迭代緩衝的差值
     real::stop_minMaxPA = 1.0 !紀錄迭代最小的maxPA
     integer::stop_NUM = 0

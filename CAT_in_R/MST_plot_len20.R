@@ -37,7 +37,7 @@ p <- ggplot(data=MST_data, aes(x=PsiSet, y=Bias,
         #         vjust = -1)+
         
         #geom_label()+
-        scale_x_discrete(name = expression(paste(bar(Psi)[set])),
+        scale_x_discrete(name = expression(paste("set  ",bar(Psi)[max]," / ",r[max])),
                 limits=c("1","0.3","0.2","0.1"))+
         scale_y_continuous( limits = c(-0.01,0.01)
                 # breaks = 0.001 * c(1, 2, 4, 8, 16),
@@ -72,7 +72,7 @@ p <- ggplot(data=MST_data, aes(x=PsiSet, y=RMSE,
         #         vjust = -1)+
 
         #geom_label()+
-        scale_x_discrete(name = expression(paste(bar(Psi)[set])),
+        scale_x_discrete(name = expression(paste("set  ",bar(Psi)[max]," / ",r[max])),
                 limits=c("1","0.3","0.2","0.1"))+
         scale_y_continuous( limits = c(0.2,0.55)
                 # breaks = 0.001 * c(1, 2, 4, 8, 16),
@@ -109,7 +109,7 @@ p <- ggplot(data=MST_data, aes(x=PsiSet, y=PsiMax,
         #         vjust = -1)+
 
         #geom_label()+
-        scale_x_discrete(name = expression(paste(bar(Psi)[set])),
+        scale_x_discrete(name = expression(paste("set  ",bar(Psi)[max]," / ",r[max])),
                 limits=c("1","0.3","0.2","0.1"))+
         scale_y_continuous( 
                 name = expression(paste('max ',bar(Psi))),
@@ -148,7 +148,7 @@ p <- ggplot(data=MST_data, aes(x=PsiSet, y=pooluseRate,
         #         vjust = -1)+ #hjust
 
         #geom_label()+
-        scale_x_discrete(name = expression(paste(bar(Psi)[set])),
+        scale_x_discrete(name = expression(paste("set  ",bar(Psi)[max]," / ",r[max])),
                 limits=c("1","0.3","0.2","0.1"))+
         scale_y_continuous(
                 name = 'utilization of the item pool',
@@ -188,7 +188,7 @@ p <- ggplot(data=MST_data, aes(x=PsiSet, y=InforTurth,
         #         vjust = -1)+ #hjust
 
         #geom_label()+
-        scale_x_discrete(name = expression(paste(bar(Psi)[set])),
+        scale_x_discrete(name = expression(paste("set  ",bar(Psi)[max]," / ",r[max])),
                 limits=c("1","0.3","0.2","0.1"))+
         scale_y_continuous(
                 name = expression(paste('mean ','Info',(theta))),
@@ -229,7 +229,7 @@ p <- ggplot(data=MST_data, aes(x=PsiSet, y=InforEstimate,
         #         vjust = -1)+ #hjust
 
         #geom_label()+
-        scale_x_discrete(name = expression(paste(bar(Psi)[set])),
+        scale_x_discrete(name = expression(paste("set  ",bar(Psi)[max]," / ",r[max])),
                 limits=c("1","0.3","0.2","0.1"))+
         scale_y_continuous(
                 name = expression(paste('mean ','Info',(hat(theta)))),
@@ -265,10 +265,10 @@ p <- ggplot(data=MST_data, aes(x=PsiSet, y=r_max,
         #         vjust = -1)+ #hjust
 
         #geom_label()+
-        scale_x_discrete(name = expression(paste(bar(Psi)[set])),
+        scale_x_discrete(name = expression(paste("set  ",bar(Psi)[max]," / ",r[max])),
                 limits=c("1","0.3","0.2","0.1"))+
         scale_y_continuous(
-                name = expression(paste("max",(r))),
+                name = expression(paste("max ",r)),
                 limits = c(0,1)
                 # breaks = 0.001 * c(1, 2, 4, 8, 16),
                 # minor_breaks = NULL
