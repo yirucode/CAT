@@ -7,14 +7,14 @@ program OMST_cont_Psi
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 20 !作答題長
+    integer,parameter :: length = 40 !作答題長
     integer,parameter :: numContentType = 3
     ! === module set ===
     integer :: contentScale(numContentType) = (/2,2,1/)
     integer :: contentMultiplier = 2
     ! === OMST set ===
     integer :: usedStages
-    integer,parameter :: numStages = 2
+    integer,parameter :: numStages = 4
     integer :: realChoose
     ! === content target ===
     integer :: contentGoal
@@ -71,15 +71,23 @@ program OMST_cont_Psi
     real::thetaHatVar !估計能力值的變異數
     real::thetaHatMSE !估計能力值的MSE
     ! Psi 控制參數 
-    integer:: alpha = 1
-    real:: psiMax = 1
+    integer:: alpha = 2
+    real:: psiMax = 0.26
+
+    ! Psi 鬆綁參數
+    real:: max_eta
+    real:: place_maxEta
+    integer:: count_NotZero = 0
+    real, dimension(numPool, numTest):: choose_maxEta
+
     ! Psi 控制過程中的各類指標
     real, external :: combination, func_deltaPsi
     real, dimension(length, numTest):: deltaCriteria
     real, dimension(numPool, numTest)::eta !item contribution
     !real::eta_choose(length, numTest) !選中的eta
     ! 因應alpha>1
-    integer,dimension(3)::alphaSet
+    !integer,dimension(3)::alphaSet
+    integer::max_alphaSet = 3
     ! Omega
     real, dimension(numTest)::omegaOne
     real, dimension(numTest)::omegaTwo
@@ -161,24 +169,24 @@ program OMST_cont_Psi
             do choose = 1, length/numStages
                 
                 ! 隨機選擇要施測的內容領域
-                    if ( choose == 1 ) then
-                        contentChange = contentTarget ! 重設內容領域控制參數
-                    endif
-                    call subr_contentTargetP(contentChange, numContentType, contentTP)
-                    call random_number(randContent)
-                    !WRITE(*,*) randContent
-                    do i = 1, numContentType
-                        if (i.EQ.1) then
-                            if ((randContent > 0) .AND. (randContent <= contentTP(i))) then
-                                contentGoal = i
-                            endif
-                        else
-                            if ((randContent > contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
-                                contentGoal = i
-                            endif
+                if ( choose == 1 ) then
+                    contentChange = contentTarget ! 重設內容領域控制參數
+                endif
+                call subr_contentTargetP(contentChange, numContentType, contentTP)
+                call random_number(randContent)
+                !WRITE(*,*) randContent
+                do i = 1, numContentType
+                    if (i.EQ.1) then
+                        if ((randContent > 0) .AND. (randContent <= contentTP(i))) then
+                            contentGoal = i
                         endif
-                    enddo
-                    contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除選中的內容題數
+                    else
+                        if ((randContent > contentTP(i-1)) .AND. (randContent <= contentTP(i))) then
+                            contentGoal = i
+                        endif
+                    endif
+                enddo
+                contentChange(contentGoal) = contentChange(contentGoal)-1 ! 刪除選中的內容題數
 
                 if (try <= alpha) then 
                     ! 計算訊息量
@@ -227,28 +235,57 @@ program OMST_cont_Psi
                         enddo
                     endif
 
+                    !標準太高，需降低標準以確保可作答的試題
                     if (count_InforZero == numPool) then 
-                        WRITE(*,*) "no item can be used"
-                        WRITE(*,*) "try = ", try
-                        WRITE(*,*) "choose = ", choose
-                        ! 寫下問題資料細節
-                        open(unit = 100 , file = 'ListCAT_debug.txt' , status = 'replace', action = 'write', iostat= ierror)
-                        write(unit = 100, fmt = *) "try = ", try
-                        write(unit = 100, fmt = *) "choose = ", choose
-                        write(unit = 100, fmt = *) "contentGoal = ", "Nan"
-                        write(unit = 100, fmt = *) "eta Criteria = ", deltaCriteria(choose, try)
-                        write(unit = 100, fmt = *) "item ID = "
-                        write(unit = 100, fmt = dataPool) (j, j=1,numPool)
-                        write(unit = 100, fmt = *) "item content = "
-                        write(unit = 100, fmt = dataPool) (content(j), j=1,numPool)
-                        write(unit = 100, fmt = *) "item used = "
-                        write(unit = 100, fmt = dataPool) (usedPool(j,try),j=1,numPool)
-                        write(unit = 100, fmt = *) "item used sum = "
-                        write(unit = 100, fmt = dataPool) (usedSum(j,try-1)+1,j=1,numPool)
-                        write(unit = 100, fmt = *) "eta = "
-                        write(unit = 100, fmt = dataPoolFS) (eta(j,try),j=1,numPool)
-                        close(100)
-                        stop ! 如果沒題目可選，則結束程式
+                        
+                        count_NotZero = 0
+                        do i = 1, numPool
+                            if ( ( usedPool(i, try) == 0 ) .AND. ( content(i) == contentGoal ) ) then
+                                count_NotZero = count_NotZero +1
+                                choose_maxEta(i, try) = eta(i,try)
+                            else
+                                count_NotZero = count_NotZero +0
+                                choose_maxEta(i, try) = 0
+                            endif
+                        enddo
+
+                        ! 如果沒題目可選，則結束程式
+                        if (count_NotZero == 0) then 
+                            WRITE(*,*) "no item can be used"
+                            WRITE(*,*) "try = ", try
+                            WRITE(*,*) "choose = ", choose
+                            ! 寫下問題資料細節
+                            open(unit = 100 , file = 'ListCAT_debug.txt' , status = 'replace', action = 'write', iostat= ierror)
+                            write(unit = 100, fmt = *) "try = ", try
+                            write(unit = 100, fmt = *) "choose = ", choose
+                            write(unit = 100, fmt = *) "contentGoal = ", "Nan"
+                            write(unit = 100, fmt = *) "eta Criteria = ", deltaCriteria(choose, try)
+                            write(unit = 100, fmt = *) "item ID = "
+                            write(unit = 100, fmt = dataPool) (j, j=1,numPool)
+                            write(unit = 100, fmt = *) "item content = "
+                            write(unit = 100, fmt = dataPool) (content(j), j=1,numPool)
+                            write(unit = 100, fmt = *) "item used = "
+                            write(unit = 100, fmt = dataPool) (usedPool(j,try),j=1,numPool)
+                            write(unit = 100, fmt = *) "item used sum = "
+                            write(unit = 100, fmt = dataPool) (usedSum(j,try-1)+1,j=1,numPool)
+                            write(unit = 100, fmt = *) "eta = "
+                            write(unit = 100, fmt = dataPoolFS) (eta(j,try),j=1,numPool)
+                            close(100)
+                            stop
+                        else
+                            call subr_maxvReal(choose_maxEta(:,try),numPool,max_eta,place_maxEta)
+                            do i = 1, numPool
+                                if (choose_maxEta(i,try) == max_eta) then
+                                    if ( (choose == 1) ) then
+                                        infor(i) = information(thetaBegin, a(i), b(i), c(i))
+                                    else
+                                        infor(i) = information(thetaHat(usedStages-1, try), a(i), b(i), c(i))
+                                    endif
+                                else
+                                    infor(i) = 0
+                                endif
+                            enddo
+                        endif
                     endif
                 endif
 
@@ -319,43 +356,69 @@ program OMST_cont_Psi
         call subr_testPsi(numTest,numPool,2,usedSum,length,try,psiTwo)
         call subr_testPsi(numTest,numPool,3,usedSum,length,try,psiThree)
     enddo
-    if (alpha==1) then
-        do i = 1,3
-            alphaSet(i)=i
-        enddo
-    else
-        do i = 1,3
-            if (i > alpha) then 
-                alphaSet(i)=i
-            else
-                alphaSet(i)=alpha
-            endif
-        enddo
-    endif
-    call subr_aveReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMean)
-    call subr_aveReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMean)
-    call subr_aveReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMean)
-    call subr_maxvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMax, place)
-    call subr_maxvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMax, place)
-    call subr_maxvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMax, place)
-    call subr_minvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOnemin, place)
-    call subr_minvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwomin, place)
-    call subr_minvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreemin, place)
-    call subr_varReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneVar)
-    call subr_varReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoVar)
-    call subr_varReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeVar)
-    call subr_aveReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMean)
-    call subr_aveReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMean)
-    call subr_aveReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMean)
-    call subr_maxvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMax, place)
-    call subr_maxvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMax, place)
-    call subr_maxvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMax, place)
-    call subr_minvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOnemin, place)
-    call subr_minvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwomin, place)
-    call subr_minvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreemin, place)
-    call subr_varReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneVar)
-    call subr_varReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoVar)
-    call subr_varReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeVar)
+    ! if (alpha==1) then
+    !     do i = 1,3
+    !         alphaSet(i)=i
+    !     enddo
+    ! else
+    !     do i = 1,3
+    !         if (i > alpha) then 
+    !             alphaSet(i)=i
+    !         else
+    !             alphaSet(i)=alpha
+    !         endif
+    !     enddo
+    ! endif
+    ! call subr_aveReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMean)
+    ! call subr_aveReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMean)
+    ! call subr_aveReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMean)
+    ! call subr_maxvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneMax, place)
+    ! call subr_maxvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoMax, place)
+    ! call subr_maxvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeMax, place)
+    ! call subr_minvReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOnemin, place)
+    ! call subr_minvReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwomin, place)
+    ! call subr_minvReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreemin, place)
+    ! call subr_varReal(omegaOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), omegaOneVar)
+    ! call subr_varReal(omegaTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), omegaTwoVar)
+    ! call subr_varReal(omegaThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), omegaThreeVar)
+    ! call subr_aveReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMean)
+    ! call subr_aveReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMean)
+    ! call subr_aveReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMean)
+    ! call subr_maxvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneMax, place)
+    ! call subr_maxvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoMax, place)
+    ! call subr_maxvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeMax, place)
+    ! call subr_minvReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOnemin, place)
+    ! call subr_minvReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwomin, place)
+    ! call subr_minvReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreemin, place)
+    ! call subr_varReal(psiOne(alphaSet(1)+1:numTest), numTest-alphaSet(1), psiOneVar)
+    ! call subr_varReal(psiTwo(alphaSet(2)+1:numTest), numTest-alphaSet(2), psiTwoVar)
+    ! call subr_varReal(psiThree(alphaSet(3)+1:numTest), numTest-alphaSet(3), psiThreeVar)
+    
+    call subr_aveReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOneMean)
+    call subr_aveReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwoMean)
+    call subr_aveReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreeMean)
+    call subr_maxvReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOneMax, place)
+    call subr_maxvReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwoMax, place)
+    call subr_maxvReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreeMax, place)
+    call subr_minvReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOnemin, place)
+    call subr_minvReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwomin, place)
+    call subr_minvReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreemin, place)
+    call subr_varReal(omegaOne(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaOneVar)
+    call subr_varReal(omegaTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaTwoVar)
+    call subr_varReal(omegaThree(max_alphaSet+1:numTest), numTest-max_alphaSet, omegaThreeVar)
+    call subr_aveReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOneMean)
+    call subr_aveReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwoMean)
+    call subr_aveReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreeMean)
+    call subr_maxvReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOneMax, place)
+    call subr_maxvReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwoMax, place)
+    call subr_maxvReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreeMax, place)
+    call subr_minvReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOnemin, place)
+    call subr_minvReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwomin, place)
+    call subr_minvReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreemin, place)
+    call subr_varReal(psiOne(max_alphaSet+1:numTest), numTest-max_alphaSet, psiOneVar)
+    call subr_varReal(psiTwo(max_alphaSet+1:numTest), numTest-max_alphaSet, psiTwoVar)
+    call subr_varReal(psiThree(max_alphaSet+1:numTest), numTest-max_alphaSet, psiThreeVar)
+
     ! mean of infor 計算
     do i = 1, numTest
         do j = 1, length
