@@ -6,7 +6,7 @@
 CC = gfortran
 CXXFLAGS =-c -g -O0 -Og -Wall 
 exe = a
-obj = main_OMST_cont_SH.o \
+obj = main_MST_theta.o \
 subr_maxvReal.o subr_maxvInt.o \
 subr_minvInt.o subr_minvReal.o\
 subr_sumReal.o subr_sumInt.o\
@@ -33,17 +33,17 @@ module_ran_mod.o \
 # main_CAT.o
 # main_CAT_contentControl.o
 # main_CAT_Psi
+# main_CAT_Psi_contentC_old
 # main_CAT_Psi_contentC
-# main_CAT_Psi_contentC_full
 # main_D_MST
+# main_D_MST_Psi_old
 # main_D_MST_Psi
-# main_D_MST_Psi_full
 # main_MST_Psi
 # main_MST_moduleReCount
 # main_MST_12designP
 # main_OMST_contentControl
+# main_OMST_cont_Psi_old
 # main_OMST_cont_Psi
-# main_OMST_cont_Psi_full
 # main_MST_12design
 # main_MST_1234design
 # main_MST_infor

@@ -8,14 +8,14 @@ program main_OMST_cont_SH
     ! === parameter ===
     integer,parameter :: numTest = 10000 !重複次數 10000
     integer,parameter :: numPool = 300 !題庫數
-    integer,parameter :: length = 40 !作答題長 
+    integer,parameter :: length = 20 !作答題長 
     integer,parameter :: numContentType = 3
     ! === module set ===
     integer :: contentScale(numContentType) = (/2,2,1/)
     integer :: contentMultiplier = 2
     ! === OMST set ===
     integer :: usedStages
-    integer,parameter :: numStages = 4
+    integer,parameter :: numStages = 2
     integer :: realChoose
     ! === content target ===
     integer :: contentGoal = 0
