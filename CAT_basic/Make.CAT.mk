@@ -33,8 +33,8 @@ module_ran_mod.o \
 # main_CAT.o
 # main_CAT_contentControl.o
 # main_CAT_Psi
-# main_CAT_Psi_contentC_old
-# main_CAT_Psi_contentC
+# main_CAT_Psi_cont_old
+# main_CAT_Psi_cont
 # main_D_MST
 # main_D_MST_Psi_old
 # main_D_MST_Psi
