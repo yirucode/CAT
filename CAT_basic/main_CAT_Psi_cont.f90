@@ -1,4 +1,4 @@
-program CAT_Psi_contentC
+program CAT_Psi_cont
     implicit none
     ! === given data ====
     ! === 輸入資料設定 ===
@@ -571,5 +571,5 @@ program CAT_Psi_contentC
     end do
     close(100)
     stop
-end program CAT_Psi_contentC
+end program CAT_Psi_cont
 
